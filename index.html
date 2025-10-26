@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pension Calculation App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: #4A5568;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #CBD5E0;
+            border-radius: 0.375rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4299E1;
+            box-shadow: 0 0 0 1px #4299E1;
+        }
+        .input-group input[readonly] {
+            background-color: #F7FAFC;
+            cursor: not-allowed;
+            font-weight: 600;
+        }
+        .output-group {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        .output-group:last-child {
+            border-bottom: none;
+        }
+        .output-group .label {
+            font-weight: 500;
+            color: #2D3748;
+        }
+        .output-group .value {
+            font-weight: 600;
+            /* Overridden by specific classes for restoration date */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+        /* Flashing effect for past/current date */
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .flashing {
+            animation: flash 1.5s infinite;
+        }
+        /* Custom styles for the increase table */
+        .increase-table-container {
+            overflow-x: auto;
+            max-width: 100%;
+        }
+        .increase-table {
+            width: 100%;
+            min-width: 1000px; /* Reduced from 1200px to shrink width */
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .increase-table th, .increase-table td {
+            padding: 8px 4px; /* Reduced horizontal padding */
+            border: 1px solid #000;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .increase-table th {
+            background-color: #F7FAFC;
+            font-weight: 600;
+            color: #2D3748;
+            text-transform: uppercase;
+        }
+        .increase-table .header-group th {
+            padding: 12px 4px;
+        }
+        .increase-table .sub-header th {
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-700">Pension Calculator</h1>
+            <p class="text-gray-500 mt-2">Enter your details to calculate pension entitlements.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Input Section -->
+            <div class="card">
+                <h2 class="card-title text-center font-bold text-xl">Input Details</h2>
+                <form id="pension-form">
+                    <!-- Service Details -->
+                    <h3 class="font-semibold text-lg mt-6 mb-2 text-gray-600 border-b pb-2">Service & Personal Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        
+                        <div class="input-group">
+                            <label for="dob">Date of Birth (DOB)</label>
+                            <input type="date" id="dob" class="calc-input" value="1976-04-10">
+                            <div id="dob-display" class="text-xs text-gray-500 mt-1"></div>
+                        </div>
+                        <div class="input-group">
+                            <label for="doe">Date of Enrollment (DOE)</label>
+                            <input type="date" id="doe" class="calc-input" value="1995-07-11">
+                            <div id="doe-display" class="text-xs text-gray-500 mt-1"></div>
+                        </div>
+                        <div class="input-group">
+                            <label for="sos">Date of Retirment (SOS)</label>
+                            <input type="date" id="sos" class="calc-input" value="2021-07-10">
+                            <div id="sos-display" class="text-xs text-gray-500 mt-1"></div>
+                        </div>
+                        <div class="input-group">
+                            <label for="gross-pension-ppo">Gross Pension as per PPO</label>
+                            <input type="text" id="gross-pension-ppo" class="calc-input" value="38,654.00">
+                        </div>
+                         <div class="input-group">
+                            <label for="tk-award">TK Award</label>
+                            <select id="tk-award" class="calc-input" value="1">
+                                <option value="No">No</option>
+                                <option value="1" selected>1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                           <label for="family-pension">Family Pension</label>
+                            <select id="family-pension" class="calc-input">
+                                <option value="No" selected>No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Output Section -->
+            <div class="card">
+                <h2 class="card-title text-center font-bold text-xl py-4">Calculated Results</h2>
+                
+                <h3 class="font-semibold text-lg mt-6 mb-2 text-gray-600 border-b pb-2">Service Summary</h3>
+                <div class="mt-4 space-y-2">
+                    <div class="output-group">
+                        <span class="label">Qualifying Service (QS)</span>
+                        <span class="value text-gray-800" id="qs-output">0 Years</span>
+                    </div>
+                    <div class="output-group">
+                        <span class="label">Age on next Birthday after SOS</span>
+                        <span class="value text-gray-800" id="age-at-sos-output">0 Years</span>
+                    </div>
+                     <div class="output-group">
+                        <span class="label">Commutation Purchase Value</span>
+                        <span class="value text-gray-800" id="commutation-factor-output">0</span>
+                    </div>
+                </div>
+                
+                <h3 class="font-semibold text-lg mt-6 mb-2 text-gray-600 border-b pb-2">Pension Details</h3>
+                 <div class="mt-4 space-y-2">
+                    <div class="output-group">
+                        <span class="label">Gross Pension</span>
+                        <span class="value text-gray-800" id="gross-pension-output">0</span>
+                    </div>
+                    <div class="output-group">
+                        <span class="label">Net Pension (Before Increases)</span>
+                        <span class="value text-gray-800" id="net-pension-pre-increase-output">0</span>
+                    </div>
+                    <div class="output-group">
+                        <span class="label">Commuted Pension</span>
+                        <span class="value text-gray-800" id="commuted-pension-output">0</span>
+                    </div>
+                     <div class="output-group">
+                        <span class="label">Commutation Amount</span>
+                        <span class="value text-gray-800" id="commutation-amount-output">0</span>
+                    </div>
+                 </div>
+
+                <h3 class="font-semibold text-lg mt-6 mb-2 text-gray-600 border-b pb-2">Final Entitlements</h3>
+                 <div class="mt-4 space-y-2 py-4">
+                    <!-- Table Header -->
+                    <div class="output-group font-bold">
+                        <span class="label w-1/3"></span>
+                        <span class="label w-1/3 text-center text-blue-600">Current</span>
+                        <span class="label w-1/3 text-center text-green-600">After Restoration</span>
+                    </div>
+
+                    <!-- Pension p.m after increases Row -->
+                    <div class="output-group">
+                        <span class="label w-1/3">Pension p.m after increases</span>
+                        <span class="value w-1/3 text-center text-gray-800" id="pension-pm-current-output">0</span>
+                        <span class="value w-1/3 text-center text-gray-800" id="pension-pm-restored-output">0</span>
+                    </div>
+
+                    <!-- TK Allowance Row -->
+                    <div class="output-group">
+                        <span class="label w-1/3">TK Allowance p.m (if any)</span>
+                        <span class="value w-1/3 text-center text-gray-800" id="tk-allowance-current-output">0</span>
+                        <span class="value w-1/3 text-center text-gray-800" id="tk-allowance-restored-output">0</span>
+                    </div>
+
+                    <!-- Total payable Row -->
+                    <div class="output-group font-extrabold text-gray-900">
+                        <span class="label w-1/3">Total payable Pension p.m</span>
+                        <!-- Use separate IDs to simplify formatting without breaking generic formatCurrency -->
+                        <span class="value w-1/3 text-center text-gray-800" id="total-payable-current-output">0</span>
+                        <span class="value w-1/3 text-center text-gray-800" id="total-payable-restored-output">0</span>
+                    </div>
+
+                     <div class="output-group pt-4"> <!-- Add padding top for separation -->
+                        <span class="label">Pension Restoration Date</span>
+                        <span class="value" id="restoration-date-output"></span>
+                    </div>
+                 </div>
+            </div>
+        </div>
+
+        <!-- Pension Increase Calculations Table -->
+        <div class="card mt-8">
+            <h2 class="card-title text-center font-bold text-xl mb-4">Pension Increase Calculations</h2>
+            <div class="increase-table-container">
+                <table class="increase-table">
+                    <thead>
+                        <tr class="header-group">
+                            <th rowspan="2" class="bg-blue-100 text-blue-600">Increase Year</th>
+                            <th rowspan="2" class="bg-blue-100 text-blue-600">%age</th>
+                            <th colspan="3" class="bg-blue-200 text-blue-700">Current</th>
+                            <th colspan="3" class="bg-green-200 text-green-700">After Restoration</th>
+                            <th rowspan="2" class="bg-blue-100 text-blue-600">Entitled</th>
+                            <th rowspan="2" class="bg-blue-100 text-blue-600">From</th>
+                            <th rowspan="2" class="bg-blue-100 text-blue-600">To</th>
+                        </tr>
+                        <tr class="sub-header">
+                            <th>Base Line</th>
+                            <th>Increase</th>
+                            <th>Net</th>
+                            <th>Base Line</th>
+                            <th>Increase</th>
+                            <th>Net</th>
+                        </tr>
+                    </thead>
+                    <tbody id="increase-table-body">
+                        <!-- Rows populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 1. HELPER FUNCTIONS ---
+
+            // Robust Rounding function (rounds half up, e.g., 10.765 to 10.77)
+            const roundToTwoDecimals = (num) => {
+                if (typeof num !== 'number' || isNaN(num)) return 0;
+                // Add a tiny epsilon to handle floating point inaccuracies before rounding
+                const epsilon = 0.0000001; 
+                return Math.round((num + epsilon) * 100) / 100;
+            }
+            
+            // Robust Rounding function for whole numbers (rounds half up, e.g., 100.5 to 101)
+            const roundToNearestWhole = (num) => {
+                if (typeof num !== 'number' || isNaN(num)) return 0;
+                const rounded = Math.round(num);
+                return rounded;
+            }
+
+
+            // Helper to get today's date in YYYY-MM-DD format (for autoupdate)
+            const getTodayDateString = () => {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            // Helper to format Rs. values
+            const formatCurrency = (value, roundToWhole = false) => {
+                const numericValue = parseFloat(value);
+                if (isNaN(numericValue) || numericValue === 0) return '-';
+                
+                let roundedValue;
+                let minimumFractionDigits;
+                let maximumFractionDigits;
+
+                if (roundToWhole) {
+                    // Use roundToNearestWhole for the final total payable amounts
+                    roundedValue = roundToNearestWhole(numericValue);
+                    minimumFractionDigits = 0;
+                    maximumFractionDigits = 0;
+                } else {
+                    // Use robust two-decimal rounding for all other monetary values
+                    roundedValue = roundToTwoDecimals(numericValue);
+                    minimumFractionDigits = 2;
+                    maximumFractionDigits = 2;
+                }
+
+                // Ensure it has the correct decimal places for display 
+                return `Rs. ${roundedValue.toLocaleString('en-IN', { minimumFractionDigits, maximumFractionDigits })}`;
+            };
+            
+            // Helper to parse dates safely (as UTC midnight to avoid time zone issues)
+            const parseDate = (dateString) => {
+                if (!dateString) return null;
+                // Create a Date object from the YYYY-MM-DD string as UTC midnight
+                const date = new Date(dateString + 'T00:00:00Z');
+                return isNaN(date.getTime()) ? null : date;
+            };
+
+            // Helper to format date for display (DD MMM, YYYY)
+            const formatDateDisplay = (date) => {
+                if (!date) return 'N/A';
+                const options = { day: '2-digit', month: 'short', year: 'numeric' };
+                // Format the UTC date string to the desired display format
+                return date.toLocaleDateString('en-GB', options).replace(/ /g, '-').toUpperCase();
+            };
+            
+            // Helper to format date for table (DD-MMM-YYYY)
+            const formatDateTable = (dateString) => {
+                // If input is YYYY-MM-DD, convert it
+                const parts = dateString.split('-');
+                if (parts.length === 3 && parts[0].length === 4) {
+                    const year = parts[0];
+                    const month = parseInt(parts[1]) - 1; // JS month is 0-indexed
+                    const day = parts[2];
+                    
+                    const dateForDisplay = new Date(Date.UTC(year, month, day));
+
+                    return dateForDisplay.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-').toUpperCase();
+                }
+                return dateString;
+            };
+
+            // --- 2. CONSTANT INITIALIZATION (Uses helpers defined above) ---
+
+            const todayDateString = getTodayDateString(); // Calculated once on load
+            const todayDateDisplay = formatDateTable(todayDateString); // Formatted for display
+
+
+            // --- COMMUTATION FACTORS DATA (Provided by user) ---
+            const pensionData = [
+                { age: 20, val_2001: 40.5043, val_1986: 50.6304, val_1966: 24.265 }, { age: 21, val_2001: 39.7341, val_1986: 49.6676, val_1966: 24.061 }, { age: 22, val_2001: 38.9653, val_1986: 48.7066, val_1966: 23.853 }, { age: 23, val_2001: 38.1974, val_1986: 47.7467, val_1966: 23.64 }, { age: 24, val_2001: 37.4307, val_1986: 46.7884, val_1966: 23.424 }, { age: 25, val_2001: 36.6651, val_1986: 45.8314, val_1966: 23.203 }, { age: 26, val_2001: 35.9006, val_1986: 44.8758, val_1966: 22.978 }, { age: 27, val_2001: 35.1372, val_1986: 43.9215, val_1966: 22.747 }, { age: 28, val_2001: 34.375, val_1986: 42.9688, val_1966: 22.513 }, { age: 29, val_2001: 33.6143, val_1986: 42.0179, val_1966: 22.273 }, { age: 30, val_2001: 32.8071, val_1986: 41.0089, val_1966: 22.028 }, { age: 31, val_2001: 32.0974, val_1986: 40.1218, val_1966: 21.077 }, { age: 32, val_2001: 31.3412, val_1986: 39.1767, val_1966: 21.522 }, { age: 33, val_2001: 30.5869, val_1986: 38.2336, val_1966: 21.26 }, { age: 34, val_2001: 29.8343, val_1986: 37.2929, val_1966: 20.993 }, { age: 35, val_2001: 29.0841, val_1986: 36.3551, val_1966: 20.72 }, { age: 36, val_2001: 28.3362, val_1986: 35.4203, val_1966: 20.442 }, { age: 37, val_2001: 27.5908, val_1986: 34.4885, val_1966: 20.157 }, { age: 38, val_2001: 26.8482, val_1986: 33.5603, val_1966: 19.867 }, { age: 39, val_2001: 26.1009, val_1986: 32.6361, val_1966: 19.57 }, { age: 40, val_2001: 25.3728, val_1986: 31.716, val_1966: 19.267 }, { age: 41, val_2001: 24.6406, val_1986: 30.8007, val_1966: 18.956 }, { age: 42, val_2001: 23.9126, val_1986: 29.8907, val_1966: 18.641 }, { age: 43, val_2001: 23.184, val_1986: 28.98, val_1966: 18.318 }, { age: 44, val_2001: 22.4713, val_1986: 28.0891, val_1966: 17.988 }, { age: 45, val_2001: 21.7592, val_1986: 27.199, val_1966: 17.65 }, { age: 46, val_2001: 21.0538, val_1986: 26.3172, val_1966: 17.307 }, { age: 47, val_2001: 20.3555, val_1986: 25.4444, val_1966: 16.956 }, { age: 48, val_2001: 19.6653, val_1986: 24.5816, val_1966: 16.596 }, { age: 49, val_2001: 18.9841, val_1986: 23.7301, val_1966: 16.231 }, { age: 50, val_2001: 18.3129, val_1986: 22.8911, val_1966: 15.859 }, { age: 51, val_2001: 17.6526, val_1986: 22.0658, val_1966: 15.481 }, { age: 52, val_2001: 17.005, val_1986: 21.2563, val_1966: 15.096 }, { age: 53, val_2001: 16.371, val_1986: 20.638, val_1966: 14.707 }, { age: 54, val_2001: 15.7517, val_1986: 19.6896, val_1966: 14.313 }, { age: 55, val_2001: 15.1478, val_1986: 18.9348, val_1966: 13.915 }, { age: 56, val_2001: 14.5602, val_1986: 18.2002, val_1966: 13.513 }, { age: 57, val_2001: 13.9888, val_1986: 17.486, val_1966: 13.109 }, { age: 58, val_2001: 13.434, val_1986: 16.7925, val_1966: 12.702 }, { age: 59, val_2001: 12.8953, val_1986: 16.1191, val_1966: 12.294 }, { age: 60, val_2001: 12.3719, val_1986: 15.4649, val_1966: 11.886 }, { age: 61, val_2001: 11.8632, val_1986: 14.829, val_1966: 11.497 }, { age: 62, val_2001: 11.3684, val_1986: 14.2105, val_1966: 11.104 }, { age: 63, val_2001: 10.8872, val_1986: 13.609, val_1966: 10.713 }, { age: 64, val_2001: 10.4191, val_1986: 13.0239, val_1966: 10.327 }, { age: 65, val_2001: 9.9636, val_1986: 12.4549, val_1966: 9.946 }, { age: 66, val_2001: 9.5214, val_1986: 11.9017, val_1966: 9.57 }, { age: 67, val_2001: 9.0914, val_1986: 11.3643, val_1966: 9.2 }, { age: 68, val_2001: 8.6742, val_1986: 10.5428, val_1966: 8.836 }, { age: 69, val_2001: 8.2697, val_1986: 10.3371, val_1966: 8.478 }, { age: 70, val_2001: 7.8778, val_1986: 9.8472, val_1966: 8.127 }, { age: 71, val_2001: 7.4983, val_1986: 9.3729, val_1966: 7.783 }, { age: 72, val_2001: 7.1314, val_1986: 8.9142, val_1966: 7.448 }, { age: 73, val_2001: 6.7766, val_1986: 8.4708, val_1966: 7.121 }, { age: 74, val_2001: 6.4342, val_1986: 8.0427, val_1966: 6.802 }, { age: 75, val_2001: 6.1039, val_1986: 7.6299, val_1966: 6.494 }, { age: 76, val_2001: 5.7858, val_1986: 7.2322, val_1966: 6.194 }, { age: 77, val_2001: 5.4797, val_1986: 6.8496, val_1966: 5.906 }, { age: 78, val_2001: 5.1854, val_1986: 6.4818, val_1966: 5.627 }, { age: 79, val_2001: 4.903, val_1986: 6.1284, val_1966: 5.364 }, { age: 80, val_2001: 4.6321, val_1986: 5.7901, val_1966: 5.104 }
+            ];
+            
+            // Build lookup tables from array
+            const factors_2001_12_01 = {};
+            const factors_1986_07_01 = {};
+            const factors_1966_07_01 = {};
+            pensionData.forEach(item => {
+                factors_2001_12_01[item.age] = item.val_2001;
+                factors_1986_07_01[item.age] = item.val_1986;
+                factors_1966_07_01[item.age] = item.val_1966;
+            });
+
+            // --- PENSION INCREASES DATA (New data provided by user in DD-MMM-YYYY format) ---
+            const pensionIncreases = [
+                { year: 1990, percentage: '10%', from: '1990-06-30', to: '1990-06-30' }, 
+                { year: 1991, percentage: 'CONDITIONAL', from: '1991-06-30', to: '1991-06-30' },
+                { year: 1995, percentage: 'CONDITIONAL', from: '1995-07-01', to: '1995-07-01' }, 
+                { year: 1997, percentage: '10%', from: '1997-02-28', to: '1997-02-28' },
+                { year: 1999, percentage: '25%', from: '1999-07-01', to: '2001-11-30' }, 
+                { year: 2001, percentage: 'CONDITIONAL', from: '2001-11-30', to: '2001-11-30' }, 
+                { year: 2003, percentage: '15%', from: '2003-07-01', to: '2005-06-30' },
+                { year: 2004, percentage: 'CONDITIONAL', from: '2004-07-01', to: '2005-06-30' }, // SET TO CONDITIONAL
+                { year: 2005, percentage: '10%', from: '2005-07-01', to: '2011-06-30' },
+                { year: 2006, percentage: 'CONDITIONAL', from: '2006-07-01', to: '2011-06-30' }, // SET TO CONDITIONAL
+                { year: 2007, percentage: 'CONDITIONAL', from: '2007-07-01', to: '2007-07-01' }, // SET TO CONDITIONAL
+                { year: 2008, percentage: '20%', from: '2008-07-01', to: '2008-07-01' },
+                { year: 2009, percentage: 'CONDITIONAL', from: '2009-07-01', to: '2011-06-30' }, // SET TO CONDITIONAL
+                { year: 2010, percentage: 'CONDITIONAL', from: '2010-07-01', to: '2017-06-30' }, // SET TO CONDITIONAL
+                { year: 2011, percentage: 'CONDITIONAL', from: '2011-07-01', to: todayDateString }, // SET TO CONDITIONAL
+                { year: 2012, percentage: '20%', from: '2012-07-01', to: '2015-06-30' },
+                { year: 2013, percentage: '10%', from: '2013-07-01', to: '2016-06-30' },
+                { year: 2014, percentage: '10%', from: '2014-07-01', to: '2016-06-30' },
+                { year: 2015, percentage: '7.5%', from: '2012-07-01', to: todayDateString }, 
+                { year: 2016, percentage: '10%', from: '2016-07-01', to: '2022-06-30' },
+                { year: 2017, percentage: '10%', from: '2017-07-01', to: '2022-06-30' },
+                { year: 2018, percentage: '10%', from: '2018-07-01', to: '2022-06-30' },
+                { year: 2019, percentage: '10%', from: '2019-07-01', to: '2022-06-30' },
+                { year: 2021, percentage: '10%', from: '2021-07-01', to: '2022-06-30' },
+                { year: 2022, percentage: '15%', from: '2022-07-01', to: todayDateString }, 
+                { year: 2023, percentage: '17.50%', from: '2023-07-01', to: todayDateString }, 
+                { year: 2024, percentage: '15%', from: '2024-07-01', to: todayDateString }, 
+                { year: 2025, percentage: '7%', from: '2025-07-01', to: todayDateString } 
+            ];
+
+
+            const allInputs = document.querySelectorAll('.calc-input');
+
+            
+            // Function to handle number input formatting (Gross Pension as per PPO)
+            function formatGrossPensionInput(event) {
+                let input = event.target.value.replace(/[^0-9.]/g, ''); // Remove non-numeric except dot
+                const parts = input.split('.');
+
+                // Limit to one decimal point and two decimal places
+                if (parts.length > 2) {
+                    input = parts[0] + '.' + parts.slice(1).join('');
+                }
+                if (parts.length === 2) {
+                    parts[1] = parts[1].substring(0, 2);
+                    input = parts.join('.');
+                }
+
+                // Add thousand separators
+                let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                
+                event.target.value = parts.length > 1 ? integerPart + '.' + parts[1] : integerPart;
+                
+                // Trigger calculation whenever input changes
+                calculateAndDisplayAll();
+            }
+            
+            function populateIncreaseTable(sosDate, grossPension, basePension, dobDate) {
+                const tbody = document.getElementById('increase-table-body');
+                tbody.innerHTML = ''; // Clear existing rows
+                
+                // --- Conditional Dates (Defined Once) ---
+                const date1977_04_30 = parseDate('1977-04-30');
+                const date1977_05_01 = parseDate('1977-05-01');
+                const date1947_08_14 = parseDate('1947-08-14');
+                const date1991_06_01 = parseDate('1991-06-01');
+                const date1993_06_01 = parseDate('1993-06-01');
+
+                // Dates for 2001 logic
+                const date1993_06_30 = parseDate('1993-06-30');
+                const date2001_12_01 = parseDate('2001-12-01');
+                const date1991_05_31 = parseDate('1991-05-31');
+                const date1993_07_01 = parseDate('1993-07-01');
+
+                // Dates for 2004 logic
+                const date1994_06_30 = parseDate('1994-06-30');
+                const date1994_07_01 = parseDate('1994-07-01');
+
+                // Dates for 2006 logic
+                const date1977_04_30_2006 = parseDate('1977-04-30');
+                const date1977_05_01_2006 = parseDate('1977-05-01');
+
+                // Dates for 2007 logic
+                const date1997_06_30_2007 = parseDate('1997-06-30');
+                const date2007_07_01_2007 = parseDate('2007-07-01');
+                const date1997_07_01_2007 = parseDate('1997-07-01');
+                
+                // Dates for 2009 logic
+                const date2001_06_30_2009 = parseDate('2001-06-30');
+                const date2001_07_01_2009 = parseDate('2001-07-01');
+
+                // Dates for 2010 logic
+                const date2001_11_30_2010 = parseDate('2001-11-30');
+                const date2001_07_01_2010 = parseDate('2001-07-01');
+
+                // Dates for 2011 logic
+                const date2002_06_30_2011 = parseDate('2002-06-30');
+                const date2002_07_01_2011 = parseDate('2002-07-01');
+                
+                // Date for 2025 Base Line logic
+                const date2024_12_31 = parseDate('2024-12-31');
+                
+                // ------------------------------------------
+                
+                // Variable to hold the Net value from the previous row (equivalent to R8, R9, R30, etc.) for Current Calculation
+                let previousNetValueCurrent = basePension; 
+                
+                // Variable to hold the Net value from the previous row for Restoration Calculation
+                let previousNetValueRestored = grossPension; 
+                
+                // Array to store all Current Net values for finding the maximum
+                const currentNetValues = [];
+                // Array to store all Restoration Net values for finding the maximum
+                const restoredNetValues = [];
+
+                pensionIncreases.forEach(item => {
+                    // FIX: Insert row into tbody, then call insertCell on the row
+                    const row = tbody.insertRow(); 
+                    
+                    // The stored dates are in YYYY-MM-DD format 
+                    const fromDate = parseDate(item.from);
+                    const toDate = parseDate(item.to);
+                    
+                    let isEntitled = 'N';
+                    let percentageToDisplay = item.percentage;
+                    
+                    // --- 1. ENTITLEMENT AND PERCENTAGE LOGIC (UNCHANGED) ---
+                    
+                    if (sosDate) {
+                        if (item.year === 1991) {
+                            // Formula: IF(SOS>1977-04-30, 12%, IF(SOS<1977-05-01, 32%, 0%))
+                            if (sosDate > date1977_04_30) {
+                                percentageToDisplay = '12%';
+                            } else if (sosDate < date1977_05_01) {
+                                percentageToDisplay = '32%';
+                            } else {
+                                percentageToDisplay = '0%';
+                            }
+                        } else if (item.year === 1995) {
+                            // Formula: IF(AND(SOS>1947-08-14, SOS<1977-04-30), 15%, 
+                            //          IF(AND(SOS>1977-04-30, SOS<1991-06-01), 10%, 
+                            //          IF(SOS<1993-06-01, 5%, 0%)))
+                            
+                            if (sosDate > date1947_08_14 && sosDate < date1977_04_30) {
+                                percentageToDisplay = '15%';
+                            } else if (sosDate > date1977_04_30 && sosDate < date1991_06_01) {
+                                percentageToDisplay = '10%';
+                            } else if (sosDate < date1993_06_01) { 
+                                percentageToDisplay = '5%';
+                            } else {
+                                percentageToDisplay = '0%';
+                            }
+                        } else if (item.year === 2001) {
+                            // Formula: IF(AND(SOS>1993-06-30, SOS<2001-12-01), 5%, 
+                            //          IF(AND(SOS>1991-05-31, SOS<1993-07-01), 10%, 
+                            //          IF(SOS<1991-06-01, 15%, 0%)))
+                            
+                            if (sosDate > date1993_06_30 && sosDate < date2001_12_01) {
+                                percentageToDisplay = '5%';
+                            } else if (sosDate > date1991_05_31 && sosDate < date1993_07_01) {
+                                percentageToDisplay = '10%';
+                            } else if (sosDate < date1991_06_01) {
+                                percentageToDisplay = '15%';
+                            } else {
+                                percentageToDisplay = '0%';
+                            }
+                        } else if (item.year === 2004) {
+                            // Formula: IF(SOS>1994-06-30, 8%, IF(SOS<1994-07-01, 16%, 0%))
+                            if (sosDate > date1994_06_30) {
+                                percentageToDisplay = '8%';
+                            } else if (sosDate < date1994_07_01) {
+                                percentageToDisplay = '16%';
+                            } else {
+                                percentageToDisplay = '0%';
+                            }
+                        } else if (item.year === 2006) {
+                            // Formula: IF(SOS>1977-04-30, 15%, IF(SOS<1977-05-01, 20%, 0%))
+                            if (sosDate > date1977_04_30_2006) {
+                                percentageToDisplay = '15%';
+                            } else if (sosDate < date1977_05_01_2006) {
+                                percentageToDisplay = '20%';
+                            } else {
+                                percentageToDisplay = '0%';
+                            }
+                        } else if (item.year === 2007) {
+                            // Formula: IF(AND(SOS>1997-06-30, SOS<2007-07-01), 15%, IF(SOS<1997-07-01, 20%, 0%))
+                            if (sosDate > date1997_06_30_2007 && sosDate < date2007_07_01_2007) {
+                                percentageToDisplay = '15%';
+                            } else if (sosDate < date1997_07_01_2007) {
+                                percentageToDisplay = '20%';
+                            } else {
+                                percentageToDisplay = '0%';
+                            }
+                        } else if (item.year === 2009) {
+                            // Formula: IF(SOS>2001-06-30, 15%, IF(SOS<2001-07-01, 20%, 0%))
+                            if (sosDate > date2001_06_30_2009) {
+                                percentageToDisplay = '15%';
+                            } else if (sosDate < date2001_07_01_2009) {
+                                percentageToDisplay = '20%';
+                            } else {
+                                percentageToDisplay = '0%';
+                            }
+                        } else if (item.year === 2010) {
+                            // Formula: IF(SOS>2001-11-30, 15%, IF(SOS<2001-07-01, 20%, 0%))
+                            if (sosDate > date2001_11_30_2010) {
+                                percentageToDisplay = '15%';
+                            } else if (sosDate < date2001_07_01_2010) {
+                                percentageToDisplay = '20%';
+                            } else {
+                                percentageToDisplay = '0%';
+                            }
+                        } else if (item.year === 2011) {
+                            // Formula: IF(SOS>2002-06-30, 15%, IF(SOS<2002-06-30_2011, 20%, 0%))
+                            if (sosDate > date2002_06_30_2011) {
+                                percentageToDisplay = '15%';
+                            } else if (sosDate < date2002_06_30_2011) {
+                                percentageToDisplay = '20%';
+                            } else {
+                                percentageToDisplay = '0%';
+                            }
+                        }
+                    } else if (item.percentage === 'CONDITIONAL') {
+                        // If no SOS date, show placeholder
+                         percentageToDisplay = '-';
+                    }
+
+                    if (sosDate && fromDate && toDate) {
+                        // Formula: =IF(OR(AND(SOS>=From, SOS<=To), From>=SOS),"Y","N")
+                        const condition1 = (sosDate >= fromDate && sosDate <= toDate);
+                        const condition2 = (fromDate >= sosDate); 
+
+                        if (condition1 || condition2) {
+                             isEntitled = 'Y';
+                        }
+                    }
+                    
+                    // --- 2. MONETARY CALCULATION LOGIC ---
+                    
+                    let currentBaseLine = previousNetValueCurrent; 
+                    let currentIncreaseValue = 0;
+                    let currentNetValue = currentBaseLine; 
+                    let baseLineDisplayCurrent = '-'; // Default display for Base Line is '-' up to 2024
+                    
+                    let restoredBaseLine = previousNetValueRestored;
+                    let restoredIncreaseValue = 0;
+                    let restoredNetValue = previousNetValueRestored;
+                    let baseLineDisplayRestored = '-'; // Default display for Restoration Base Line is '-'
+
+                    // Store the Net from 2024 before the Base Line logic might override it
+                    const net2024 = previousNetValueCurrent; 
+
+                    const percentageText = percentageToDisplay.replace('%', '');
+                    const percentageValue = parseFloat(percentageText) / 100;
+                    
+                    // Flags to determine if a calculation occurred for display/max tracking
+                    let isIncreaseCalculatedCurrent = false;
+                    let isNetCalculatedCurrent = false; 
+                    let isIncreaseCalculatedRestored = false;
+                    let isNetCalculatedRestored = false; 
+
+
+                    if (item.year === 1990) {
+                        // --- 1990 Current Logic ---
+                        if (isEntitled === 'Y' && !isNaN(percentageValue) && grossPension > 0) {
+                            currentIncreaseValue = roundToTwoDecimals(percentageValue * grossPension);
+                            isIncreaseCalculatedCurrent = true;
+                        } else {
+                            currentIncreaseValue = 0;
+                        }
+
+                        // Current Net: =ROUND(IF(Q4>0,(Q4+GPension-MPension),(MPension)),2)
+                        if (currentIncreaseValue > 0) {
+                            currentNetValue = roundToTwoDecimals(currentIncreaseValue + grossPension - basePension);
+                        } else {
+                            currentNetValue = roundToTwoDecimals(basePension);
+                        }
+                        isNetCalculatedCurrent = true;
+                        
+                        // --- 1990 Restoration Logic: Increase ---
+                        // Formula: =ROUND(IF($V$4="Y",($O$4*GPension),(0)),2)
+                        if (isEntitled === 'Y' && !isNaN(percentageValue) && grossPension > 0) {
+                            restoredIncreaseValue = roundToTwoDecimals(percentageValue * grossPension);
+                            isIncreaseCalculatedRestored = true;
+                        } else {
+                            restoredIncreaseValue = 0;
+                        }
+
+                        // Restoration Base Line is Gross Pension (Initial restored state)
+                        restoredBaseLine = grossPension;
+                        
+                        // Restoration Net: (Base Line + Increase)
+                        restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue);
+                        isNetCalculatedRestored = true;
+                        
+                        // Update net values for next iteration
+                        previousNetValueCurrent = currentNetValue;
+                        previousNetValueRestored = restoredNetValue;
+
+                    } else if (item.year >= 1991 && item.year <= 1999) {
+                        // --- 1991-1999 Current Logic ---
+                        if (isEntitled === 'Y' && !isNaN(percentageValue)) {
+                            // Increase: =ROUND(IF(V5="Y", (($R4 + MPension) * O5), 0), 2)
+                            const increaseRaw = (previousNetValueCurrent + basePension) * percentageValue;
+                            currentIncreaseValue = roundToTwoDecimals(increaseRaw);
+                            isIncreaseCalculatedCurrent = true;
+                        } else {
+                            currentIncreaseValue = 0;
+                        }
+                        currentNetValue = roundToTwoDecimals(previousNetValueCurrent + currentIncreaseValue);
+                        isNetCalculatedCurrent = true;
+
+                        // --- 1991-1999 Restoration Logic ---
+                        if (isEntitled === 'Y' && !isNaN(percentageValue)) {
+                            const restoredIncreaseRaw = restoredBaseLine * percentageValue;
+                            restoredIncreaseValue = roundToTwoDecimals(restoredIncreaseRaw);
+                            isIncreaseCalculatedRestored = true;
+                        } else {
+                            restoredIncreaseValue = 0;
+                        }
+                        restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue);
+                        isNetCalculatedRestored = true;
+                        
+                        // Update net values for next iteration
+                        previousNetValueCurrent = currentNetValue;
+                        previousNetValueRestored = restoredNetValue;
+
+                    } else if (item.year >= 2001 && item.year <= 2024) {
+                        // --- 2001-2024 Current Logic (Formula: =ROUND(IF(V9="Y",(O9*R8),(0)),2)) ---
+                        if (isEntitled === 'Y' && !isNaN(percentageValue)) {
+                            const increaseRaw = percentageValue * previousNetValueCurrent;
+                            currentIncreaseValue = roundToTwoDecimals(increaseRaw);
+                            isIncreaseCalculatedCurrent = true;
+                        } else {
+                            currentIncreaseValue = 0;
+                        }
+                        currentNetValue = roundToTwoDecimals(previousNetValueCurrent + currentIncreaseValue);
+                        isNetCalculatedCurrent = true;
+
+                        // --- 2001-2024 Restoration Logic ---
+                        if (isEntitled === 'Y' && !isNaN(percentageValue)) {
+                            const restoredIncreaseRaw = restoredBaseLine * percentageValue;
+                            restoredIncreaseValue = roundToTwoDecimals(restoredIncreaseRaw);
+                            isIncreaseCalculatedRestored = true;
+                        } else {
+                            restoredIncreaseValue = 0;
+                        }
+                        restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue);
+                        isNetCalculatedRestored = true;
+                        
+                        // Update net values for next iteration
+                        previousNetValueCurrent = currentNetValue;
+                        previousNetValueRestored = restoredNetValue;
+                    } 
+                    
+                    // --- 2025 BASE LINE AND INCREASE LOGIC ---
+                    if (item.year === 2025) {
+                        
+                        // 2025 Current Base Line Formula: =IF($B$4>DATE(2024,12,31),MPension,R30)
+                        if (sosDate && sosDate > date2024_12_31) {
+                            currentBaseLine = basePension; // MPension
+                        } else {
+                            currentBaseLine = net2024; // R30 (Net 2024)
+                        }
+                        
+                        baseLineDisplayCurrent = formatCurrency(currentBaseLine); 
+                        
+                        // 2025 Current Increase Formula: =ROUND(IF(AND(V31="Y",P31>0),O31*P31,IF(AND(V31="Y",P31=0),O31*R30,0)),2)
+                        if (isEntitled === 'Y' && percentageValue > 0) {
+                            if (currentBaseLine > 0) { // P31 > 0
+                                currentIncreaseValue = roundToTwoDecimals(percentageValue * currentBaseLine); // O31 * P31
+                            } else if (currentBaseLine === 0) { // P31 = 0
+                                currentIncreaseValue = roundToTwoDecimals(percentageValue * net2024); // O31 * R30
+                            } else {
+                                currentIncreaseValue = 0;
+                            }
+                            isIncreaseCalculatedCurrent = true;
+                        } else {
+                            currentIncreaseValue = 0;
+                        }
+
+                        currentNetValue = roundToTwoDecimals(currentBaseLine + currentIncreaseValue);
+                        isNetCalculatedCurrent = true;
+                        
+                        // 2025 Restoration Logic: Base Line and Increase
+                        restoredBaseLine = previousNetValueRestored;
+                        if (isEntitled === 'Y' && !isNaN(percentageValue)) {
+                            const restoredIncreaseRaw = restoredBaseLine * percentageValue;
+                            restoredIncreaseValue = roundToTwoDecimals(restoredIncreaseRaw);
+                            isIncreaseCalculatedRestored = true;
+                        } else {
+                            restoredIncreaseValue = 0;
+                        }
+                        restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue);
+                        isNetCalculatedRestored = true;
+
+                        baseLineDisplayRestored = formatCurrency(restoredBaseLine); // Show calculation starting 2025 for consistency
+                        
+                        // Update net values for next (hypothetical) iteration
+                        previousNetValueCurrent = currentNetValue;
+                        previousNetValueRestored = restoredNetValue;
+                    }
+                    
+                    // --- 3. STORE NET VALUE FOR MAX CALCULATION ---
+                    // Only store the net value if it was calculated (i.e., we are past the initial placeholder years)
+                    if (isNetCalculatedCurrent) {
+                        currentNetValues.push(currentNetValue);
+                    }
+                    if (isNetCalculatedRestored) {
+                        restoredNetValues.push(restoredNetValue);
+                    }
+
+
+                    // Column 1: Increase Year
+                    row.insertCell().textContent = item.year;
+                    
+                    // Column 2: %age (Calculated for conditional years, fixed otherwise)
+                    row.insertCell().textContent = percentageToDisplay;
+                    
+                    // Columns 3-8: Monetary values
+                    
+                    // Base Line (Current) - ONLY SHOWS CALCULATED VALUE FOR 2025
+                    row.insertCell().textContent = item.year === 2025 ? baseLineDisplayCurrent : '-'; 
+                    
+                    // Increase (Current)
+                    const increaseDisplayCurrent = isIncreaseCalculatedCurrent ? formatCurrency(currentIncreaseValue) : '-';
+                    row.insertCell().textContent = increaseDisplayCurrent;
+                    
+                    // Net (Current)
+                    const netDisplayCurrent = isNetCalculatedCurrent ? formatCurrency(currentNetValue) : '-';
+                    row.insertCell().textContent = netDisplayCurrent;
+                    
+                    // Base Line (Restoration) - ONLY SHOWS CALCULATED VALUE STARTING 2025
+                    row.insertCell().textContent = item.year === 2025 ? baseLineDisplayRestored : '-';
+                    
+                    // Increase (Restoration)
+                    const increaseDisplayRestored = isIncreaseCalculatedRestored ? formatCurrency(restoredIncreaseValue) : '-';
+                    row.insertCell().textContent = increaseDisplayRestored;
+                    
+                    // Net (Restoration)
+                    const netDisplayRestored = isNetCalculatedRestored ? formatCurrency(restoredNetValue) : '-';
+                    row.insertCell().textContent = netDisplayRestored;
+                    
+                    // Column 9: Entitled (Calculated based on formula)
+                    row.insertCell().textContent = isEntitled;
+                    
+                    // Column 10: From
+                    row.insertCell().textContent = formatDateTable(item.from);
+
+                    // Column 11: To
+                    row.insertCell().textContent = formatDateTable(item.to);
+                });
+                
+                // Return both arrays of calculated net values
+                return { current: currentNetValues, restored: restoredNetValues };
+            }
+
+
+            function calculateAndDisplayAll() {
+                try {
+                    // --- Get Input Values ---
+                    const dobDate = parseDate(document.getElementById('dob').value);
+                    const doeDate = parseDate(document.getElementById('doe').value);
+                    const sosDate = parseDate(document.getElementById('sos').value);
+                    const tkAward = document.getElementById('tk-award').value;
+                    const isFamilyPension = document.getElementById('family-pension').value === 'Yes';
+                    
+                    // Gross Pension PPO (clean value for calculation)
+                    const grossPensionPPOText = document.getElementById('gross-pension-ppo').value.replace(/,/g, '');
+                    const grossPensionPPO = parseFloat(grossPensionPPOText) || 0;
+                    
+                    // --- Update Date Displays ---
+                    document.getElementById('dob-display').textContent = formatDateDisplay(dobDate);
+                    document.getElementById('doe-display').textContent = formatDateDisplay(doeDate);
+                    document.getElementById('sos-display').textContent = formatDateDisplay(sosDate);
+
+                    // --- CALCULATION STEP 1: Service Summary ---
+                    let roundedQS = 0;
+                    let ageNextBirthday = 0;
+                    let commutationFactor = 0;
+                    let restorationDate = null;
+                    
+                    if (doeDate && sosDate) {
+                        // Qualifying Service (QS): DOE - SOS, if months > 5 add one year (Math.round)
+                        const serviceInMillis = sosDate - doeDate;
+                        const serviceInYearsDecimal = serviceInMillis / (1000 * 60 * 60 * 24 * 365.25);
+                        roundedQS = Math.round(serviceInYearsDecimal);
+
+                        // Age on next Birthday: SOS - DOB and Math.ceil (roundup)
+                        if (dobDate) {
+                            const ageAtSOSInYears = (sosDate - dobDate) / (1000 * 60 * 60 * 24 * 365.25);
+                            ageNextBirthday = Math.ceil(ageAtSOSInYears);
+                        }
+
+                        // Commutation Purchase Value (VLOOKUP)
+                        let factorsToUse = null;
+                        const policyDate2001 = parseDate('2001-12-01');
+                        const policyDate1986 = parseDate('1986-07-01');
+
+                        if (sosDate >= policyDate2001) {
+                            factorsToUse = factors_2001_12_01;
+                        } else if (sosDate >= policyDate1986) {
+                            factorsToUse = factors_1986_07_01;
+                        } else {
+                            factorsToUse = factors_1966_07_01;
+                        }
+                        
+                        commutationFactor = factorsToUse[ageNextBirthday] || 0;
+
+                        // Pension Restoration Date: Date of SOS + Math.round(Commutation Purchase Value)
+                        const roundedCommutationFactor = Math.round(commutationFactor);
+                        restorationDate = new Date(sosDate);
+                        restorationDate.setFullYear(restorationDate.getFullYear() + roundedCommutationFactor);
+                    }
+                    
+                    // --- CALCULATION STEP 2: Pension Details (basePension is MPension) ---
+                    
+                    // Gross Pension (Output): 75% if Family Pension is Yes, otherwise 100% of PPO input
+                    let grossPension = grossPensionPPO;
+                    if (isFamilyPension) {
+                        grossPension = grossPensionPPO * 0.75;
+                    }
+
+                    // Commuted Pension: IF(SOS>2005-06-30, 35%), IF(SOS>2001-11-30, 40%), IF(SOS<2001-12-01, 50%)
+                    let commutedPensionPercentage = 0;
+                    if (sosDate) {
+                        const date2005 = parseDate('2005-06-30');
+                        const date2001 = parseDate('2001-11-30');
+
+                        if (sosDate > date2005) {
+                            commutedPensionPercentage = 0.35;
+                        } else if (sosDate > date2001) {
+                            commutedPensionPercentage = 0.40;
+                        } else { // SOS < 2001-12-01
+                            commutedPensionPercentage = 0.50;
+                        }
+                    }
+
+                    const commutedPension = roundToTwoDecimals(grossPension * commutedPensionPercentage);
+                    
+                    // Renaming netPensionPreIncrease to basePension for clearer formula mapping (MPension)
+                    const basePension = roundToTwoDecimals(grossPension - commutedPension);
+                    
+                    // Commutation Amount: Calculated on original (100%) PPO value
+                    const commutationAmount = roundToTwoDecimals(grossPensionPPO * commutedPensionPercentage * commutationFactor * 12);
+
+                    // --- CALCULATION STEP 3: Populate table and get Current & Restored Net values ---
+                    const netValues = populateIncreaseTable(sosDate, grossPension, basePension, dobDate);
+                    
+                    // --- CALCULATION STEP 4: Determine Final Pension Amount (Current & Restored) ---
+                    
+                    // Pension p.m after increases (Current) is the highest value in the Current | Net column
+                    let finalPensionCurrent = basePension; // Start with the minimum possible value (base pension)
+                    if (netValues.current.length > 0) {
+                        finalPensionCurrent = Math.max(...netValues.current);
+                    }
+
+                    // Pension p.m after increases (Restored) is the highest value in the Restored | Net column (NEW LOGIC)
+                    let finalPensionRestored = grossPension; 
+                    if (netValues.restored.length > 0) {
+                        finalPensionRestored = Math.max(...netValues.restored);
+                    }
+
+                    // --- CALCULATION STEP 5: Final Entitlements (TK Allowance & Totals) ---
+                    let tkAllowance = 0;
+                    if (tkAward === '1') {
+                        tkAllowance = 170;
+                    } else if (tkAward === '2') {
+                        tkAllowance = 130;
+                    } else if (tkAward === '3') {
+                        tkAllowance = 70;
+                    }
+                    
+                    // Total Payable Pension p.m: Sum of Pension p.m after increases and TK Allowance
+                    const totalPayableCurrent = roundToTwoDecimals(finalPensionCurrent + tkAllowance);
+                    const totalPayableRestored = roundToTwoDecimals(finalPensionRestored + tkAllowance);
+                    
+                    // --- Update UI ---
+                    
+                    // Service Summary
+                    document.getElementById('qs-output').textContent = `${roundedQS} Years`;
+                    document.getElementById('age-at-sos-output').textContent = `${ageNextBirthday} Years`;
+                    document.getElementById('commutation-factor-output').textContent = commutationFactor.toFixed(4);
+                    
+                    // Pension Details
+                    document.getElementById('gross-pension-output').textContent = formatCurrency(grossPension);
+                    document.getElementById('net-pension-pre-increase-output').textContent = formatCurrency(basePension);
+                    document.getElementById('commuted-pension-output').textContent = formatCurrency(commutedPension);
+                    document.getElementById('commutation-amount-output').textContent = formatCurrency(commutationAmount);
+
+                    // Final Entitlements Table
+                    document.getElementById('pension-pm-current-output').textContent = formatCurrency(finalPensionCurrent);
+                    document.getElementById('pension-pm-restored-output').textContent = formatCurrency(finalPensionRestored);
+                    
+                    document.getElementById('tk-allowance-current-output').textContent = formatCurrency(tkAllowance);
+                    document.getElementById('tk-allowance-restored-output').textContent = formatCurrency(tkAllowance);
+                    
+                    // Total Payable Pension p.m (Rounded to nearest whole number, no decimals)
+                    document.getElementById('total-payable-current-output').textContent = formatCurrency(totalPayableCurrent, true);
+                    document.getElementById('total-payable-restored-output').textContent = formatCurrency(totalPayableRestored, true);
+                    
+                    // Restoration Date Styling
+                    const restorationOutputSpan = document.getElementById('restoration-date-output');
+                    restorationOutputSpan.textContent = restorationDate ? formatDateDisplay(restorationDate) : 'N/A';
+                    
+                    if (restorationDate) {
+                        const today = parseDate(getTodayDateString());
+                        // Clear existing classes
+                        restorationOutputSpan.className = 'value'; 
+                        
+                        if (restorationDate > today) {
+                            // Date is in the future (Red Bold)
+                            restorationOutputSpan.classList.add('text-red-600', 'font-bold');
+                        } else {
+                            // Date is past or today (Green Bold Flashing)
+                            restorationOutputSpan.classList.add('text-green-600', 'font-bold', 'flashing');
+                        }
+                    } else {
+                         restorationOutputSpan.className = 'value text-gray-800'; 
+                    }
+                    
+                } catch (error) {
+                    console.error("Error in calculateAndDisplayAll:", error);
+                }
+            }
+            
+            // Add event listeners to all inputs for instant calculation
+            allInputs.forEach(input => {
+                if(input.id === 'gross-pension-ppo') {
+                    input.addEventListener('input', formatGrossPensionInput);
+                } else {
+                    input.addEventListener('input', calculateAndDisplayAll);
+                }
+            });
+
+            // Initial calculation on load
+            calculateAndDisplayAll();
+        });
+    </script>
+</body>
+</html>
