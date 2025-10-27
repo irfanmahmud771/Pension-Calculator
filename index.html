@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pension Calculation App</title>
+    <!-- Load Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Google Font 'Inter' -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Custom styles for the application */
         body {
             font-family: 'Inter', sans-serif;
         }
@@ -809,12 +812,12 @@
                     // --- APPLY MINIMUM PENSION LOGIC ---
                     // Apply minimum if (1) it's defined (applicableMinPension > 0) AND (2) the calculated net is less than the minimum
                     
-                    if (isNetCalculatedCurrent && applicableMinPension > 0 && currentNetValue < applicableMinPension) {
+                    if (isEntitled === 'Y' && isNetCalculatedCurrent && applicableMinPension > 0 && currentNetValue < applicableMinPension) {
                         currentNetValue = applicableMinPension;
                         minPensionAppliedCurrent = true;
                     }
 
-                    if (isNetCalculatedRestored && applicableMinPension > 0 && restoredNetValue < applicableMinPension) {
+                    if (isEntitled === 'Y' && isNetCalculatedRestored && applicableMinPension > 0 && restoredNetValue < applicableMinPension) {
                         restoredNetValue = applicableMinPension;
                         minPensionAppliedRestored = true;
                     }
@@ -1119,8 +1122,4 @@
     </script>
 </body>
 </html>
-
-
-
-
 
