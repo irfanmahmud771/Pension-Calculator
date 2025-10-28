@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pension Calculation App</title>
-    <!-- Load Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Google Font 'Inter' -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles for the application */
         body {
             font-family: 'Inter', sans-serif;
         }
@@ -108,7 +105,7 @@
         <header class="text-center mb-8">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-700">Pension Calculator</h1>
             <p class="text-gray-500 mt-2">Enter your details to calculate pension entitlements.</p>
-            <p class="text-red-600 mt-2 font-medium">(For Retirement date 01 July, 1989 to till now)</p>
+            <p class="text-red-600 mt-2 font-medium">(For Retirement date 01 July, 1986 to till now)</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -394,7 +391,10 @@
             
             // --- MINIMUM PENSION DATA (From uploaded image) ---
             const minPensionData = {
+                1988: { self: 300.00, family: 150.00 },
+                1995: { self: 300.00, family: 150.00 },
                 1997: { self: 300.00, family: 150.00 },
+                1999: { self: 300.00, family: 150.00 },
                 2008: { self: 2000.00, family: 1000.00 },
                 2010: { self: 3000.00, family: 2250.00 },
                 2013: { self: 5000.00, family: 3750.00 },
@@ -407,6 +407,8 @@
 
             // --- PENSION INCREASES DATA (New data provided by user in DD-MMM-YYYY format) ---
             const pensionIncreases = [
+                { year: 1987, percentage: '4%', from: '1987-06-30', to: '1987-06-30' }, 
+                { year: 1988, percentage: '7%', from: '1988-06-30', to: '1988-06-30' }, 
                 { year: 1990, percentage: '10%', from: '1990-06-30', to: '1990-06-30' }, 
                 { year: 1991, percentage: 'CONDITIONAL', from: '1991-06-30', to: '1991-06-30' },
                 { year: 1995, percentage: 'CONDITIONAL', from: '1995-07-01', to: '1995-07-01' }, 
@@ -684,14 +686,80 @@
                     let minPensionAppliedRestored = false;
 
 
-                    if (year === 1990) {
-                        // --- 1990 Current Logic ---
+                    if (year === 1987) { 
+                        // --- 1987 Restoration Logic (First increase) ---
+                        // Restoration Base Line is Gross Pension (from previousNetValueRestored initial value)
+                        restoredBaseLine = grossPension; // Explicitly set for first row
+                        
+                        // Increase: =ROUND(IF($V$1987="Y",($O$1987*GPension),(0)),2)
                         if (isEntitled === 'Y' && !isNaN(percentageValue) && grossPension > 0) {
-                            currentIncreaseValue = roundToTwoDecimals(percentageValue * grossPension);
-                            isIncreaseCalculatedCurrent = true;
+                            restoredIncreaseValue = roundToTwoDecimals(percentageValue * grossPension);
+                            isIncreaseCalculatedRestored = true;
                         } else {
-                            currentIncreaseValue = 0;
+                            restoredIncreaseValue = 0;
                         }
+                        
+                        // Restoration Net: (Base Line + Increase)
+                        restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue);
+                        isNetCalculatedRestored = true;
+
+                        // --- 1987 Current Logic (USER REQUEST: Make same as Restoration) ---
+                        currentIncreaseValue = restoredIncreaseValue; // LINK
+                        isIncreaseCalculatedCurrent = isIncreaseCalculatedRestored; // LINK
+
+                        // Current Net: =ROUND(IF(Q_1987 > 0,(Q_1987 + GPension - MPension),(MPension)),2)
+                        if (currentIncreaseValue > 0) {
+                            currentNetValue = roundToTwoDecimals(currentIncreaseValue + grossPension - basePension);
+                        } else {
+                            currentNetValue = roundToTwoDecimals(basePension);
+                        }
+                        isNetCalculatedCurrent = true;
+
+                    } else if (year === 1988) {
+                        // --- 1988 Restoration Logic (USER FORMULA: MAX(PrevNet, Min) * %) ---
+                        // Restoration Base Line is previous net
+                        restoredBaseLine = previousNetValueRestored; 
+                        
+                        if (isEntitled === 'Y' && !isNaN(percentageValue)) {
+                            // Formula: MAX(Net of Previous year, Minimum Pension) * %age
+                            const baseForIncrease = Math.max(restoredBaseLine, applicableMinPension);
+                            restoredIncreaseValue = roundToTwoDecimals(baseForIncrease * percentageValue); 
+                            isIncreaseCalculatedRestored = true;
+                        } else {
+                            restoredIncreaseValue = 0;
+                        }
+                        
+                        // Restoration Net: (Base Line + Increase)
+                        restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue);
+                        isNetCalculatedRestored = true;
+
+                        // --- 1988 Current Logic (USER REQUEST: Make same as Restoration) ---
+                        currentIncreaseValue = restoredIncreaseValue; // LINK
+                        isIncreaseCalculatedCurrent = isIncreaseCalculatedRestored; // LINK
+                        
+                        currentNetValue = roundToTwoDecimals(previousNetValueCurrent + currentIncreaseValue);
+                        isNetCalculatedCurrent = true;
+
+                    } else if (year === 1990) {
+                        // --- 1990 Restoration Logic (USER FORMULA: MAX(PrevNet, Min) * %) ---
+                        restoredBaseLine = previousNetValueRestored;
+                        
+                        if (isEntitled === 'Y' && !isNaN(percentageValue)) {
+                            // Formula: MAX(Net of Previous year, Minimum Pension) * %age
+                            const baseForIncrease = Math.max(restoredBaseLine, applicableMinPension);
+                            restoredIncreaseValue = roundToTwoDecimals(baseForIncrease * percentageValue); 
+                            isIncreaseCalculatedRestored = true;
+                        } else {
+                            restoredIncreaseValue = 0;
+                        }
+                        
+                        // Restoration Net: (Base Line + Increase)
+                        restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue);
+                        isNetCalculatedRestored = true;
+
+                        // --- 1990 Current Logic (USER REQUEST: Make same as Restoration) ---
+                        currentIncreaseValue = restoredIncreaseValue; // LINK
+                        isIncreaseCalculatedCurrent = isIncreaseCalculatedRestored; // LINK
 
                         // Current Net: =ROUND(IF(Q4>0,(Q4+GPension-MPension),(MPension)),2)
                         if (currentIncreaseValue > 0) {
@@ -701,45 +769,27 @@
                         }
                         isNetCalculatedCurrent = true;
                         
-                        // --- 1990 Restoration Logic: Increase ---
-                        // Formula: =ROUND(IF($V$4="Y",($O$4*GPension),(0)),2)
-                        if (isEntitled === 'Y' && !isNaN(percentageValue) && grossPension > 0) {
-                            restoredIncreaseValue = roundToTwoDecimals(percentageValue * grossPension);
+                    } else if (year >= 1991 && year <= 1999) {
+                        // --- 1991-1999 Restoration Logic (USER FORMULA: MAX(PrevNet, Min) * %) ---
+                        restoredBaseLine = previousNetValueRestored;
+
+                        if (isEntitled === 'Y' && !isNaN(percentageValue)) {
+                            // Formula: MAX(Net of Previous year, Minimum Pension) * %age
+                            const baseForIncrease = Math.max(restoredBaseLine, applicableMinPension);
+                            restoredIncreaseValue = roundToTwoDecimals(baseForIncrease * percentageValue); 
                             isIncreaseCalculatedRestored = true;
                         } else {
                             restoredIncreaseValue = 0;
                         }
-
-                        // Restoration Base Line is Gross Pension (Initial restored state)
-                        restoredBaseLine = grossPension;
-                        
-                        // Restoration Net: (Base Line + Increase)
                         restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue);
                         isNetCalculatedRestored = true;
 
-                    } else if (year >= 1991 && year <= 1999) {
-                        // --- 1991-1999 Current Logic ---
-                        if (isEntitled === 'Y' && !isNaN(percentageValue)) {
-                            // Increase: =ROUND(IF(V5="Y", (($R4 + MPension) * O5), 0), 2)
-                            const increaseRaw = (previousNetValueCurrent + basePension) * percentageValue;
-                            currentIncreaseValue = roundToTwoDecimals(increaseRaw);
-                            isIncreaseCalculatedCurrent = true;
-                        } else {
-                            currentIncreaseValue = 0;
-                        }
+                        // --- 1991-1999 Current Logic (USER REQUEST: Make same as Restoration) ---
+                        currentIncreaseValue = restoredIncreaseValue; // LINK
+                        isIncreaseCalculatedCurrent = isIncreaseCalculatedRestored; // LINK
+
                         currentNetValue = roundToTwoDecimals(previousNetValueCurrent + currentIncreaseValue);
                         isNetCalculatedCurrent = true;
-
-                        // --- 1991-1999 Restoration Logic ---
-                        if (isEntitled === 'Y' && !isNaN(percentageValue)) {
-                            const restoredIncreaseRaw = restoredBaseLine * percentageValue;
-                            restoredIncreaseValue = roundToTwoDecimals(restoredIncreaseRaw);
-                            isIncreaseCalculatedRestored = true;
-                        } else {
-                            restoredIncreaseValue = 0;
-                        }
-                        restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue);
-                        isNetCalculatedRestored = true;
 
                     } else if (year >= 2001 && year <= 2024) {
                         // --- 2001-2024 Current Logic (Formula: =ROUND(IF(V9="Y",(O9*R8),(0)),2)) ---
@@ -811,13 +861,15 @@
 
                     // --- APPLY MINIMUM PENSION LOGIC ---
                     // Apply minimum if (1) it's defined (applicableMinPension > 0) AND (2) the calculated net is less than the minimum
+                    // AND (3) isEntitled = 'Y'
+                    // AND (4) year > 1999 (as requested by user)
                     
-                    if (isEntitled === 'Y' && isNetCalculatedCurrent && applicableMinPension > 0 && currentNetValue < applicableMinPension) {
+                    if (isEntitled === 'Y' && year > 1999 && isNetCalculatedCurrent && applicableMinPension > 0 && currentNetValue < applicableMinPension) {
                         currentNetValue = applicableMinPension;
                         minPensionAppliedCurrent = true;
                     }
 
-                    if (isEntitled === 'Y' && isNetCalculatedRestored && applicableMinPension > 0 && restoredNetValue < applicableMinPension) {
+                    if (isEntitled === 'Y' && year > 1999 && isNetCalculatedRestored && applicableMinPension > 0 && restoredNetValue < applicableMinPension) {
                         restoredNetValue = applicableMinPension;
                         minPensionAppliedRestored = true;
                     }
@@ -1122,4 +1174,8 @@
     </script>
 </body>
 </html>
+
+
+
+
 
