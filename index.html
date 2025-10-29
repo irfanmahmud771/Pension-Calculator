@@ -160,30 +160,111 @@
             display: none;
         }
 
+        /* --- Mobile Responsive Styles --- */
+        @media (max-width: 768px) {
+            .logo-left {
+                /* position: relative;
+                top: auto;
+                left: auto;
+                width: 8rem; /* 128px */
+                /* height: auto;
+                margin: 0 auto 1rem; /* Center logo */
+                display: none; /* Hide logo on mobile */
+            }
+            /* .logo-right {
+                /* position: relative;
+                top: auto;
+                right: auto;
+                width: 10rem; /* 160px */
+                /* height: auto;
+                margin: 0 auto 1rem; /* Center logo */
+                /*display: none; /* Hide logo on mobile */
+            /*} */
+            .container {
+                padding: 1rem; /* Reduce padding on mobile */
+            }
+            .card {
+                padding: 1rem; /* Reduce card padding */
+            }
+            header h1 {
+                font-size: 1.875rem; /* 30px */
+            }
+            header p {
+                font-size: 0.875rem; /* 14px */
+            }
+            .increase-table-container {
+                /* Allow table to be scrollable on mobile */
+                overflow-x: auto;
+            }
+            .increase-table {
+                min-width: 800px; /* Further reduce min-width for mobile */
+            }
+            /* Make final entitlement table stack */
+            .output-group {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 0.5rem 0;
+            }
+            .output-group .label {
+                margin-bottom: 0.25rem;
+                font-size: 0.875rem; /* 14px */
+            }
+            .output-group .value {
+                font-size: 1rem; /* 16px */
+                padding-left: 0.5rem; /* Indent value slightly */
+            }
+             /* Special handling for the header row in the final table */
+            .output-group.font-bold {
+                flex-direction: row; /* Keep header as row */
+                justify-content: space-between;
+            }
+            .output-group.font-bold .label {
+                 margin-bottom: 0;
+                 font-size: 1rem; /* 16px */
+                 width: auto !important; /* Override width */
+            }
+             /* Special handling for the 3-column rows in final table */
+             .output-group .w-1\/3 {
+                width: 100% !important; /* Make columns full width */
+                text-align: left !important; /* Align text left */
+                padding-left: 0.5rem; /* Indent */
+            }
+            .output-group .w-1\/3.label {
+                padding-left: 0; /* No indent for label */
+                font-size: 0.875rem; /* 14px */
+                margin-bottom: 0.25rem;
+            }
+            /* Hide the empty span in the header on mobile */
+            .output-group.font-bold .label.w-1\/3:first-child {
+                display: none;
+            }
+        }
+        /* --- End Mobile Styles --- */
+
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
     <div class="container mx-auto p-4 md:p-8 relative"> <!-- Added relative positioning -->
         <!-- Logo Container -->
-        <div class="logo-container">
+        <div class="logo-container flex flex-col md:flex-row justify-between items-center">
             <!-- Logo Added -->
-            <img src="logo.gif" alt="Logo" class="logo-left absolute top-4 left-4 w-32 h-32 object-contain">
+            <img src="logo.gif" alt="Logo" class="logo-left md:absolute md:top-4 md:left-4 w-32 h-32 object-contain" onerror="this.src='https://placehold.co/128x128/eeeeee/aaaaaa?text=Logo'; this.onerror=null;">
             
             <!-- New Logo Added -->
-            <img src="Exact.jpg" alt="Exact Logo" class="logo-right absolute top-4 right-4 w-40 h-40 object-contain">
+            <!-- <img src="Exact.jpg" alt="Exact Logo" class="logo-right md:absolute md:top-4 md:right-4 w-40 h-40 object-contain" onerror="this.src='https://placehold.co/160x160/eeeeee/aaaaaa?text=Logo'; this.onerror=null;"> -->
         </div>
         
-        <header class="text-center mb-8">
+        <header class="text-center mb-8 mt-4 md:mt-0">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-700">Pension Calculator</h1>
             <!-- Reduced margin-top for tighter spacing -->
-            <p class="text-gray-500 mt-1">(For Retirement date 01 July, 1986 to till now)</p>
+            <p class="text-red-600 mt-1">(For Retirement date 01 July, 1986 to till now)</p>
             <!-- Added new line, set color to blue, and reduced margin-top -->
             <p class="text-blue-600 mt-1 font-medium">Designed by Chf Wrt Off Irfan Mahmud Sect Asstt</p>
         </header>
 
         <!-- Wrapper for print grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Input Section -->
             <div class="card">
                 <h2 class="card-title text-center font-bold text-xl">Input Details</h2>
@@ -280,45 +361,48 @@
 
                 <!-- This section remains visible on screen -->
                 <div>
-                    <h3 class="font-semibold text-lg mt-6 mb-2 text-gray-600 border-b pb-2">Final Entitlements After Increase</h3>
-                     <div class="mt-4 space-y-2 py-4">
-                        <!-- Table Header -->
+                    <h3 class="font-semibold text-lg mt-6 mb-2 text-gray-600 border-b pb-2">Final Pension After Increases</h3>
+                     <div class="mt-4 space-y-2"> <!-- Removed py-4 and changed mt-6 to mt-4 -->
+                        <!-- Table Header (REMOVED) -->
+                        <!--
                         <div class="output-group font-bold">
                             <span class="label w-1/3"></span>
-                            <span class="label w-1/3 text-center text-blue-600">Current</span>
-                            <span class="label w-1/3 text-center text-green-600">After Restoration</span>
+                        </div>
+                        -->
+
+                        <!-- Pension p.m (Current) Row -->
+                        <div class="output-group">
+                            <span class="label w-1/3 whitespace-nowrap">Pension (Current)</span>
+                            <span class="value w-1/3 text-right text-gray-800" id="pension-pm-current-output">0</span> <!-- Changed text-center to text-right -->
                         </div>
 
-                        <!-- Pension p.m after increases Row -->
+                        <!-- Pension p.m (After Restoration) Row -->
                         <div class="output-group">
-                            <span class="label w-1/3">Pension p.m</span>
-                            <span class="value w-1/3 text-center text-gray-800" id="pension-pm-current-output">0</span>
-                            <span class="value w-1/3 text-center text-gray-800" id="pension-pm-restored-output">0</span>
+                            <span class="label w-1/3 whitespace-nowrap">Pension (After Restoration)</span>
+                            <span class="value w-1/3 text-right text-gray-800" id="pension-pm-restored-output">0</span> <!-- Changed text-center to text-right -->
                         </div>
 
                         <!-- TK Allowance Row -->
                         <div class="output-group">
-                            <span class="label w-1/3">TK Allowance p.m</span>
-                            <span class="value w-1/3 text-center text-gray-800" id="tk-allowance-current-output">0</span>
-                            <span class="value w-1/3 text-center text-gray-800" id="tk-allowance-restored-output">0</span>
+                            <span class="label w-1/3 whitespace-nowrap">TK Allowance</span>
+                            <span class="value w-1/3 text-right text-gray-800" id="tk-allowance-current-output">0</span> <!-- Changed text-center to text-right -->
                         </div>
 
-                        <!-- Total payable Row -->
-                        <div class="output-group font-extrabold text-gray-900">
-                            <span class="label w-1/3">Total Payable Pension p.m</span>
-                            <!-- Use separate IDs to simplify formatting without breaking generic formatCurrency -->
+                        <!-- Total payable Row (Effectively deleted/repurposed) -->
+                        <!-- <div class="output-group font-extrabold text-gray-900">
+                            <span class="label w-1/3"></span>
                             <span class="value w-1/3 text-center text-gray-800" id="total-payable-current-output">0</span>
                             <span class="value w-1/3 text-center text-gray-800" id="total-payable-restored-output">0</span>
-                        </div>
+                        </div> -->
 
                          <div class="output-group pt-4"> <!-- Add padding top for separation -->
-                            <span class="label">Pension Restoration Date</span>
-                            <span class="value" id="restoration-date-output"></span>
+                            <span class="label w-1/3 whitespace-nowrap">Pension Restoration Date</span>
+                            <span class="value text-right" id="restoration-date-output"></span> <!-- Added text-right -->
                         </div>
 
                         <div class="output-group">
-                            <span class="label">Age on Pension Restoration</span>
-                            <span class="value text-gray-800" id="age-at-restoration-output">0 Years</span>
+                            <span class="label w-1/3 whitespace-nowrap">Age on Pension Restoration</span>
+                            <span class="value text-gray-800 text-right" id="age-at-restoration-output">0 Years</span> <!-- Added text-right -->
                         </div>
                      </div>
                 </div>
@@ -342,7 +426,7 @@
                             <th rowspan="2" class="bg-blue-100 text-blue-600 hidden-column">To</th>
                             <th colspan="2" class="bg-cyan-200 text-cyan-700 hidden-column">Minimum Pension</th>
                         </tr>
-                        <tr class="sub-header">
+                        <tr classs="sub-header">
                             <th>Base Line</th>
                             <th>Increase</th>
                             <th>Net</th>
@@ -1203,6 +1287,9 @@
                         // Use Math.max, but also include the initial basePension in comparison
                         finalPensionCurrent = Math.max(basePension, ...netValues.current);
                     }
+                    
+                    // *** NEW: Apply Math.ceil() to the final calculated value ***
+                    finalPensionCurrent = Math.ceil(finalPensionCurrent);
 
                     // Pension p.m after increases (Restored) is the highest value in the Restored | Net column (NEW LOGIC)
                     let finalPensionRestored = grossPension; 
@@ -1210,6 +1297,10 @@
                         // Use Math.max, but also include the initial grossPension in comparison
                         finalPensionRestored = Math.max(grossPension, ...netValues.restored);
                     }
+                    
+                    // *** NEW: Apply Math.ceil() to the final calculated value ***
+                    finalPensionRestored = Math.ceil(finalPensionRestored);
+
 
                     // --- CALCULATION STEP 5: Final Entitlements (TK Allowance & Totals) ---
                     let tkAllowance = 0;
@@ -1222,8 +1313,8 @@
                     }
                     
                     // Total Payable Pension p.m: Sum of Pension p.m after increases and TK Allowance
-                    const totalPayableCurrent = roundToTwoDecimals(finalPensionCurrent + tkAllowance);
-                    const totalPayableRestored = roundToTwoDecimals(finalPensionRestored + tkAllowance);
+                    // const totalPayableCurrent = roundToTwoDecimals(finalPensionCurrent + tkAllowance);
+                    // const totalPayableRestored = roundToTwoDecimals(finalPensionRestored + tkAllowance);
                     
                     // --- Update UI (Screen) ---
                     
@@ -1239,14 +1330,16 @@
                     document.getElementById('commutation-amount-output').textContent = formatCurrency(commutationAmount);
 
                     // Final Entitlements Table (Screen)
-                    document.getElementById('pension-pm-current-output').textContent = formatCurrency(finalPensionCurrent);
-                    document.getElementById('pension-pm-restored-output').textContent = formatCurrency(finalPensionRestored);
+                    
+                    // *** Use roundToWhole=true for final display as it's already rounded up ***
+                    document.getElementById('pension-pm-current-output').textContent = formatCurrency(finalPensionCurrent, true);
+                    document.getElementById('pension-pm-restored-output').textContent = formatCurrency(finalPensionRestored, true);
                     
                     document.getElementById('tk-allowance-current-output').textContent = formatCurrency(tkAllowance);
-                    document.getElementById('tk-allowance-restored-output').textContent = formatCurrency(tkAllowance);
+                    // document.getElementById('tk-allowance-restored-output').textContent = formatCurrency(tkAllowance);
                     
-                    document.getElementById('total-payable-current-output').textContent = formatCurrency(totalPayableCurrent, true);
-                    document.getElementById('total-payable-restored-output').textContent = formatCurrency(totalPayableRestored, true);
+                    // document.getElementById('total-payable-current-output').textContent = formatCurrency(totalPayableCurrent, true);
+                    // document.getElementById('total-payable-restored-output').textContent = formatCurrency(totalPayableRestored, true);
                     
                     // Restoration Date Styling (Screen)
                     const restorationOutputSpan = document.getElementById('restoration-date-output');
@@ -1332,6 +1425,7 @@
                 } else {
                     grossPensionInput.disabled = true;
                     increasePensionBtn.disabled = true;
+
                     decreasePensionBtn.disabled = true;
                 }
 
@@ -1408,5 +1502,6 @@
     </script>
 </body>
 </html>
+
 
 
