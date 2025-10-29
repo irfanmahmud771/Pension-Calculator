@@ -37,6 +37,63 @@
             cursor: not-allowed;
             font-weight: 600;
         }
+        /* Style for disabled inputs */
+        .input-group input:disabled, 
+        .input-group select:disabled,
+        .pension-stepper button:disabled {
+            background-color: #F7FAFC;
+            color: #A0AEC0;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* NEW: Styles for the pension input with stepper buttons */
+        .pension-input-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        .pension-input-wrapper input {
+            flex-grow: 1;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            /* Ensure it doesn't get too small */
+            min-width: 50px; 
+        }
+        .pension-stepper {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .pension-stepper button {
+            width: 2.5rem; /* 40px */
+            height: 1.25rem; /* 20px */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #F1F5F9; /* slate-100 */
+            border: 1px solid #CBD5E0; /* cool-gray-300 */
+            color: #4A5568; /* cool-gray-600 */
+            font-weight: 600;
+            line-height: 1;
+            transition: background-color 0.15s ease-in-out;
+            /* Prevent text selection on rapid clicks */
+            user-select: none;
+        }
+        .pension-stepper button:hover:not(:disabled) {
+            background-color: #E2E8F0; /* slate-200 */
+        }
+        .pension-stepper button:first-child {
+            border-top-right-radius: 0.375rem;
+            border-bottom-width: 0.5px;
+            border-left-width: 0;
+        }
+        .pension-stepper button:last-child {
+            border-bottom-right-radius: 0.375rem;
+            border-top-width: 0.5px;
+            border-left-width: 0;
+        }
+        /* End new styles */
+
         .output-group {
             display: flex;
             justify-content: space-between;
@@ -97,15 +154,26 @@
         .increase-table .sub-header th {
             font-weight: 500;
         }
+        /* NEW: Class to hide columns */
+        .hidden-column {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <div class="container mx-auto p-4 md:p-8">
+    <div class="container mx-auto p-4 md:p-8 relative"> <!-- Added relative positioning -->
+        <!-- Logo Added -->
+        <img src="logo.gif" alt="Logo" class="absolute top-4 left-4 w-24 h-24 object-contain">
+        
+        <!-- New Logo Added -->
+        <img src="Exact.jpg" alt="Exact Logo" class="absolute top-4 right-4 w-24 h-24 object-contain">
+        
         <header class="text-center mb-8">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-700">Pension Calculator</h1>
             <p class="text-gray-500 mt-2">Enter your details to calculate pension entitlements.</p>
-            <p class="text-red-600 mt-2 font-medium">(For Retirement date 01 July, 1986 to till now)</p>
+            <p class="text-red-600 mt-1 font-medium">(For Retirement date 01 July, 1986 to till now)</p>
+            <p class="text-blue-600 mt-1 font-medium">Designed by Chf Wrt Off Irfan Mahmud Sect Asstt</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -124,21 +192,28 @@
                         </div>
                         <div class="input-group">
                             <label for="doe">Date of Enrollment (DOE)</label>
-                            <input type="date" id="doe" class="calc-input">
+                            <input type="date" id="doe" class="calc-input" disabled>
                             <div id="doe-display" class="text-xs text-gray-500 mt-1"></div>
                         </div>
                         <div class="input-group">
                             <label for="sos">Date of Retirment (SOS)</label>
-                            <input type="date" id="sos" class="calc-input">
+                            <input type="date" id="sos" class="calc-input" disabled>
                             <div id="sos-display" class="text-xs text-gray-500 mt-1"></div>
                         </div>
                         <div class="input-group">
                             <label for="gross-pension-ppo">Gross Pension as per PPO</label>
-                            <input type="text" id="gross-pension-ppo" class="calc-input">
+                            <!-- NEW: Input wrapper for stepper buttons -->
+                            <div class="pension-input-wrapper">
+                                <input type="text" id="gross-pension-ppo" class="calc-input" disabled>
+                                <div class="pension-stepper">
+                                    <button type="button" id="increase-pension" aria-label="Increase pension" disabled>+</button>
+                                    <button type="button" id="decrease-pension" aria-label="Decrease pension" disabled>-</button>
+                                </div>
+                            </div>
                         </div>
                          <div class="input-group">
                             <label for="tk-award">TK Award</label>
-                            <select id="tk-award" class="calc-input">
+                            <select id="tk-award" class="calc-input" disabled>
                                 <option value="No" selected>No</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
@@ -147,7 +222,7 @@
                         </div>
                         <div class="input-group">
                            <label for="family-pension">Family Pension</label>
-                            <select id="family-pension" class="calc-input">
+                            <select id="family-pension" class="calc-input" disabled>
                                 <option value="No" selected>No</option>
                                 <option value="Yes">Yes</option>
                             </select>
@@ -251,11 +326,11 @@
                             <th rowspan="2" class="bg-blue-100 text-blue-600">%age</th>
                             <th colspan="3" class="bg-blue-200 text-blue-700">Current</th>
                             <th colspan="3" class="bg-green-200 text-green-700">After Restoration</th>
-                            <th rowspan="2" class="bg-blue-100 text-blue-600">Entitled</th>
-                            <th rowspan="2" class="bg-blue-100 text-blue-600">From</th>
-                            <th rowspan="2" class="bg-blue-100 text-blue-600">To</th>
+                            <th rowspan="2" class="bg-blue-100 text-blue-600 hidden-column">Entitled</th>
+                            <th rowspan="2" class="bg-blue-100 text-blue-600 hidden-column">From</th>
+                            <th rowspan="2" class="bg-blue-100 text-blue-600 hidden-column">To</th>
                             <!-- NEW COLUMNS: Minimum Pension Header -->
-                            <th colspan="2" class="bg-cyan-200 text-cyan-700">Minimum Pension</th>
+                            <th colspan="2" class="bg-cyan-200 text-cyan-700 hidden-column">Minimum Pension</th>
                         </tr>
                         <tr class="sub-header">
                             <th>Base Line</th>
@@ -265,8 +340,8 @@
                             <th>Increase</th>
                             <th>Net</th>
                             <!-- NEW COLUMNS: Self / Family -->
-                            <th>Self</th>
-                            <th>Family</th>
+                            <th class="hidden-column">Self</th>
+                            <th class="hidden-column">Family</th>
                         </tr>
                     </thead>
                     <tbody id="increase-table-body">
@@ -279,6 +354,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Get DOM Elements ---
+            const dobInput = document.getElementById('dob');
+            const doeInput = document.getElementById('doe');
+            const sosInput = document.getElementById('sos');
+            const grossPensionInput = document.getElementById('gross-pension-ppo');
+            const tkAwardInput = document.getElementById('tk-award');
+            const familyPensionInput = document.getElementById('family-pension');
+            const allInputs = document.querySelectorAll('.calc-input');
+            // NEW: Stepper buttons
+            const increasePensionBtn = document.getElementById('increase-pension');
+            const decreasePensionBtn = document.getElementById('decrease-pension');
 
             // --- 1. HELPER FUNCTIONS ---
 
@@ -376,7 +463,7 @@
 
             // --- COMMUTATION FACTORS DATA (Provided by user) ---
             const pensionData = [
-                { age: 20, val_2001: 40.5043, val_1986: 50.6304, val_1966: 24.265 }, { age: 21, val_2001: 39.7341, val_1986: 49.6676, val_1966: 24.061 }, { age: 22, val_2001: 38.9653, val_1986: 48.7066, val_1966: 23.853 }, { age: 23, val_2001: 38.1974, val_1986: 47.7467, val_1966: 23.64 }, { age: 24, val_2001: 37.4307, val_1986: 46.7884, val_1966: 23.424 }, { age: 25, val_2001: 36.6651, val_1986: 45.8314, val_1966: 23.203 }, { age: 26, val_2001: 35.9006, val_1986: 44.8758, val_1966: 22.978 }, { age: 27, val_2001: 35.1372, val_1986: 43.9215, val_1966: 22.747 }, { age: 28, val_2001: 34.375, val_1986: 42.9688, val_1966: 22.513 }, { age: 29, val_2001: 33.6143, val_1986: 42.0179, val_1966: 22.273 }, { age: 30, val_2001: 32.8071, val_1986: 41.0089, val_1966: 22.028 }, { age: 31, val_2001: 32.0974, val_1986: 40.1218, val_1966: 21.077 }, { age: 32, val_2001: 31.3412, val_1986: 39.1767, val_1966: 21.522 }, { age: 33, val_2001: 30.5869, val_1986: 38.2336, val_1966: 21.26 }, { age: 34, val_2001: 29.8343, val_1986: 37.2929, val_1966: 20.993 }, { age: 35, val_2001: 29.0841, val_1986: 36.3551, val_1966: 20.72 }, { age: 36, val_2001: 28.3362, val_1986: 35.4203, val_1966: 20.442 }, { age: 37, val_2001: 27.5908, val_1986: 34.4885, val_1966: 20.157 }, { age: 38, val_2001: 26.8482, val_1986: 33.5603, val_1966: 19.867 }, { age: 39, val_2001: 26.1009, val_1986: 32.6361, val_1966: 19.57 }, { age: 40, val_2001: 25.3728, val_1986: 31.716, val_1966: 19.267 }, { age: 41, val_2001: 24.6406, val_1986: 30.8007, val_1966: 18.956 }, { age: 42, val_2001: 23.9126, val_1986: 29.8907, val_1966: 18.641 }, { age: 43, val_2001: 23.184, val_1986: 28.98, val_1966: 18.318 }, { age: 44, val_2001: 22.4713, val_1986: 28.0891, val_1966: 17.988 }, { age: 45, val_2001: 21.7592, val_1986: 27.199, val_1966: 17.65 }, { age: 46, val_2001: 21.0538, val_1986: 26.3172, val_1966: 17.307 }, { age: 47, val_2001: 20.3555, val_1986: 25.4444, val_1966: 16.956 }, { age: 48, val_2001: 19.6653, val_1986: 24.5816, val_1966: 16.596 }, { age: 49, val_2001: 18.9841, val_1986: 23.7301, val_1966: 16.231 }, { age: 50, val_2001: 18.3129, val_1986: 22.8911, val_1966: 15.859 }, { age: 51, val_2001: 17.6526, val_1986: 22.0658, val_1966: 15.481 }, { age: 52, val_2001: 17.005, val_1986: 21.2563, val_1966: 15.096 }, { age: 53, val_2001: 16.371, val_1986: 20.638, val_1966: 14.707 }, { age: 54, val_2001: 15.7517, val_1986: 19.6896, val_1966: 14.313 }, { age: 55, val_2001: 15.1478, val_1986: 18.9348, val_1966: 13.915 }, { age: 56, val_2001: 14.5602, val_1986: 18.2002, val_1966: 13.513 }, { age: 57, val_2001: 13.9888, val_1986: 17.486, val_1966: 13.109 }, { age: 58, val_2001: 13.434, val_1986: 16.7925, val_1966: 12.702 }, { age: 59, val_2001: 12.8953, val_1986: 16.1191, val_1966: 12.294 }, { age: 60, val_2001: 12.3719, val_1986: 15.4649, val_1966: 11.886 }, { age: 61, val_2001: 11.8632, val_1986: 14.829, val_1966: 11.497 }, { age: 62, val_2001: 11.3684, val_1986: 14.2105, val_1966: 11.104 }, { age: 63, val_2001: 10.8872, val_1986: 13.609, val_1966: 10.713 }, { age: 64, val_2001: 10.4191, val_1986: 13.0239, val_1966: 10.327 }, { age: 65, val_2001: 9.9636, val_1986: 12.4549, val_1966: 9.946 }, { age: 66, val_2001: 9.5214, val_1986: 11.9017, val_1966: 9.57 }, { age: 67, val_2001: 9.0914, val_1986: 11.3643, val_1966: 9.2 }, { age: 68, val_2001: 8.6742, val_1986: 10.5428, val_1966: 8.836 }, { age: 69, val_2001: 8.2697, val_1986: 10.3371, val_1966: 8.478 }, { age: 70, val_2001: 7.8778, val_1986: 9.8472, val_1966: 8.127 }, { age: 71, val_2001: 7.4983, val_1986: 9.3729, val_1966: 7.783 }, { age: 72, val_2001: 7.1314, val_1986: 8.9142, val_1966: 7.448 }, { age: 73, val_2001: 6.7766, val_1986: 8.4708, val_1966: 7.121 }, { age: 74, val_2001: 6.4342, val_1986: 8.0427, val_1966: 6.802 }, { age: 75, val_2001: 6.1039, val_1986: 7.6299, val_1966: 6.494 }, { age: 76, val_2001: 5.7858, val_1986: 7.2322, val_1966: 6.194 }, { age: 77, val_2001: 5.4797, val_1986: 6.8496, val_1966: 5.906 }, { age: 78, val_2001: 5.1854, val_1986: 6.4818, val_1966: 5.627 }, { age: 79, val_2001: 4.903, val_1986: 6.1284, val_1966: 5.364 }, { age: 80, val_2001: 4.6321, val_1986: 5.7901, val_1966: 5.104 }
+                { age: 20, val_2001: 40.5043, val_1986: 50.6304, val_1966: 24.265 }, { age: 21, val_2001: 39.7341, val_1986: 49.6676, val_1966: 24.061 }, { age: 22, val_2001: 38.9653, val_1986: 48.7066, val_1966: 23.853 }, { age: 23, val_2001: 38.1974, val_1986: 47.7467, val_1966: 23.64 }, { age: 24, val_2001: 37.4307, val_1986: 46.7884, val_1966: 23.424 }, { age: 25, val_2001: 36.6651, val_1986: 45.8314, val_1966: 23.203 }, { age: 26, val_2001: 35.9006, val_1986: 44.8758, val_1966: 22.978 }, { age: 27, val_2001: 35.1372, val_1986: 43.9215, val_1966: 22.747 }, { age: 28, val_2001: 34.375, val_1986: 42.9688, val_1966: 22.513 }, { age: 29, val_2001: 33.6143, val_1986: 42.0179, val_1966: 22.273 }, { age: 30, val_2001: 32.8071, val_1986: 41.0089, val_1966: 22.028 }, { age: 31, val_2001: 32.0974, val_1986: 40.1218, val_1966: 21.077 }, { age: 32, val_2001: 31.3412, val_1986: 39.1767, val_1966: 21.522 }, { age: 33, val_2001: 30.5869, val_1986: 38.2336, val_1966: 21.26 }, { age: 34, val_2001: 29.8343, val_1986: 37.2929, val_1966: 20.993 }, { age: 35, val_2001: 29.0841, val_1986: 36.3551, val_1966: 20.72 }, { age: 36, val_2001: 28.3362, val_1986: 35.4203, val_1966: 20.442 }, { age: 37, val_2001: 27.5908, val_1986: 34.4885, val_1966: 20.157 }, { age: 38, val_2001: 26.8482, val_1986: 33.5603, val_1966: 19.867 }, { age: 39, val_2001: 26.1009, val_1986: 32.6361, val_1966: 19.57 }, { age: 40, val_2001: 25.3728, val_1986: 31.716, val_1966: 19.267 }, { age: 41, val_2001: 24.6406, val_1986: 30.8007, val_1966: 18.956 }, { age: 42, val_2001: 23.9126, val_1986: 29.8907, val_1966: 18.641 }, { age: 43, val_2001: 23.184, val_1986: 28.98, val_1966: 18.318 }, { age: 44, val_2001: 22.4713, val_1986: 28.0891, val_1966: 17.988 }, { age: 45, val_2001: 21.7592, val_1986: 27.199, val_1966: 17.65 }, { age: 46, val_2001: 21.0538, val_1986: 26.3172, val_1966: 17.307 }, { age: 47, val_2001: 20.3555, val_1986: 25.4444, val_1966: 16.956 }, { age: 48, val_2001: 19.6653, val_1986: 24.5816, val_1966: 16.596 }, { age: 49, val_2001: 18.9841, val_1986: 23.7301, val_1966: 16.231 }, { age: 50, val_2001: 18.3129, val_1986: 22.8911, val_1966: 15.859 }, { age: 51, val_2001: 17.6526, val_1986: 22.0658, val_1S966: 15.481 }, { age: 52, val_2001: 17.005, val_1986: 21.2563, val_1966: 15.096 }, { age: 53, val_2001: 16.371, val_1986: 20.638, val_1966: 14.707 }, { age: 54, val_2001: 15.7517, val_1986: 19.6896, val_1966: 14.313 }, { age: 55, val_2001: 15.1478, val_1986: 18.9348, val_1966: 13.915 }, { age: 56, val_2001: 14.5602, val_1986: 18.2002, val_1966: 13.513 }, { age: 57, val_2001: 13.9888, val_1986: 17.486, val_1966: 13.109 }, { age: 58, val_2001: 13.434, val_1986: 16.7925, val_1966: 12.702 }, { age: 59, val_2001: 12.8953, val_1986: 16.1191, val_1966: 12.294 }, { age: 60, val_2001: 12.3719, val_1986: 15.4649, val_1966: 11.886 }, { age: 61, val_2001: 11.8632, val_1986: 14.829, val_1966: 11.497 }, { age: 62, val_2001: 11.3684, val_1986: 14.2105, val_1966: 11.104 }, { age: 63, val_2001: 10.8872, val_1986: 13.609, val_1966: 10.713 }, { age: 64, val_2001: 10.4191, val_1986: 13.0239, val_1966: 10.327 }, { age: 65, val_2001: 9.9636, val_1986: 12.4549, val_1966: 9.946 }, { age: 66, val_2001: 9.5214, val_1986: 11.9017, val_1966: 9.57 }, { age: 67, val_2001: 9.0914, val_1986: 11.3643, val_1966: 9.2 }, { age: 68, val_2001: 8.6742, val_1986: 10.5428, val_1966: 8.836 }, { age: 69, val_2001: 8.2697, val_1986: 10.3371, val_1966: 8.478 }, { age: 70, val_2001: 7.8778, val_1986: 9.8472, val_1966: 8.127 }, { age: 71, val_2001: 7.4983, val_1986: 9.3729, val_1966: 7.783 }, { age: 72, val_2001: 7.1314, val_1986: 8.9142, val_1966: 7.448 }, { age: 73, val_2001: 6.7766, val_1986: 8.4708, val_1966: 7.121 }, { age: 74, val_2001: 6.4342, val_1986: 8.0427, val_1966: 6.802 }, { age: 75, val_2001: 6.1039, val_1986: 7.6299, val_1966: 6.494 }, { age: 76, val_2001: 5.7858, val_1986: 7.2322, val_1966: 6.194 }, { age: 77, val_2001: 5.4797, val_1986: 6.8496, val_1966: 5.906 }, { age: 78, val_2001: 5.1854, val_1986: 6.4818, val_1966: 5.627 }, { age: 79, val_2001: 4.903, val_1986: 6.1284, val_1966: 5.364 }, { age: 80, val_2001: 4.6321, val_1986: 5.7901, val_1966: 5.104 }
             ];
             
             // Build lookup tables from array
@@ -439,9 +526,6 @@
                 { year: 2025, percentage: '7%', from: '2025-07-01', to: todayDateString } 
             ];
 
-
-            const allInputs = document.querySelectorAll('.calc-input');
-
             
             // Function to handle number input formatting (Gross Pension as per PPO)
             function formatGrossPensionInput(event) {
@@ -456,14 +540,63 @@
                     parts[1] = parts[1].substring(0, 2);
                     input = parts.join('.');
                 }
-
+                
+                // Remove existing commas before adding new ones
+                let integerPart = parts[0].replace(/,/g, '');
                 // Add thousand separators
-                let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                 
                 event.target.value = parts.length > 1 ? integerPart + '.' + parts[1] : integerPart;
                 
                 // Trigger calculation whenever input changes
                 calculateAndDisplayAll();
+                // Trigger input enabling check
+                checkInputEnabling();
+            }
+
+            // --- NEW: Logic for "click-and-hold" buttons ---
+            let pressTimer; // Timer for holding
+            let intervalTimer; // Timer for continuous increase/decrease
+            const initialDelay = 500; // ms before continuous press starts
+            const repeatDelay = 100; // ms between each step during continuous press
+
+            // Function to handle button press
+            function startPress(amount) {
+                // Clear any existing timers
+                stopPress();
+                // Apply one step immediately
+                adjustPension(amount);
+                
+                // Start a timer to check for a long press
+                pressTimer = setTimeout(() => {
+                    // After initial delay, start the repeating interval
+                    intervalTimer = setInterval(() => {
+                        adjustPension(amount);
+                    }, repeatDelay);
+                }, initialDelay);
+            }
+
+            // Function to handle button release
+            function stopPress() {
+                clearTimeout(pressTimer);
+                clearInterval(intervalTimer);
+            }
+
+            // Function to handle stepper button clicks
+            function adjustPension(amount) {
+                const currentValue = parseFloat(grossPensionInput.value.replace(/,/g, '')) || 0;
+                const newValue = Math.max(0, currentValue + amount); // Ensure it doesn't go below 0
+                
+                // Format the new value as a string with up to 2 decimals
+                let newValueString = String(roundToTwoDecimals(newValue));
+                
+                // Manually format with commas and trigger the input event
+                const parts = newValueString.split('.');
+                let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                grossPensionInput.value = parts.length > 1 ? integerPart + '.' + parts[1] : integerPart;
+
+                // Dispatch an 'input' event to trigger all associated handlers
+                grossPensionInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
             
             function populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension) {
@@ -859,19 +992,19 @@
                         baseLineDisplayRestored = formatCurrency(restoredBaseLine, false, true); // Use forTable=true
                     }
 
-                    // --- APPLY MINIMUM PENSION LOGIC ---
+                    // --- APPLY MINIMUM PENSION LOGIC (Only for years > 1999) ---
                     // Apply minimum if (1) it's defined (applicableMinPension > 0) AND (2) the calculated net is less than the minimum
-                    // AND (3) isEntitled = 'Y'
-                    // AND (4) year > 1999 (as requested by user)
                     
-                    if (isEntitled === 'Y' && year > 1999 && isNetCalculatedCurrent && applicableMinPension > 0 && currentNetValue < applicableMinPension) {
-                        currentNetValue = applicableMinPension;
-                        minPensionAppliedCurrent = true;
-                    }
+                    if (year > 1999) { // <<< LOGIC MODIFIED HERE
+                        if (isEntitled === 'Y' && isNetCalculatedCurrent && applicableMinPension > 0 && currentNetValue < applicableMinPension) {
+                            currentNetValue = applicableMinPension;
+                            minPensionAppliedCurrent = true;
+                        }
 
-                    if (isEntitled === 'Y' && year > 1999 && isNetCalculatedRestored && applicableMinPension > 0 && restoredNetValue < applicableMinPension) {
-                        restoredNetValue = applicableMinPension;
-                        minPensionAppliedRestored = true;
+                        if (isEntitled === 'Y' && isNetCalculatedRestored && applicableMinPension > 0 && restoredNetValue < applicableMinPension) {
+                            restoredNetValue = applicableMinPension;
+                            minPensionAppliedRestored = true;
+                        }
                     }
                     
                     // --- UPDATE PREVIOUS NET VALUES for next iteration ---
@@ -930,17 +1063,28 @@
                     }
                     
                     // Column 9: Entitled (Calculated based on formula)
-                    row.insertCell().textContent = isEntitled;
+                    const entitledCell = row.insertCell();
+                    entitledCell.textContent = isEntitled;
+                    entitledCell.classList.add('hidden-column');
                     
                     // Column 10: From
-                    row.insertCell().textContent = formatDateTable(item.from);
+                    const fromCell = row.insertCell();
+                    fromCell.textContent = formatDateTable(item.from);
+                    fromCell.classList.add('hidden-column');
 
                     // Column 11: To
-                    row.insertCell().textContent = formatDateTable(item.to);
+                    const toCell = row.insertCell();
+                    toCell.textContent = formatDateTable(item.to);
+                    toCell.classList.add('hidden-column');
 
                     // NEW COLUMNS: Minimum Pension
-                    row.insertCell().textContent = minPensionSelf > 0 ? formatCurrency(minPensionSelf, false, true) : '-'; // Use forTable=true
-                    row.insertCell().textContent = minPensionFamily > 0 ? formatCurrency(minPensionFamily, false, true) : '-'; // Use forTable=true
+                    const minSelfCell = row.insertCell();
+                    minSelfCell.textContent = minPensionSelf > 0 ? formatCurrency(minPensionSelf, false, true) : '-'; // Use forTable=true
+                    minSelfCell.classList.add('hidden-column');
+                    
+                    const minFamilyCell = row.insertCell();
+                    minFamilyCell.textContent = minPensionFamily > 0 ? formatCurrency(minPensionFamily, false, true) : '-'; // Use forTable=true
+                    minFamilyCell.classList.add('hidden-column');
                 });
                 
                 // Return both arrays of calculated net values
@@ -951,14 +1095,15 @@
             function calculateAndDisplayAll() {
                 try {
                     // --- Get Input Values ---
-                    const dobDate = parseDate(document.getElementById('dob').value);
-                    const doeDate = parseDate(document.getElementById('doe').value);
-                    const sosDate = parseDate(document.getElementById('sos').value);
-                    const tkAward = document.getElementById('tk-award').value;
-                    const isFamilyPension = document.getElementById('family-pension').value === 'Yes';
+                    const dobDate = parseDate(dobInput.value);
+                    const doeDate = parseDate(doeInput.value);
+                    const sosDate = parseDate(sosInput.value);
+                    
+                    const tkAward = tkAwardInput.value;
+                    const isFamilyPension = familyPensionInput.value === 'Yes';
                     
                     // Gross Pension PPO (clean value for calculation)
-                    const grossPensionPPOText = document.getElementById('gross-pension-ppo').value.replace(/,/g, '');
+                    const grossPensionPPOText = grossPensionInput.value.replace(/,/g, '');
                     const grossPensionPPO = parseFloat(grossPensionPPOText) || 0;
                     
                     // --- Update Date Displays ---
@@ -1159,17 +1304,107 @@
                 }
             }
             
-            // Add event listeners to all inputs for instant calculation
+            // --- SEQUENTIAL INPUT ENABLING LOGIC ---
+            function checkInputEnabling() {
+                const dobFilled = dobInput.value !== '';
+                const doeFilled = doeInput.value !== '';
+                const sosFilled = sosInput.value !== '';
+                // Check for a non-zero, non-empty value
+                const grossPensionFilled = grossPensionInput.value !== '' && parseFloat(grossPensionInput.value.replace(/,/g, '')) > 0;
+
+                // DOB -> DOE
+                if (dobFilled) {
+                    doeInput.disabled = false;
+                } else {
+                    doeInput.disabled = true;
+                }
+
+                // DOE -> SOS
+                if (dobFilled && doeFilled) {
+                    sosInput.disabled = false;
+                } else {
+                    sosInput.disabled = true;
+                }
+
+                // SOS -> Gross Pension
+                if (dobFilled && doeFilled && sosFilled) {
+                    grossPensionInput.disabled = false;
+                    increasePensionBtn.disabled = false;
+                    decreasePensionBtn.disabled = false;
+                } else {
+                    grossPensionInput.disabled = true;
+                    increasePensionBtn.disabled = true;
+                    decreasePensionBtn.disabled = true;
+                }
+
+                // Gross Pension -> TK & Family
+                if (dobFilled && doeFilled && sosFilled && grossPensionFilled) {
+                    tkAwardInput.disabled = false;
+                    familyPensionInput.disabled = false;
+                } else {
+                    tkAwardInput.disabled = true;
+                    familyPensionInput.disabled = true;
+
+                }
+
+                // --- Reset fields if prerequisite is emptied ---
+                if (doeInput.disabled) {
+                    doeInput.value = '';
+                    document.getElementById('doe-display').textContent = '';
+                }
+                if (sosInput.disabled) {
+                    sosInput.value = '';
+                    document.getElementById('sos-display').textContent = '';
+                }
+                if (grossPensionInput.disabled) grossPensionInput.value = '';
+                if (tkAwardInput.disabled) tkAwardInput.value = 'No';
+                if (familyPensionInput.disabled) familyPensionInput.value = 'No';
+            }
+            
+            // Add event listeners to all inputs
             allInputs.forEach(input => {
                 if(input.id === 'gross-pension-ppo') {
-                    input.addEventListener('input', formatGrossPensionInput);
+                    // This is handled by the formatGrossPensionInput listener
                 } else {
-                    input.addEventListener('input', calculateAndDisplayAll);
+                    // Use 'input' for date pickers to catch changes immediately
+                    input.addEventListener('input', () => { 
+                        calculateAndDisplayAll();
+                        checkInputEnabling(); // Check enabling on all other inputs too
+                    });
                 }
             });
 
-            // Initial calculation on load
+            // Add listener for the gross pension input (handles formatting)
+            grossPensionInput.addEventListener('input', formatGrossPensionInput);
+
+            // --- NEW: Add listeners for stepper buttons (click-and-hold) ---
+            
+            // Mouse events
+            increasePensionBtn.addEventListener('mousedown', () => startPress(1));
+            decreasePensionBtn.addEventListener('mousedown', () => startPress(-1));
+            // Release events (also cover mouse leaving the button)
+            document.addEventListener('mouseup', stopPress);
+            document.addEventListener('mouseleave', stopPress);
+
+            // Touch events
+            increasePensionBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Prevent scrolling
+                startPress(1);
+            });
+            decreasePensionBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Prevent scrolling
+                startPress(-1);
+            });
+            // Release events
+            increasePensionBtn.addEventListener('touchend', stopPress);
+            decreasePensionBtn.addEventListener('touchend', stopPress);
+            increasePensionBtn.addEventListener('touchcancel', stopPress);
+            decreasePensionBtn.addEventListener('touchcancel', stopPress);
+
+
+            // Initial calculation and enabling check on load
             calculateAndDisplayAll();
+            checkInputEnabling();
         });
     </script>
 </body>
