@@ -154,28 +154,35 @@
         .increase-table .sub-header th {
             font-weight: 500;
         }
-        /* NEW: Class to hide columns */
+        
+        /* New class to hide columns */
         .hidden-column {
             display: none;
         }
+
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
     <div class="container mx-auto p-4 md:p-8 relative"> <!-- Added relative positioning -->
-        <!-- Logo Added -->
-        <img src="logo.gif" alt="Logo" class="absolute top-4 left-4 w-24 h-24 object-contain">
-        
-        <!-- New Logo Added -->
-        <img src="Exact.jpg" alt="Exact Logo" class="absolute top-4 right-4 w-24 h-24 object-contain">
+        <!-- Logo Container -->
+        <div class="logo-container">
+            <!-- Logo Added -->
+            <img src="logo.gif" alt="Logo" class="logo-left absolute top-4 left-4 w-32 h-32 object-contain">
+            
+            <!-- New Logo Added -->
+            <img src="Exact.jpg" alt="Exact Logo" class="logo-right absolute top-4 right-4 w-40 h-40 object-contain">
+        </div>
         
         <header class="text-center mb-8">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-700">Pension Calculator</h1>
-            <p class="text-gray-500 mt-2">Enter your details to calculate pension entitlements.</p>
-            <p class="text-red-600 mt-1 font-medium">(For Retirement date 01 July, 1986 to till now)</p>
+            <!-- Reduced margin-top for tighter spacing -->
+            <p class="text-gray-500 mt-1">(For Retirement date 01 July, 1986 to till now)</p>
+            <!-- Added new line, set color to blue, and reduced margin-top -->
             <p class="text-blue-600 mt-1 font-medium">Designed by Chf Wrt Off Irfan Mahmud Sect Asstt</p>
         </header>
 
+        <!-- Wrapper for print grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Input Section -->
             <div class="card">
@@ -271,47 +278,50 @@
                     </div>
                  </div>
 
-                <h3 class="font-semibold text-lg mt-6 mb-2 text-gray-600 border-b pb-2">Final Entitlements After Increase</h3>
-                 <div class="mt-4 space-y-2 py-4">
-                    <!-- Table Header -->
-                    <div class="output-group font-bold">
-                        <span class="label w-1/3"></span>
-                        <span class="label w-1/3 text-center text-blue-600">Current</span>
-                        <span class="label w-1/3 text-center text-green-600">After Restoration</span>
-                    </div>
+                <!-- This section remains visible on screen -->
+                <div>
+                    <h3 class="font-semibold text-lg mt-6 mb-2 text-gray-600 border-b pb-2">Final Entitlements After Increase</h3>
+                     <div class="mt-4 space-y-2 py-4">
+                        <!-- Table Header -->
+                        <div class="output-group font-bold">
+                            <span class="label w-1/3"></span>
+                            <span class="label w-1/3 text-center text-blue-600">Current</span>
+                            <span class="label w-1/3 text-center text-green-600">After Restoration</span>
+                        </div>
 
-                    <!-- Pension p.m after increases Row -->
-                    <div class="output-group">
-                        <span class="label w-1/3">Pension p.m</span>
-                        <span class="value w-1/3 text-center text-gray-800" id="pension-pm-current-output">0</span>
-                        <span class="value w-1/3 text-center text-gray-800" id="pension-pm-restored-output">0</span>
-                    </div>
+                        <!-- Pension p.m after increases Row -->
+                        <div class="output-group">
+                            <span class="label w-1/3">Pension p.m</span>
+                            <span class="value w-1/3 text-center text-gray-800" id="pension-pm-current-output">0</span>
+                            <span class="value w-1/3 text-center text-gray-800" id="pension-pm-restored-output">0</span>
+                        </div>
 
-                    <!-- TK Allowance Row -->
-                    <div class="output-group">
-                        <span class="label w-1/3">TK Allowance p.m</span>
-                        <span class="value w-1/3 text-center text-gray-800" id="tk-allowance-current-output">0</span>
-                        <span class="value w-1/3 text-center text-gray-800" id="tk-allowance-restored-output">0</span>
-                    </div>
+                        <!-- TK Allowance Row -->
+                        <div class="output-group">
+                            <span class="label w-1/3">TK Allowance p.m</span>
+                            <span class="value w-1/3 text-center text-gray-800" id="tk-allowance-current-output">0</span>
+                            <span class="value w-1/3 text-center text-gray-800" id="tk-allowance-restored-output">0</span>
+                        </div>
 
-                    <!-- Total payable Row -->
-                    <div class="output-group font-extrabold text-gray-900">
-                        <span class="label w-1/3">Total Payable Pension p.m</span>
-                        <!-- Use separate IDs to simplify formatting without breaking generic formatCurrency -->
-                        <span class="value w-1/3 text-center text-gray-800" id="total-payable-current-output">0</span>
-                        <span class="value w-1/3 text-center text-gray-800" id="total-payable-restored-output">0</span>
-                    </div>
+                        <!-- Total payable Row -->
+                        <div class="output-group font-extrabold text-gray-900">
+                            <span class="label w-1/3">Total Payable Pension p.m</span>
+                            <!-- Use separate IDs to simplify formatting without breaking generic formatCurrency -->
+                            <span class="value w-1/3 text-center text-gray-800" id="total-payable-current-output">0</span>
+                            <span class="value w-1/3 text-center text-gray-800" id="total-payable-restored-output">0</span>
+                        </div>
 
-                     <div class="output-group pt-4"> <!-- Add padding top for separation -->
-                        <span class="label">Pension Restoration Date</span>
-                        <span class="value" id="restoration-date-output"></span>
-                    </div>
+                         <div class="output-group pt-4"> <!-- Add padding top for separation -->
+                            <span class="label">Pension Restoration Date</span>
+                            <span class="value" id="restoration-date-output"></span>
+                        </div>
 
-                    <div class="output-group">
-                        <span class="label">Age on Pension Restoration</span>
-                        <span class="value text-gray-800" id="age-at-restoration-output">0 Years</span>
-                    </div>
-                 </div>
+                        <div class="output-group">
+                            <span class="label">Age on Pension Restoration</span>
+                            <span class="value text-gray-800" id="age-at-restoration-output">0 Years</span>
+                        </div>
+                     </div>
+                </div>
             </div>
         </div>
 
@@ -326,10 +336,10 @@
                             <th rowspan="2" class="bg-blue-100 text-blue-600">%age</th>
                             <th colspan="3" class="bg-blue-200 text-blue-700">Current</th>
                             <th colspan="3" class="bg-green-200 text-green-700">After Restoration</th>
+                            <!-- Hidden columns -->
                             <th rowspan="2" class="bg-blue-100 text-blue-600 hidden-column">Entitled</th>
                             <th rowspan="2" class="bg-blue-100 text-blue-600 hidden-column">From</th>
                             <th rowspan="2" class="bg-blue-100 text-blue-600 hidden-column">To</th>
-                            <!-- NEW COLUMNS: Minimum Pension Header -->
                             <th colspan="2" class="bg-cyan-200 text-cyan-700 hidden-column">Minimum Pension</th>
                         </tr>
                         <tr class="sub-header">
@@ -339,7 +349,7 @@
                             <th>Base Line</th>
                             <th>Increase</th>
                             <th>Net</th>
-                            <!-- NEW COLUMNS: Self / Family -->
+                            <!-- Hidden sub-headers -->
                             <th class="hidden-column">Self</th>
                             <th class="hidden-column">Family</th>
                         </tr>
@@ -463,7 +473,7 @@
 
             // --- COMMUTATION FACTORS DATA (Provided by user) ---
             const pensionData = [
-                { age: 20, val_2001: 40.5043, val_1986: 50.6304, val_1966: 24.265 }, { age: 21, val_2001: 39.7341, val_1986: 49.6676, val_1966: 24.061 }, { age: 22, val_2001: 38.9653, val_1986: 48.7066, val_1966: 23.853 }, { age: 23, val_2001: 38.1974, val_1986: 47.7467, val_1966: 23.64 }, { age: 24, val_2001: 37.4307, val_1986: 46.7884, val_1966: 23.424 }, { age: 25, val_2001: 36.6651, val_1986: 45.8314, val_1966: 23.203 }, { age: 26, val_2001: 35.9006, val_1986: 44.8758, val_1966: 22.978 }, { age: 27, val_2001: 35.1372, val_1986: 43.9215, val_1966: 22.747 }, { age: 28, val_2001: 34.375, val_1986: 42.9688, val_1966: 22.513 }, { age: 29, val_2001: 33.6143, val_1986: 42.0179, val_1966: 22.273 }, { age: 30, val_2001: 32.8071, val_1986: 41.0089, val_1966: 22.028 }, { age: 31, val_2001: 32.0974, val_1986: 40.1218, val_1966: 21.077 }, { age: 32, val_2001: 31.3412, val_1986: 39.1767, val_1966: 21.522 }, { age: 33, val_2001: 30.5869, val_1986: 38.2336, val_1966: 21.26 }, { age: 34, val_2001: 29.8343, val_1986: 37.2929, val_1966: 20.993 }, { age: 35, val_2001: 29.0841, val_1986: 36.3551, val_1966: 20.72 }, { age: 36, val_2001: 28.3362, val_1986: 35.4203, val_1966: 20.442 }, { age: 37, val_2001: 27.5908, val_1986: 34.4885, val_1966: 20.157 }, { age: 38, val_2001: 26.8482, val_1986: 33.5603, val_1966: 19.867 }, { age: 39, val_2001: 26.1009, val_1986: 32.6361, val_1966: 19.57 }, { age: 40, val_2001: 25.3728, val_1986: 31.716, val_1966: 19.267 }, { age: 41, val_2001: 24.6406, val_1986: 30.8007, val_1966: 18.956 }, { age: 42, val_2001: 23.9126, val_1986: 29.8907, val_1966: 18.641 }, { age: 43, val_2001: 23.184, val_1986: 28.98, val_1966: 18.318 }, { age: 44, val_2001: 22.4713, val_1986: 28.0891, val_1966: 17.988 }, { age: 45, val_2001: 21.7592, val_1986: 27.199, val_1966: 17.65 }, { age: 46, val_2001: 21.0538, val_1986: 26.3172, val_1966: 17.307 }, { age: 47, val_2001: 20.3555, val_1986: 25.4444, val_1966: 16.956 }, { age: 48, val_2001: 19.6653, val_1986: 24.5816, val_1966: 16.596 }, { age: 49, val_2001: 18.9841, val_1986: 23.7301, val_1966: 16.231 }, { age: 50, val_2001: 18.3129, val_1986: 22.8911, val_1966: 15.859 }, { age: 51, val_2001: 17.6526, val_1986: 22.0658, val_1S966: 15.481 }, { age: 52, val_2001: 17.005, val_1986: 21.2563, val_1966: 15.096 }, { age: 53, val_2001: 16.371, val_1986: 20.638, val_1966: 14.707 }, { age: 54, val_2001: 15.7517, val_1986: 19.6896, val_1966: 14.313 }, { age: 55, val_2001: 15.1478, val_1986: 18.9348, val_1966: 13.915 }, { age: 56, val_2001: 14.5602, val_1986: 18.2002, val_1966: 13.513 }, { age: 57, val_2001: 13.9888, val_1986: 17.486, val_1966: 13.109 }, { age: 58, val_2001: 13.434, val_1986: 16.7925, val_1966: 12.702 }, { age: 59, val_2001: 12.8953, val_1986: 16.1191, val_1966: 12.294 }, { age: 60, val_2001: 12.3719, val_1986: 15.4649, val_1966: 11.886 }, { age: 61, val_2001: 11.8632, val_1986: 14.829, val_1966: 11.497 }, { age: 62, val_2001: 11.3684, val_1986: 14.2105, val_1966: 11.104 }, { age: 63, val_2001: 10.8872, val_1986: 13.609, val_1966: 10.713 }, { age: 64, val_2001: 10.4191, val_1986: 13.0239, val_1966: 10.327 }, { age: 65, val_2001: 9.9636, val_1986: 12.4549, val_1966: 9.946 }, { age: 66, val_2001: 9.5214, val_1986: 11.9017, val_1966: 9.57 }, { age: 67, val_2001: 9.0914, val_1986: 11.3643, val_1966: 9.2 }, { age: 68, val_2001: 8.6742, val_1986: 10.5428, val_1966: 8.836 }, { age: 69, val_2001: 8.2697, val_1986: 10.3371, val_1966: 8.478 }, { age: 70, val_2001: 7.8778, val_1986: 9.8472, val_1966: 8.127 }, { age: 71, val_2001: 7.4983, val_1986: 9.3729, val_1966: 7.783 }, { age: 72, val_2001: 7.1314, val_1986: 8.9142, val_1966: 7.448 }, { age: 73, val_2001: 6.7766, val_1986: 8.4708, val_1966: 7.121 }, { age: 74, val_2001: 6.4342, val_1986: 8.0427, val_1966: 6.802 }, { age: 75, val_2001: 6.1039, val_1986: 7.6299, val_1966: 6.494 }, { age: 76, val_2001: 5.7858, val_1986: 7.2322, val_1966: 6.194 }, { age: 77, val_2001: 5.4797, val_1986: 6.8496, val_1966: 5.906 }, { age: 78, val_2001: 5.1854, val_1986: 6.4818, val_1966: 5.627 }, { age: 79, val_2001: 4.903, val_1986: 6.1284, val_1966: 5.364 }, { age: 80, val_2001: 4.6321, val_1986: 5.7901, val_1966: 5.104 }
+                { age: 20, val_2001: 40.5043, val_1986: 50.6304, val_1966: 24.265 }, { age: 21, val_2001: 39.7341, val_1986: 49.6676, val_1966: 24.061 }, { age: 22, val_2001: 38.9653, val_1986: 48.7066, val_1966: 23.853 }, { age: 23, val_2001: 38.1974, val_1986: 47.7467, val_1966: 23.64 }, { age: 24, val_2001: 37.4307, val_1986: 46.7884, val_1966: 23.424 }, { age: 25, val_2001: 36.6651, val_1986: 45.8314, val_1966: 23.203 }, { age: 26, val_2001: 35.9006, val_1986: 44.8758, val_1966: 22.978 }, { age: 27, val_2001: 35.1372, val_1986: 43.9215, val_1966: 22.747 }, { age: 28, val_2001: 34.375, val_1986: 42.9688, val_1966: 22.513 }, { age: 29, val_2001: 33.6143, val_1986: 42.0179, val_1966: 22.273 }, { age: 30, val_2001: 32.8071, val_1986: 41.0089, val_1966: 22.028 }, { age: 31, val_2001: 32.0974, val_1986: 40.1218, val_1966: 21.077 }, { age: 32, val_2001: 31.3412, val_1986: 39.1767, val_1966: 21.522 }, { age: 33, val_2001: 30.5869, val_1986: 38.2336, val_1966: 21.26 }, { age: 34, val_2001: 29.8343, val_1986: 37.2929, val_1966: 20.993 }, { age: 35, val_2001: 29.0841, val_1986: 36.3551, val_1966: 20.72 }, { age: 36, val_2001: 28.3362, val_1986: 35.4203, val_1966: 20.442 }, { age: 37, val_2001: 27.5908, val_1986: 34.4885, val_1966: 20.157 }, { age: 38, val_2001: 26.8482, val_1986: 33.5603, val_1966: 19.867 }, { age: 39, val_2001: 26.1009, val_1986: 32.6361, val_1966: 19.57 }, { age: 40, val_2001: 25.3728, val_1986: 31.716, val_1966: 19.267 }, { age: 41, val_2001: 24.6406, val_1986: 30.8007, val_1966: 18.956 }, { age: 42, val_2001: 23.9126, val_1986: 29.8907, val_1966: 18.641 }, { age: 43, val_2001: 23.184, val_1986: 28.98, val_1966: 18.318 }, { age: 44, val_2001: 22.4713, val_1986: 28.0891, val_1966: 17.988 }, { age: 45, val_2001: 21.7592, val_1986: 27.199, val_1966: 17.65 }, { age: 46, val_2001: 21.0538, val_1986: 26.3172, val_1966: 17.307 }, { age: 47, val_2001: 20.3555, val_1986: 25.4444, val_1966: 16.956 }, { age: 48, val_2001: 19.6653, val_1986: 24.5816, val_1966: 16.596 }, { age: 49, val_2001: 18.9841, val_1986: 23.7301, val_1966: 16.231 }, { age: 50, val_2001: 18.3129, val_1986: 22.8911, val_1966: 15.859 }, { age: 51, val_2001: 17.6526, val_1986: 22.0658, val_1966: 15.481 }, { age: 52, val_2001: 17.005, val_1986: 21.2563, val_1966: 15.096 }, { age: 53, val_2001: 16.371, val_1986: 20.638, val_1966: 14.707 }, { age: 54, val_2001: 15.7517, val_1986: 19.6896, val_1966: 14.313 }, { age: 55, val_2001: 15.1478, val_1986: 18.9348, val_1966: 13.915 }, { age: 56, val_2001: 14.5602, val_1986: 18.2002, val_1966: 13.513 }, { age: 57, val_2001: 13.9888, val_1986: 17.486, val_1966: 13.109 }, { age: 58, val_2001: 13.434, val_1986: 16.7925, val_1966: 12.702 }, { age: 59, val_2001: 12.8953, val_1986: 16.1191, val_1966: 12.294 }, { age: 60, val_2001: 12.3719, val_1986: 15.4649, val_1966: 11.886 }, { age: 61, val_2001: 11.8632, val_1986: 14.829, val_1966: 11.497 }, { age: 62, val_2001: 11.3684, val_1986: 14.2105, val_1966: 11.104 }, { age: 63, val_2001: 10.8872, val_1986: 13.609, val_1966: 10.713 }, { age: 64, val_2001: 10.4191, val_1986: 13.0239, val_1966: 10.327 }, { age: 65, val_2001: 9.9636, val_1986: 12.4549, val_1966: 9.946 }, { age: 66, val_2001: 9.5214, val_1986: 11.9017, val_1966: 9.57 }, { age: 67, val_2001: 9.0914, val_1986: 11.3643, val_1966: 9.2 }, { age: 68, val_2001: 8.6742, val_1986: 10.5428, val_1966: 8.836 }, { age: 69, val_2001: 8.2697, val_1986: 10.3371, val_1966: 8.478 }, { age: 70, val_2001: 7.8778, val_1986: 9.8472, val_1966: 8.127 }, { age: 71, val_2001: 7.4983, val_1986: 9.3729, val_1966: 7.783 }, { age: 72, val_2001: 7.1314, val_1986: 8.9142, val_1966: 7.448 }, { age: 73, val_2001: 6.7766, val_1986: 8.4708, val_1966: 7.121 }, { age: 74, val_2001: 6.4342, val_1986: 8.0427, val_1966: 6.802 }, { age: 75, val_2001: 6.1039, val_1986: 7.6299, val_1966: 6.494 }, { age: 76, val_2001: 5.7858, val_1986: 7.2322, val_1966: 6.194 }, { age: 77, val_2001: 5.4797, val_1986: 6.8496, val_1966: 5.906 }, { age: 78, val_2001: 5.1854, val_1986: 6.4818, val_1966: 5.627 }, { age: 79, val_2001: 4.903, val_1986: 6.1284, val_1966: 5.364 }, { age: 80, val_2001: 4.6321, val_1986: 5.7901, val_1966: 5.104 }
             ];
             
             // Build lookup tables from array
@@ -1063,28 +1073,23 @@
                     }
                     
                     // Column 9: Entitled (Calculated based on formula)
-                    const entitledCell = row.insertCell();
-                    entitledCell.textContent = isEntitled;
-                    entitledCell.classList.add('hidden-column');
-                    
+                    row.insertCell().textContent = isEntitled;
+                    row.cells[8].classList.add('hidden-column'); // Hide this cell
+
                     // Column 10: From
-                    const fromCell = row.insertCell();
-                    fromCell.textContent = formatDateTable(item.from);
-                    fromCell.classList.add('hidden-column');
+                    row.insertCell().textContent = formatDateTable(item.from);
+                    row.cells[9].classList.add('hidden-column'); // Hide this cell
 
                     // Column 11: To
-                    const toCell = row.insertCell();
-                    toCell.textContent = formatDateTable(item.to);
-                    toCell.classList.add('hidden-column');
+                    row.insertCell().textContent = formatDateTable(item.to);
+                    row.cells[10].classList.add('hidden-column'); // Hide this cell
 
                     // NEW COLUMNS: Minimum Pension
-                    const minSelfCell = row.insertCell();
-                    minSelfCell.textContent = minPensionSelf > 0 ? formatCurrency(minPensionSelf, false, true) : '-'; // Use forTable=true
-                    minSelfCell.classList.add('hidden-column');
+                    row.insertCell().textContent = minPensionSelf > 0 ? formatCurrency(minPensionSelf, false, true) : '-'; // Use forTable=true
+                    row.cells[11].classList.add('hidden-column'); // Hide this cell
                     
-                    const minFamilyCell = row.insertCell();
-                    minFamilyCell.textContent = minPensionFamily > 0 ? formatCurrency(minPensionFamily, false, true) : '-'; // Use forTable=true
-                    minFamilyCell.classList.add('hidden-column');
+                    row.insertCell().textContent = minPensionFamily > 0 ? formatCurrency(minPensionFamily, false, true) : '-'; // Use forTable=true
+                    row.cells[12].classList.add('hidden-column'); // Hide this cell
                 });
                 
                 // Return both arrays of calculated net values
@@ -1220,7 +1225,7 @@
                     const totalPayableCurrent = roundToTwoDecimals(finalPensionCurrent + tkAllowance);
                     const totalPayableRestored = roundToTwoDecimals(finalPensionRestored + tkAllowance);
                     
-                    // --- Update UI ---
+                    // --- Update UI (Screen) ---
                     
                     // Service Summary
                     document.getElementById('qs-output').textContent = `${roundedQS} Years`;
@@ -1233,38 +1238,35 @@
                     document.getElementById('commuted-pension-output').textContent = formatCurrency(commutedPension);
                     document.getElementById('commutation-amount-output').textContent = formatCurrency(commutationAmount);
 
-                    // Final Entitlements Table
+                    // Final Entitlements Table (Screen)
                     document.getElementById('pension-pm-current-output').textContent = formatCurrency(finalPensionCurrent);
                     document.getElementById('pension-pm-restored-output').textContent = formatCurrency(finalPensionRestored);
                     
                     document.getElementById('tk-allowance-current-output').textContent = formatCurrency(tkAllowance);
                     document.getElementById('tk-allowance-restored-output').textContent = formatCurrency(tkAllowance);
                     
-                    // Total Payable Pension p.m (Rounded to nearest whole number, no decimals)
                     document.getElementById('total-payable-current-output').textContent = formatCurrency(totalPayableCurrent, true);
                     document.getElementById('total-payable-restored-output').textContent = formatCurrency(totalPayableRestored, true);
                     
-                    // Restoration Date Styling
+                    // Restoration Date Styling (Screen)
                     const restorationOutputSpan = document.getElementById('restoration-date-output');
-                    restorationOutputSpan.textContent = restorationDate ? formatDateDisplay(restorationDate) : 'N/A';
+                    const restorationDateFormatted = restorationDate ? formatDateDisplay(restorationDate) : 'N/A';
+                    restorationOutputSpan.textContent = restorationDateFormatted;
                     
                     if (restorationDate) {
                         const today = parseDate(getTodayDateString());
-                        // Clear existing classes
                         restorationOutputSpan.className = 'value'; 
                         
                         if (restorationDate > today) {
-                            // Date is in the future (Red Bold)
                             restorationOutputSpan.classList.add('text-red-600', 'font-bold');
                         } else {
-                            // Date is past or today (Green Bold Flashing)
                             restorationOutputSpan.classList.add('text-green-600', 'font-bold', 'flashing');
                         }
                     } else {
                          restorationOutputSpan.className = 'value text-gray-800'; 
                     }
                     
-                    // Age at Restoration Calculation & Display
+                    // Age at Restoration Calculation & Display (Screen)
                     let restorationAgeYears = 0;
                     let restorationAgeMonths = 0;
                     let restorationAgeDisplay = 'N/A';
@@ -1274,7 +1276,6 @@
                         totalMonths -= dobDate.getUTCMonth();
                         totalMonths += restorationDate.getUTCMonth();
 
-                        // If the end day is less than the start day, we haven't completed the last month.
                         if (restorationDate.getUTCDate() < dobDate.getUTCDate()) {
                             totalMonths--;
                         }
@@ -1282,19 +1283,16 @@
                         restorationAgeYears = Math.floor(totalMonths / 12);
                         restorationAgeMonths = totalMonths % 12;
                         
-                        // --- New Formatting Logic ---
-                        let yearsString = `${restorationAgeYears} Years`; // Always show years
+                        let yearsString = `${restorationAgeYears} Years`;
                         let monthsString = '';
                         
                         if (restorationAgeMonths === 1) {
-                            monthsString = `, 1 Month`; // Singular
+                            monthsString = `, 1 Month`;
                         } else if (restorationAgeMonths > 1) {
-                            monthsString = `, ${restorationAgeMonths} Months`; // Plural
+                            monthsString = `, ${restorationAgeMonths} Months`;
                         }
-                        // If restorationAgeMonths is 0, monthsString remains empty ''.
                         
                         restorationAgeDisplay = yearsString + monthsString;
-                        // --- End New Formatting Logic ---
                     }
                     
                     document.getElementById('age-at-restoration-output').textContent = restorationAgeDisplay;
@@ -1343,8 +1341,9 @@
                     familyPensionInput.disabled = false;
                 } else {
                     tkAwardInput.disabled = true;
+                    tkAwardInput.value = 'No';
                     familyPensionInput.disabled = true;
-
+                    familyPensionInput.value = 'No';
                 }
 
                 // --- Reset fields if prerequisite is emptied ---
@@ -1409,8 +1408,5 @@
     </script>
 </body>
 </html>
-
-
-
 
 
