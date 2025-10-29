@@ -160,111 +160,30 @@
             display: none;
         }
 
-        /* --- Mobile Responsive Styles --- */
-        @media (max-width: 768px) {
-            .logo-left {
-                /* position: relative;
-                top: auto;
-                left: auto;
-                width: 8rem; /* 128px */
-                /* height: auto;
-                margin: 0 auto 1rem; /* Center logo */
-                display: none; /* Hide logo on mobile */
-            }
-            /* .logo-right {
-                /* position: relative;
-                top: auto;
-                right: auto;
-                width: 10rem; /* 160px */
-                /* height: auto;
-                margin: 0 auto 1rem; /* Center logo */
-                /*display: none; /* Hide logo on mobile */
-            /*} */
-            .container {
-                padding: 1rem; /* Reduce padding on mobile */
-            }
-            .card {
-                padding: 1rem; /* Reduce card padding */
-            }
-            header h1 {
-                font-size: 1.875rem; /* 30px */
-            }
-            header p {
-                font-size: 0.875rem; /* 14px */
-            }
-            .increase-table-container {
-                /* Allow table to be scrollable on mobile */
-                overflow-x: auto;
-            }
-            .increase-table {
-                min-width: 800px; /* Further reduce min-width for mobile */
-            }
-            /* Make final entitlement table stack */
-            .output-group {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 0.5rem 0;
-            }
-            .output-group .label {
-                margin-bottom: 0.25rem;
-                font-size: 0.875rem; /* 14px */
-            }
-            .output-group .value {
-                font-size: 1rem; /* 16px */
-                padding-left: 0.5rem; /* Indent value slightly */
-            }
-             /* Special handling for the header row in the final table */
-            .output-group.font-bold {
-                flex-direction: row; /* Keep header as row */
-                justify-content: space-between;
-            }
-            .output-group.font-bold .label {
-                 margin-bottom: 0;
-                 font-size: 1rem; /* 16px */
-                 width: auto !important; /* Override width */
-            }
-             /* Special handling for the 3-column rows in final table */
-             .output-group .w-1\/3 {
-                width: 100% !important; /* Make columns full width */
-                text-align: left !important; /* Align text left */
-                padding-left: 0.5rem; /* Indent */
-            }
-            .output-group .w-1\/3.label {
-                padding-left: 0; /* No indent for label */
-                font-size: 0.875rem; /* 14px */
-                margin-bottom: 0.25rem;
-            }
-            /* Hide the empty span in the header on mobile */
-            .output-group.font-bold .label.w-1\/3:first-child {
-                display: none;
-            }
-        }
-        /* --- End Mobile Styles --- */
-
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
     <div class="container mx-auto p-4 md:p-8 relative"> <!-- Added relative positioning -->
         <!-- Logo Container -->
-        <div class="logo-container flex flex-col md:flex-row justify-between items-center">
+        <div class="logo-container">
             <!-- Logo Added -->
-            <img src="logo.gif" alt="Logo" class="logo-left md:absolute md:top-4 md:left-4 w-32 h-32 object-contain" onerror="this.src='https://placehold.co/128x128/eeeeee/aaaaaa?text=Logo'; this.onerror=null;">
+            <img src="logo.gif" alt="Logo" class="logo-left absolute top-4 left-4 w-32 h-32 object-contain">
             
             <!-- New Logo Added -->
-            <!-- <img src="Exact.jpg" alt="Exact Logo" class="logo-right md:absolute md:top-4 md:right-4 w-40 h-40 object-contain" onerror="this.src='https://placehold.co/160x160/eeeeee/aaaaaa?text=Logo'; this.onerror=null;"> -->
+            <img src="Exact.jpg" alt="Exact Logo" class="logo-right absolute top-4 right-4 w-40 h-40 object-contain">
         </div>
         
-        <header class="text-center mb-8 mt-4 md:mt-0">
+        <header class="text-center mb-8">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-700">Pension Calculator</h1>
             <!-- Reduced margin-top for tighter spacing -->
-            <p class="text-red-600 mt-1">(For Retirement date 01 July, 1986 to till now)</p>
+            <p class="text-gray-500 mt-1">(For Retirement date 01 July, 1986 to till now)</p>
             <!-- Added new line, set color to blue, and reduced margin-top -->
             <p class="text-blue-600 mt-1 font-medium">Designed by Chf Wrt Off Irfan Mahmud Sect Asstt</p>
         </header>
 
         <!-- Wrapper for print grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Input Section -->
             <div class="card">
                 <h2 class="card-title text-center font-bold text-xl">Input Details</h2>
@@ -1413,7 +1332,6 @@
                 } else {
                     grossPensionInput.disabled = true;
                     increasePensionBtn.disabled = true;
-
                     decreasePensionBtn.disabled = true;
                 }
 
@@ -1490,7 +1408,5 @@
     </script>
 </body>
 </html>
-
-
 
 
