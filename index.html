@@ -892,6 +892,8 @@
 
                     // Store the Net from 2024 before the Base Line logic might override it
                     const net2024 = previousNetValueCurrent; 
+                    // Store the Restored Net from 2024
+                    const restoredNet2024 = previousNetValueRestored;
 
                     const percentageText = percentageToDisplay.replace('%', '');
                     const percentageValue = parseFloat(percentageText) / 100;
@@ -1042,48 +1044,41 @@
                         isNetCalculatedRestored = true;
                     } 
                     
-                    // --- 2025 BASE LINE AND INCREASE LOGIC ---
+                    // --- 2025 BASE LINE AND INCREASE LOGIC (REVISED as per user request) ---
                     if (year === 2025) {
                         
-                        // 2025 Current Base Line Formula: =IF($B$4>DATE(2024,12,31),MPension,R30)
-                        if (sosDate && sosDate > date2024_12_31) {
-                            currentBaseLine = basePension; // MPension
-                        } else {
-                            currentBaseLine = net2024; // R30 (Net 2024)
-                        }
+                        // LOGIC 1: Base Line 2025 (Current) is Net amount of 2024 Current
+                        currentBaseLine = net2024;
+                        baseLineDisplayCurrent = formatCurrency(currentBaseLine, false, true);
                         
-                        baseLineDisplayCurrent = formatCurrency(currentBaseLine, false, true); // Use forTable=true
-                        
-                        // 2025 Current Increase Formula: =ROUND(IF(AND(V31="Y",P31>0),O31*P31,IF(AND(V31="Y",P31=0),O31*R30,0)),2)
+                        // 2025 Current Increase Formula: Base Line * %age
                         if (isEntitled === 'Y' && percentageValue > 0) {
-                            if (currentBaseLine > 0) { // P31 > 0
-                                currentIncreaseValue = roundToTwoDecimals(percentageValue * currentBaseLine); // O31 * P31
-                            } else if (currentBaseLine === 0) { // P31 = 0
-                                currentIncreaseValue = roundToTwoDecimals(percentageValue * net2024); // O31 * R30
-                            } else {
-                                currentIncreaseValue = 0;
-                            }
+                            currentIncreaseValue = roundToTwoDecimals(percentageValue * currentBaseLine); 
                             isIncreaseCalculatedCurrent = true;
                         } else {
                             currentIncreaseValue = 0;
                         }
 
-                        currentNetValue = roundToTwoDecimals(currentBaseLine + currentIncreaseValue);
+                        // LOGIC 2: Current Net 2025 = Increase 2025 + NET of 2024 Current
+                        currentNetValue = roundToTwoDecimals(currentIncreaseValue + net2024);
                         isNetCalculatedCurrent = true;
                         
-                        // 2025 Restoration Logic: Base Line and Increase
-                        restoredBaseLine = previousNetValueRestored;
+                        // LOGIC 3 (CORRECTED): Base Line 2025 (Restored) is Net amount of 2024 After Restoration
+                        restoredBaseLine = restoredNet2024; // Use the stored Net After Restoration from the previous loop (Net of 2024 After Restoration)
+                        baseLineDisplayRestored = formatCurrency(restoredBaseLine, false, true);
+
+                        // 2025 Restoration Increase Formula: Base Line * %age
                         if (isEntitled === 'Y' && !isNaN(percentageValue)) {
-                            const restoredIncreaseRaw = restoredBaseLine * percentageValue;
+                            const restoredIncreaseRaw = restoredBaseLine * percentageValue; 
                             restoredIncreaseValue = roundToTwoDecimals(restoredIncreaseRaw);
                             isIncreaseCalculatedRestored = true;
                         } else {
                             restoredIncreaseValue = 0;
                         }
+                        
+                        // 2025 Restoration Net: Base Line + Increase (Base Line is net2024 Restored)
                         restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue);
                         isNetCalculatedRestored = true;
-
-                        baseLineDisplayRestored = formatCurrency(restoredBaseLine, false, true); // Use forTable=true
                     }
 
                     // --- APPLY MINIMUM PENSION LOGIC (Only for years > 1999) ---
@@ -1502,6 +1497,3 @@
     </script>
 </body>
 </html>
-
-
-
