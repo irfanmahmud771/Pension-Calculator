@@ -307,20 +307,17 @@
         </div>
         
         <header class="text-center mb-8 mt-4 md:mt-0">
-            <!-- === RESTORED HEADER === -->
             <h1 class="text-3xl md:text-4xl font-bold text-gray-700">Pension Calculator</h1>
             <!-- Reduced margin-top for tighter spacing -->
             <p class="text-red-600 mt-1">(For Retirement date 01 July, 1986 to till now)</p>
             <!-- Added new line, set color to blue, and reduced margin-top -->
             <p class="text-blue-600 mt-1 font-medium">Designed by Chf Wrt Off Irfan Mahmud Sect Asstt</p>
-            <!-- === END RESTORED HEADER === -->
         </header>
 
         <!-- Wrapper for print grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Input Section -->
             <div class="card">
-                <!-- === RESTORED INPUT CARD === -->
                 <h2 class="card-title text-center font-bold text-xl">Input Details</h2>
                 <form id="pension-form">
                     <!-- Service Details -->
@@ -371,12 +368,10 @@
                         </div>
                     </div>
                 </form>
-                <!-- === END RESTORED INPUT CARD === -->
             </div>
 
             <!-- Output Section -->
             <div class="card">
-                <!-- === RESTORED OUTPUT CARD === -->
                 <h2 class="card-title text-center font-bold text-xl py-4">Calculated Results</h2>
                 
                 <h3 class="font-semibold text-lg mt-6 mb-2 text-gray-600 border-b pb-2">Service Summary</h3>
@@ -418,43 +413,55 @@
                 <!-- This section remains visible on screen -->
                 <div>
                     <h3 class="font-semibold text-lg mt-6 mb-2 text-gray-600 border-b pb-2">Final Pension After Increases</h3>
-                     <div class="mt-4 space-y-2"> 
+                     <div class="mt-4 space-y-2"> <!-- Removed py-4 and changed mt-6 to mt-4 -->
+                        <!-- Table Header (REMOVED) -->
+                        <!--
+                        <div class="output-group font-bold">
+                            <span class="label w-1/3"></span>
+                        </div>
+                        -->
+
                         <!-- Pension p.m (Current) Row -->
                         <div class="output-group">
                             <span class="label w-1/3 whitespace-nowrap">Pension (Current)</span>
-                            <span class="value w-1/3 text-right text-gray-800" id="pension-pm-current-output">0</span>
+                            <span class="value w-1/3 text-right text-gray-800" id="pension-pm-current-output">0</span> <!-- Changed text-center to text-right -->
                         </div>
 
                         <!-- Pension p.m (After Restoration) Row -->
                         <div class="output-group">
                             <span class="label w-1/3 whitespace-nowrap">Pension (After Restoration)</span>
-                            <span class="value w-1/3 text-right text-gray-800" id="pension-pm-restored-output">0</span>
+                            <span class="value w-1/3 text-right text-gray-800" id="pension-pm-restored-output">0</span> <!-- Changed text-center to text-right -->
                         </div>
 
                         <!-- TK Allowance Row -->
                         <div class="output-group">
                             <span class="label w-1/3 whitespace-nowrap">TK Allowance</span>
-                            <span class="value w-1/3 text-right text-gray-800" id="tk-allowance-current-output">0</span>
+                            <span class="value w-1/3 text-right text-gray-800" id="tk-allowance-current-output">0</span> <!-- Changed text-center to text-right -->
                         </div>
 
-                         <div class="output-group pt-4"> 
+                        <!-- Total payable Row (Effectively deleted/repurposed) -->
+                        <!-- <div class="output-group font-extrabold text-gray-900">
+                            <span class="label w-1/3"></span>
+                            <span class="value w-1/3 text-center text-gray-800" id="total-payable-current-output">0</span>
+                            <span class="value w-1/3 text-center text-gray-800" id="total-payable-restored-output">0</span>
+                        </div> -->
+
+                         <div class="output-group pt-4"> <!-- Add padding top for separation -->
                             <span class="label w-1/3 whitespace-nowrap">Pension Restoration Date</span>
-                            <span class="value text-right" id="restoration-date-output"></span>
+                            <span class="value text-right" id="restoration-date-output"></span> <!-- Added text-right -->
                         </div>
 
                         <div class="output-group">
                             <span class="label w-1/3 whitespace-nowrap">Age on Pension Restoration</span>
-                            <span class="value text-gray-800 text-right" id="age-at-restoration-output">0 Years</span>
+                            <span class="value text-gray-800 text-right" id="age-at-restoration-output">0 Years</span> <!-- Added text-right -->
                         </div>
                      </div>
                 </div>
-                <!-- === END RESTORED OUTPUT CARD === -->
             </div>
         </div>
 
         <!-- Pension Increase Calculations Table -->
         <div class="card mt-8">
-            <!-- === RESTORED INCREASE TABLE === -->
             <h2 class="card-title text-center font-bold text-xl mb-4">Pension Increase Calculations</h2>
             <div class="increase-table-container">
                 <table class="increase-table">
@@ -487,7 +494,6 @@
                     </tbody>
                 </table>
             </div>
-            <!-- === END RESTORED INCREASE TABLE === -->
         </div>
 
         <!-- NEW: Total Visits Display -->
@@ -513,7 +519,6 @@
 
     <!-- NEW: Password Modal HTML -->
     <div id="password-modal" class="modal-overlay">
-        <!-- === RESTORED PASSWORD MODAL === -->
         <div class="modal-content">
             <h3 class="text-lg font-bold mb-4">Enter Password</h3>
             <div class="input-group">
@@ -530,7 +535,6 @@
                 </button>
             </div>
         </div>
-        <!-- === END RESTORED PASSWORD MODAL === -->
     </div>
     <!-- End Modal -->
 
@@ -1446,7 +1450,6 @@
                 });
 
                 // After transaction, set up a listener to display the count
-                // (or just display it once, but listener is robust)
                 onSnapshot(visitDocRef, (doc) => {
                     if (doc.exists()) {
                         visitCountSpan.textContent = doc.data().count;
@@ -1537,7 +1540,7 @@
             // Log "Load Data" buttons
             logContainer.addEventListener('click', (e) => {
                 if (e.target.classList.contains('load-log-btn')) {
-                    loadLogData(e.target);
+                    loadLogData(e.Tearget);
                 }
             });
 
@@ -1559,11 +1562,40 @@
 
         // --- NEW: App Entry Point (DOM Ready) ---
         document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                // Get App ID and Config from global scope
-                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-                const firebaseConfig = JSON.parse(__firebase_config);
+            const errorContainer = document.getElementById('error-container');
+            
+            function showError(message) {
+                const body = document.querySelector('body');
+                if (body) {
+                    body.innerHTML = `<div class="p-4 text-center text-red-700 bg-red-100 rounded-lg m-4">${message}</div>`;
+                }
+            }
 
+            // Check for global variables
+            if (typeof __app_id === 'undefined' || !__app_id) {
+                showError("Application ID is missing. Cannot initialize.");
+                return;
+            }
+            if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+                showError("Firebase configuration is missing. Cannot initialize.");
+                return;
+            }
+            if (typeof __initial_auth_token === 'undefined') {
+                showError("Auth token is missing. Cannot initialize.");
+                return;
+            }
+            
+            appId = __app_id;
+            let firebaseConfig;
+            
+            try {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } catch (e) {
+                showError(`Firebase configuration is invalid: ${e.message}`);
+                return;
+            }
+
+            try {
                 // Initialize Firebase
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -1577,37 +1609,37 @@
                         console.log("User authenticated:", userId);
                     } else {
                         console.log("User is signed out.");
+                        // Handle potential sign-out?
                     }
                 });
 
                 // Sign in the user
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                if (__initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
 
                 // --- MODIFIED: Safer init call ---
-                // Now that DOM is loaded AND auth is awaited, we can init.
                 if (auth.currentUser) {
                     userId = auth.currentUser.uid;
                     initApp(); // Call initApp HERE.
                 } else {
-                    // This case should be rare, but good to handle.
-                    // Re-listen for auth state if it failed the first time.
-                    console.error("Auth not ready, setting up one-time listener...");
+                    console.error("Auth not ready after sign-in, setting up one-time listener...");
                     const unsubscribe = onAuthStateChanged(auth, (user) => {
                         if (user) {
                             userId = user.uid;
                             initApp();
                             unsubscribe(); // Remove listener after it runs once
+                        } else {
+                             showError("Authentication failed. Please reload.");
                         }
                     });
                 }
 
             } catch (e) {
                 console.error("Error initializing Firebase:", e);
-                document.body.innerHTML = `<div class="p-8 text-center text-red-600">Error initializing application. Please check console.</div>`;
+                showError(`Error initializing application: ${e.message}`);
             }
         });
 
