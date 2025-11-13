@@ -591,7 +591,94 @@
             let logDebounceTimer = null;
             const LOG_DEBOUNCE_DELAY = 10000; // 10 seconds
 
+            // --- NEW: localStorage key for log ---
+            const LOG_STORAGE_KEY = 'pensionAppLog';
+
             // --- 1. HELPER FUNCTIONS ---
+
+            // --- NEW: Helper to get log from localStorage ---
+            function getLog() {
+                try {
+                    const logData = localStorage.getItem(LOG_STORAGE_KEY);
+                    return logData ? JSON.parse(logData) : [];
+                } catch (e) {
+                    console.error("Failed to parse log from localStorage:", e);
+                    return [];
+                }
+            }
+
+            // --- NEW: Helper to save log to localStorage ---
+            function saveLog(logArray) {
+                try {
+                    localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logArray));
+                } catch (e) {
+                    console.error("Failed to save log to localStorage:", e);
+                }
+            }
+
+            // --- NEW: Function to render the log from an array ---
+            function renderLog() {
+                const logArray = getLog();
+                if (!logContainer) return;
+
+                if (logArray.length === 0) {
+                    logContainer.innerHTML = '<span class="text-gray-400">Log starts empty...</span>';
+                    return;
+                }
+
+                let logHTML = '';
+                // The log is saved with newest first (unshift), so we iterate normally
+                for (const entry of logArray) {
+                    const log_dob_display = formatDateForLog(entry.dob_raw);
+                    const log_doe_display = formatDateForLog(entry.doe_raw);
+                    const log_sos_display = formatDateForLog(entry.sos_raw);
+                    
+                    // Format pension display value (with commas)
+                    const pensionRaw = entry.pension_raw || '0';
+                    const parts = pensionRaw.split('.');
+                    let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    // Ensure two decimal places if decimals exist
+                    let decimalPart = parts[1] ? (parts[1] + '00').substring(0, 2) : '';
+                    
+                    let log_pension_display = integerPart;
+                    if (decimalPart) {
+                        log_pension_display += '.' + decimalPart;
+                    }
+                    
+                    // Handle edge case where input was just "0" or empty
+                    if (parseFloat(pensionRaw) === 0) {
+                         log_pension_display = '0';
+                    }
+                    
+                    // Handle empty input string
+                    if (entry.pension_raw === '') {
+                        log_pension_display = 'N/A';
+                    }
+
+
+                    logHTML += `<div class="p-2 border-b border-gray-200"><strong>[${entry.timestamp}] ${entry.triggerSource}</strong><br>
+                        <strong>DOB:</strong> ${log_dob_display}, 
+                        <strong>DOE:</strong> ${log_doe_display}, 
+                        <strong>SOS:</strong> ${log_sos_display}<br>
+                        <strong>Pension:</strong> ${log_pension_display}, 
+                        <strong>TK:</strong> ${entry.tk}, 
+                        <strong>Family:</strong> ${entry.family}
+                        <br>
+                        <button 
+                            class="load-log-btn text-xs bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2"
+                            data-dob="${entry.dob_raw || ''}"
+                            data-doe="${entry.doe_raw || ''}"
+                            data-sos="${entry.sos_raw || ''}"
+                            data-pension="${entry.pension_raw || '0'}"
+                            data-tk="${entry.tk}"
+                            data-family="${entry.family}">
+                            Load this Data
+                        </button>
+                    </div>`;
+                }
+                logContainer.innerHTML = logHTML;
+            }
+
 
             // Robust Rounding function (rounds half up, e.g., 10.765 to 10.77)
             const roundToTwoDecimals = (num) => {
@@ -840,69 +927,50 @@
                 grossPensionInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
             
-            // --- NEW: Logging Function ---
+            // --- NEW: Logging Function (Now saves to localStorage) ---
             function logCalculation(triggerSource) {
                 // Only log if all key inputs are present
                 const log_dob_raw = dobInput.value;
                 const log_doe_raw = doeInput.value;
                 const log_sos_raw = sosInput.value;
-                // --- MODIFIED: Get both raw and display values for pension ---
                 const log_pension_raw = grossPensionInput.value.replace(/,/g, '') || '0';
-                const log_pension_display = grossPensionInput.value;
+                const log_pension_display_check = grossPensionInput.value; // Just for the check
                 
                 // Prevent logging incomplete entries
-                if (!log_dob_raw || !log_doe_raw || !log_sos_raw || !log_pension_display) {
+                if (!log_dob_raw || !log_doe_raw || !log_sos_raw || !log_pension_display_check) {
                     return; 
                 }
-
-                // --- NEW: Format dates for display in log ---
-                const log_dob_display = formatDateForLog(log_dob_raw);
-                const log_doe_display = formatDateForLog(log_doe_raw);
-                const log_sos_display = formatDateForLog(log_sos_raw);
 
                 const log_tk = tkAwardInput.value;
                 const log_family = familyPensionInput.value;
                 
                 // --- Create timestamp ---
                 const now = new Date();
-                // --- MODIFIED: Format date as DD-MM-YYYY ---
                 const day = String(now.getDate()).padStart(2, '0');
                 const month = String(now.getMonth() + 1).padStart(2, '0');
                 const year = now.getFullYear();
                 const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 const timestamp = `${day}-${month}-${year} ${time}`;
                 
-                // --- Format log message ---
-                // --- MODIFIED: Added Load Data button with data attributes ---
-                // --- MODIFIED: Use display dates (DD-MM-YYYY) ---
-                const logMessage = `<div class="p-2 border-b border-gray-200"><strong>[${timestamp}] ${triggerSource}</strong><br>
-                    <strong>DOB:</strong> ${log_dob_display}, 
-                    <strong>DOE:</strong> ${log_doe_display}, 
-                    <strong>SOS:</strong> ${log_sos_display}<br>
-                    <strong>Pension:</strong> ${log_pension_display || 'N/A'}, 
-                    <strong>TK:</strong> ${log_tk}, 
-                    <strong>Family:</strong> ${log_family}
-                    <br>
-                    <button 
-                        class="load-log-btn text-xs bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2"
-                        data-dob="${log_dob_raw || ''}"
-                        data-doe="${log_doe_raw || ''}"
-                        data-sos="${log_sos_raw || ''}"
-                        data-pension="${log_pension_raw}"
-                        data-tk="${log_tk}"
-                        data-family="${log_family}">
-                        Load this Data
-                    </button>
-                </div>`;
+                // --- NEW: Create log object ---
+                const logEntry = {
+                    timestamp: timestamp,
+                    triggerSource: triggerSource,
+                    dob_raw: log_dob_raw,
+                    doe_raw: log_doe_raw,
+                    sos_raw: log_sos_raw,
+                    pension_raw: log_pension_raw,
+                    tk: log_tk,
+                    family: log_family
+                };
 
-                // --- Add to log container ---
-                // Check if it's the first log entry
-                const firstLog = logContainer.querySelector('.text-gray-400');
-                if (firstLog) {
-                    logContainer.innerHTML = logMessage; // Replace placeholder
-                } else {
-                    logContainer.innerHTML = logMessage + logContainer.innerHTML; // Prepend
-                }
+                // --- NEW: Get log, add new entry, and save ---
+                let logArray = getLog();
+                logArray.unshift(logEntry); // Prepend new entry to show at top
+                saveLog(logArray);
+                
+                // --- NEW: Re-render the log container ---
+                renderLog();
             }
             
             // --- NEW: Modal Control Functions ---
@@ -921,7 +989,10 @@
                 const password = passwordInput.value;
                 if (password === 'Smile@786') {
                     // Correct password
-                    logContainer.innerHTML = '<span class="text-gray-400">Log cleared...</span>';
+                    // --- NEW: Clear from localStorage and re-render ---
+                    saveLog([]); // Save an empty array
+                    renderLog(); // This will show the "Log starts empty..." message
+                    
                     closePasswordModal();
                 } else {
                     // Incorrect password
@@ -941,10 +1012,22 @@
                 // Format the pension value correctly
                 const pensionValue = data.pension || '';
                 grossPensionInput.value = pensionValue; // Set raw value
-                // Manually format it to add commas, just in case
+                
+                // Manually format it to add commas
                 const parts = pensionValue.split('.');
                 let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                grossPensionInput.value = parts.length > 1 ? integerPart + '.' + parts[1] : integerPart;
+                // Ensure two decimal places if decimals exist
+                let decimalPart = parts[1] ? (parts[1] + '00').substring(0, 2) : '';
+                
+                grossPensionInput.value = integerPart;
+                 if (decimalPart) {
+                    grossPensionInput.value += '.' + decimalPart;
+                }
+                // Handle edge case where input was just "0"
+                if (parseFloat(pensionValue) === 0) {
+                    grossPensionInput.value = '0';
+                }
+
 
                 tkAwardInput.value = data.tk || 'No';
                 familyPensionInput.value = data.family || 'No';
@@ -1803,6 +1886,9 @@
             // Initial calculation and enabling check on load
             calculateAndDisplayAll();
             checkInputEnabling();
+
+            // --- NEW: Load and render the log from localStorage ---
+            renderLog();
         });
     </script>
 </body>
