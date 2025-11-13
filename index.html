@@ -6,6 +6,8 @@
     <title>Pension Calculation App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- NEW: Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -214,23 +216,8 @@
         /* --- Mobile Responsive Styles --- */
         @media (max-width: 768px) {
             .logo-left {
-                /* position: relative;
-                top: auto;
-                left: auto;
-                width: 8rem; /* 128px */
-                /* height: auto;
-                margin: 0 auto 1rem; /* Center logo */
                 display: none; /* Hide logo on mobile */
             }
-            /* .logo-right {
-                /* position: relative;
-                top: auto;
-                right: auto;
-                width: 10rem; /* 160px */
-                /* height: auto;
-                margin: 0 auto 1rem; /* Center logo */
-                /*display: none; /* Hide logo on mobile */
-            /*} */
             .container {
                 padding: 1rem; /* Reduce padding on mobile */
             }
@@ -291,33 +278,22 @@
             }
         }
         /* --- End Mobile Styles --- */
-
-        /* NEW: Hide online features by default */
-        .online-feature {
-            display: none;
-        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <!-- NEW: App Warning Bar -->
+    <!-- App Warning Bar -->
     <div id="app-warning" class="p-4 text-center text-yellow-800 bg-yellow-100 rounded-lg m-4" style="display: none;"></div>
 
-    <div class="container mx-auto p-4 md:p-8 relative"> <!-- Added relative positioning -->
+    <div class="container mx-auto p-4 md:p-8 relative"> 
         <!-- Logo Container -->
         <div class="logo-container flex flex-col md:flex-row justify-between items-center">
-            <!-- Logo Added -->
             <img src="logo.gif" alt="Logo" class="logo-left md:absolute md:top-4 md:left-4 w-32 h-32 object-contain" onerror="this.src='https://placehold.co/128x128/eeeeee/aaaaaa?text=Logo'; this.onerror=null;">
-            
-            <!-- New Logo Added -->
-            <!-- <img src="Exact.jpg" alt="Exact Logo" class="logo-right md:absolute md:top-4 md:right-4 w-40 h-40 object-contain" onerror="this.src='https://placehold.co/160x160/eeeeee/aaaaaa?text=Logo'; this.onerror=null;"> -->
         </div>
         
         <header class="text-center mb-8 mt-4 md:mt-0">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-700">Pension Calculator</h1>
-            <!-- Reduced margin-top for tighter spacing -->
             <p class="text-red-600 mt-1">(For Retirement date 01 July, 1986 to till now)</p>
-            <!-- Added new line, set color to blue, and reduced margin-top -->
             <p class="text-blue-600 mt-1 font-medium">Designed by Chf Wrt Off Irfan Mahmud Sect Asstt</p>
         </header>
 
@@ -348,7 +324,6 @@
                         </div>
                         <div class="input-group">
                             <label for="gross-pension-ppo">Gross Pension as per PPO</label>
-                            <!-- NEW: Input wrapper for stepper buttons -->
                             <div class="pension-input-wrapper">
                                 <input type="text" id="gross-pension-ppo" class="calc-input" disabled>
                                 <div class="pension-stepper">
@@ -420,33 +395,26 @@
                 <!-- This section remains visible on screen -->
                 <div>
                     <h3 class="font-semibold text-lg mt-6 mb-2 text-gray-600 border-b pb-2">Final Pension After Increases</h3>
-                     <div class="mt-4 space-y-2"> <!-- Removed py-4 and changed mt-6 to mt-4 -->
-                        <!-- Pension p.m (Current) Row -->
+                     <div class="mt-4 space-y-2"> 
                         <div class="output-group">
                             <span class="label w-1/3 whitespace-nowrap">Pension (Current)</span>
-                            <span class="value w-1/3 text-right text-gray-800" id="pension-pm-current-output">0</span> <!-- Changed text-center to text-right -->
+                            <span class="value w-1/3 text-right text-gray-800" id="pension-pm-current-output">0</span>
                         </div>
-
-                        <!-- Pension p.m (After Restoration) Row -->
                         <div class="output-group">
                             <span class="label w-1/3 whitespace-nowrap">Pension (After Restoration)</span>
-                            <span class="value w-1/3 text-right text-gray-800" id="pension-pm-restored-output">0</span> <!-- Changed text-center to text-right -->
+                            <span class="value w-1/3 text-right text-gray-800" id="pension-pm-restored-output">0</span>
                         </div>
-
-                        <!-- TK Allowance Row -->
                         <div class="output-group">
                             <span class="label w-1/3 whitespace-nowrap">TK Allowance</span>
-                            <span class="value w-1/3 text-right text-gray-800" id="tk-allowance-current-output">0</span> <!-- Changed text-center to text-right -->
+                            <span class="value w-1/3 text-right text-gray-800" id="tk-allowance-current-output">0</span>
                         </div>
-
-                         <div class="output-group pt-4"> <!-- Add padding top for separation -->
+                         <div class="output-group pt-4"> 
                             <span class="label w-1/3 whitespace-nowrap">Pension Restoration Date</span>
-                            <span class="value text-right" id="restoration-date-output"></span> <!-- Added text-right -->
+                            <span class="value text-right" id="restoration-date-output"></span>
                         </div>
-
                         <div class="output-group">
                             <span class="label w-1/3 whitespace-nowrap">Age on Pension Restoration</span>
-                            <span class="value text-gray-800 text-right" id="age-at-restoration-output">0 Years</span> <!-- Added text-right -->
+                            <span class="value text-gray-800 text-right" id="age-at-restoration-output">0 Years</span>
                         </div>
                      </div>
                 </div>
@@ -489,13 +457,13 @@
             </div>
         </div>
 
-        <!-- NEW: Total Visits Display (now with online-feature class) -->
-        <div class="flex justify-end mt-4 online-feature" id="visit-counter-wrapper">
+        <!-- Total Visits Display -->
+        <div class="flex justify-end mt-4" id="visit-counter-wrapper">
              <p id="visit-counter" class="text-right text-sm font-medium text-gray-600">Total Visits: <span id="visit-count" class="font-bold text-gray-800">0</span></p>
         </div>
 
-        <!-- NEW: Calculation Log (now with online-feature class) -->
-        <div class="card mt-2 online-feature" id="log-wrapper"> <!-- Reduced margin-top from mt-8 -->
+        <!-- Calculation Log -->
+        <div class="card mt-2" id="log-wrapper">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="card-title font-bold text-xl">Calculation Log</h2>
                 <button id="clear-log-btn" class="text-sm bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-lg transition-colors">
@@ -503,14 +471,13 @@
                 </button>
             </div>
             <div id="log-container" class="h-48 overflow-y-auto bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs font-mono">
-                <!-- Log entries will be inserted here -->
                 <span class="text-gray-400">Loading log...</span>
             </div>
         </div>
 
     </div>
 
-    <!-- NEW: Password Modal HTML -->
+    <!-- Password Modal HTML -->
     <div id="password-modal" class="modal-overlay">
         <div class="modal-content">
             <h3 class="text-lg font-bold mb-4">Enter Password</h3>
@@ -533,39 +500,20 @@
 
 
     <!-- ====================================================================== -->
-    <!-- NEW: Firebase SDK Imports -->
+    <!-- SUPABASE SCRIPT -->
     <!-- ====================================================================== -->
     <script type="module">
-        // Firebase Core SDK
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // Firebase Auth
-        import { 
-            getAuth, 
-            signInAnonymously, 
-            signInWithCustomToken, 
-            onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // Firebase Firestore
-        import { 
-            getFirestore, 
-            doc, 
-            collection, 
-            addDoc, 
-            getDocs, 
-            onSnapshot, 
-            runTransaction, 
-            writeBatch,
-            serverTimestamp,
-            setLogLevel,
-            query // <-- Added query
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // NEW: Import Supabase createClient
+        const { createClient } = supabase;
 
-        // --- Firebase/App State Variables ---
-        let db;
-        let auth;
-        let appId;
-        let userId;
-        let isFirebaseEnabled = false; // Start as false
+        // --- NEW: YOUR SUPABASE URL AND ANON KEY ---
+        const SUPABASE_URL = "https://xyfibnqodbisyykjrrbs.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5ZmlibnFvZGJpc3l5a2pycmJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwNTc1NjMsImV4cCI6MjA3ODYzMzU2M30.GodY0oqueaXq15tRYM1Lyaw5regYnPOg6v4aAaBPqgM";
+        // --------------------------------------------------
+
+        // --- App State Variables ---
+        let supabaseClient;
+        let isSupabaseEnabled = false;
 
         // Debounce timer for logging
         let logDebounceTimer = null;
@@ -573,7 +521,6 @@
 
         // --- 1. HELPER FUNCTIONS (Remain unchanged) ---
 
-        // Helper to get today's date in YYYY-MM-DD format (for autoupdate)
         const getTodayDateString = () => {
             const now = new Date();
             const year = now.getFullYear();
@@ -582,23 +529,20 @@
             return `${year}-${month}-${day}`;
         };
 
-        const todayDateString = getTodayDateString(); // Calculated once on load
+        const todayDateString = getTodayDateString(); 
 
-        // Robust Rounding function (rounds half up, e.g., 10.765 to 10.77)
         const roundToTwoDecimals = (num) => {
             if (typeof num !== 'number' || isNaN(num)) return 0;
             const epsilon = 0.0000001; 
             return Math.round((num + epsilon) * 100) / 100;
         }
         
-        // Robust Rounding function for whole numbers (rounds half up, e.g., 100.5 to 101)
         const roundToNearestWhole = (num) => {
             if (typeof num !== 'number' || isNaN(num)) return 0;
             const rounded = Math.round(num);
             return rounded;
         }
 
-        // Helper to format Rs. values
         const formatCurrency = (value, roundToWhole = false, forTable = false) => {
             const numericValue = parseFloat(value);
             if (isNaN(numericValue) || numericValue === 0) return '-';
@@ -621,26 +565,23 @@
             return prefix + roundedValue.toLocaleString('en-IN', { minimumFractionDigits, maximumFractionDigits });
         };
         
-        // Helper to parse dates safely (as UTC midnight to avoid time zone issues)
         const parseDate = (dateString) => {
             if (!dateString) return null;
             const date = new Date(dateString + 'T00:00:00Z');
             return isNaN(date.getTime()) ? null : date;
         };
 
-        // Helper to format date for display (DD MMM, YYYY)
         const formatDateDisplay = (date) => {
             if (!date) return 'N/A';
             const options = { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' };
             return date.toLocaleString('en-GB', options).replace(/ /g, '-').toUpperCase();
         };
         
-        // Helper to format date for table (DD-MMM-YYYY)
         const formatDateTable = (dateString) => {
             const parts = dateString.split('-');
             if (parts.length === 3 && parts[0].length === 4) {
                 const year = parts[0];
-                const month = parseInt(parts[1]) - 1; // JS month is 0-indexed
+                const month = parseInt(parts[1]) - 1;
                 const day = parts[2];
                 const dateForDisplay = new Date(Date.UTC(year, month, day));
                 return dateForDisplay.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).replace(/ /g, '-').toUpperCase();
@@ -648,7 +589,6 @@
             return dateString;
         };
         
-        // Helper to format date for log (YYYY-MM-DD to DD-MM-YYYY)
         const formatDateForLog = (dateString) => {
             if (!dateString) return 'N/A';
             const parts = dateString.split('-');
@@ -658,9 +598,20 @@
             return dateString;
         };
         
+        // NEW: Format visit count to K/M
+        const formatVisitCount = (num) => {
+            if (num < 1000) {
+                return num;
+            } else if (num < 1000000) {
+                return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'K';
+            } else {
+                return (num / 1000000).toFixed(num % 1000000 === 0 ? 0 : 1) + 'M';
+            }
+        };
+
+
         // --- 2. DATA CONSTANTS (Remain unchanged) ---
 
-        // --- COMMUTATION FACTORS DATA ---
         const pensionData = [
             { age: 20, val_2001: 40.5043, val_1986: 50.6304, val_1966: 24.265 }, { age: 21, val_2001: 39.7341, val_1986: 49.6676, val_1966: 24.061 }, { age: 22, val_2001: 38.9653, val_1986: 48.7066, val_1966: 23.853 }, { age: 23, val_2001: 38.1974, val_1986: 47.7467, val_1966: 23.64 }, { age: 24, val_2001: 37.4307, val_1986: 46.7884, val_1966: 23.424 }, { age: 25, val_2001: 36.6651, val_1986: 45.8314, val_1966: 23.203 }, { age: 26, val_2001: 35.9006, val_1986: 44.8758, val_1966: 22.978 }, { age: 27, val_2001: 35.1372, val_1986: 43.9215, val_1966: 22.747 }, { age: 28, val_2001: 34.375, val_1986: 42.9688, val_1966: 22.513 }, { age: 29, val_2001: 33.6143, val_1986: 42.0179, val_1966: 22.273 }, { age: 30, val_2001: 32.8071, val_1986: 41.0089, val_1966: 22.028 }, { age: 31, val_2001: 32.0974, val_1986: 40.1218, val_1966: 21.077 }, { age: 32, val_2001: 31.3412, val_1986: 39.1767, val_1966: 21.522 }, { age: 33, val_2001: 30.5869, val_1986: 38.2336, val_1966: 21.26 }, { age: 34, val_2001: 29.8343, val_1986: 37.2929, val_1966: 20.993 }, { age: 35, val_2001: 29.0841, val_1986: 36.3551, val_1966: 20.72 }, { age: 36, val_2001: 28.3362, val_1986: 35.4203, val_1966: 20.442 }, { age: 37, val_2001: 27.5908, val_1986: 34.4885, val_1966: 20.157 }, { age: 38, val_2001: 26.8482, val_1986: 33.5603, val_1966: 19.867 }, { age: 39, val_2001: 26.1009, val_1986: 32.6361, val_1966: 19.57 }, { age: 40, val_2001: 25.3728, val_1986: 31.716, val_1966: 19.267 }, { age: 41, val_2001: 24.6406, val_1986: 30.8007, val_1966: 18.956 }, { age: 42, val_2001: 23.9126, val_1986: 29.8907, val_1966: 18.641 }, { age: 43, val_2001: 23.184, val_1986: 28.98, val_1966: 18.318 }, { age: 44, val_2001: 22.4713, val_1986: 28.0891, val_1966: 17.988 }, { age: 45, val_2001: 21.7592, val_1986: 27.199, val_1966: 17.65 }, { age: 46, val_2001: 21.0538, val_1986: 26.3172, val_1966: 17.307 }, { age: 47, val_2001: 20.3555, val_1986: 25.4444, val_1966: 16.956 }, { age: 48, val_2001: 19.6653, val_1986: 24.5816, val_1966: 16.596 }, { age: 49, val_2001: 18.9841, val_1986: 23.7301, val_1966: 16.231 }, { age: 50, val_2001: 18.3129, val_1986: 22.8911, val_1966: 15.859 }, { age: 51, val_2001: 17.6526, val_1986: 22.0658, val_1966: 15.481 }, { age: 52, val_2001: 17.005, val_1986: 21.2563, val_1966: 15.096 }, { age: 53, val_2001: 16.371, val_1986: 20.638, val_1966: 14.707 }, { age: 54, val_2001: 15.7517, val_1986: 19.6896, val_1966: 14.313 }, { age: 55, val_2001: 15.1478, val_1986: 18.9348, val_1966: 13.915 }, { age: 56, val_2001: 14.5602, val_1986: 18.2002, val_1966: 13.513 }, { age: 57, val_2001: 13.9888, val_1986: 17.486, val_1966: 13.109 }, { age: 58, val_2001: 13.434, val_1986: 16.7925, val_1966: 12.702 }, { age: 59, val_2001: 12.8953, val_1986: 16.1191, val_1966: 12.294 }, { age: 60, val_2001: 12.3719, val_1986: 15.4649, val_1966: 11.886 }, { age: 61, val_2001: 11.8632, val_1986: 14.829, val_1966: 11.497 }, { age: 62, val_2001: 11.3684, val_1986: 14.2105, val_1966: 11.104 }, { age: 63, val_2001: 10.8872, val_1986: 13.609, val_1966: 10.713 }, { age: 64, val_2001: 10.4191, val_1986: 13.0239, val_1966: 10.327 }, { age: 65, val_2001: 9.9636, val_1986: 12.4549, val_1966: 9.946 }, { age: 66, val_2001: 9.5214, val_1986: 11.9017, val_1966: 9.57 }, { age: 67, val_2001: 9.0914, val_1986: 11.3643, val_1966: 9.2 }, { age: 68, val_2001: 8.6742, val_1986: 10.5428, val_1966: 8.836 }, { age: 69, val_2001: 8.2697, val_1986: 10.3371, val_1966: 8.478 }, { age: 70, val_2001: 7.8778, val_1986: 9.8472, val_1966: 8.127 }, { age: 71, val_2001: 7.4983, val_1986: 9.3729, val_1966: 7.783 }, { age: 72, val_2001: 7.1314, val_1986: 8.9142, val_1966: 7.448 }, { age: 73, val_2001: 6.7766, val_1986: 8.4708, val_1966: 7.121 }, { age: 74, val_2001: 6.4342, val_1986: 8.0427, val_1966: 6.802 }, { age: 75, val_2001: 6.1039, val_1986: 7.6299, val_1966: 6.494 }, { age: 76, val_2001: 5.7858, val_1986: 7.2322, val_1966: 6.194 }, { age: 77, val_2001: 5.4797, val_1986: 6.8496, val_1966: 5.906 }, { age: 78, val_2001: 5.1854, val_1986: 6.4818, val_1966: 5.627 }, { age: 79, val_2001: 4.903, val_1986: 6.1284, val_1966: 5.364 }, { age: 80, val_2001: 4.6321, val_1986: 5.7901, val_1966: 5.104 }
         ];
@@ -674,12 +625,10 @@
             factors_1966_07_01[item.age] = item.val_1966;
         });
         
-        // --- MINIMUM PENSION DATA ---
         const minPensionData = {
             1988: { self: 300.00, family: 150.00 }, 1995: { self: 300.00, family: 150.00 }, 1997: { self: 300.00, family: 150.00 }, 1999: { self: 300.00, family: 150.00 }, 2008: { self: 2000.00, family: 1000.00 }, 2010: { self: 3000.00, family: 2250.00 }, 2013: { self: 5000.00, family: 3750.00 }, 2014: { self: 6000.00, family: 4500.00 }, 2018: { self: 10000.00, family: 7500.00 }, 2023: { self: 12000.00, family: 9000.00 }
         };
 
-        // --- PENSION INCREASES DATA ---
         const pensionIncreases = [
             { year: 1987, percentage: '4%', from: '1987-06-30', to: '1987-06-30' }, { year: 1988, percentage: '7%', from: '1988-06-30', to: '1988-06-30' }, { year: 1990, percentage: '10%', from: '1990-06-30', to: '1990-06-30' }, { year: 1991, percentage: 'CONDITIONAL', from: '1991-06-30', to: '1991-06-30' }, { year: 1995, percentage: 'CONDITIONAL', from: '1995-07-01', to: '1995-07-01' }, { year: 1997, percentage: '10%', from: '1997-02-28', to: '1997-02-28' }, { year: 1999, percentage: '25%', from: '1999-07-01', to: '2001-11-30' }, { year: 2001, percentage: 'CONDITIONAL', from: '2001-11-30', to: '2001-11-30' }, { year: 2003, percentage: '15%', from: '2003-07-01', to: '2005-06-30' }, { year: 2004, percentage: 'CONDITIONAL', from: '2004-07-01', to: '2005-06-30' }, { year: 2005, percentage: '10%', from: '2005-07-01', to: '2011-06-30' }, { year: 2006, percentage: 'CONDITIONAL', from: '2006-07-01', to: '2011-06-30' }, { year: 2007, percentage: 'CONDITIONAL', from: '2007-07-01', to: '2007-07-01' }, { year: 2008, percentage: '20%', from: '2008-07-01', to: '2008-07-01' }, { year: 2009, percentage: 'CONDITIONAL', from: '2009-07-01', to: '2011-06-30' }, { year: 2010, percentage: 'CONDITIONAL', from: '2010-07-01', to: '2017-06-30' }, { year: 2011, percentage: 'CONDITIONAL', from: '2011-07-01', to: todayDateString }, { year: 2012, percentage: '20%', from: '2012-07-01', to: '2015-06-30' }, { year: 2013, percentage: '10%', from: '2013-07-01', to: '2016-06-30' }, { year: 2014, percentage: '10%', from: '2014-07-01', to: '2016-06-30' }, { year: 2015, percentage: '7.5%', from: '2012-07-01', to: todayDateString }, { year: 2016, percentage: '10%', from: '2016-07-01', to: '2022-06-30' }, { year: 2017, percentage: '10%', from: '2017-07-01', to: '2022-06-30' }, { year: 2018, percentage: '10%', from: '2018-07-01', to: '2022-06-30' }, { year: 2019, percentage: '10%', from: '2019-07-01', to: '2022-06-30' }, { year: 2021, percentage: '10%', from: '2021-07-01', to: '2022-06-30' }, { year: 2022, percentage: '15%', from: '2022-07-01', to: todayDateString }, { year: 2023, percentage: '17.50%', from: '2023-07-01', to: todayDateString }, { year: 2024, percentage: '15%', from: '2024-07-01', to: todayDateString }, { year: 2025, percentage: '7%', from: '2025-07-01', to: todayDateString } 
         ];
@@ -687,7 +636,6 @@
         
         // --- 3. CORE CALCULATION LOGIC (Functions) ---
         
-        // --- Function to render the log from an array ---
         function renderLog(logArray) {
             const logContainer = document.getElementById('log-container');
             if (!logContainer) return;
@@ -698,31 +646,23 @@
             }
 
             let logHTML = '';
-            // Iterate the array (which is already sorted newest-first)
             for (const entry of logArray) {
                 const log_dob_display = formatDateForLog(entry.dob_raw);
                 const log_doe_display = formatDateForLog(entry.doe_raw);
                 const log_sos_display = formatDateForLog(entry.sos_raw);
                 
-                // Format pension display value (with commas)
                 const pensionRaw = entry.pension_raw || '0';
                 const parts = pensionRaw.split('.');
                 let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                 let decimalPart = parts[1] ? (parts[1] + '00').substring(0, 2) : '';
                 
                 let log_pension_display = integerPart;
-                if (decimalPart) {
-                    log_pension_display += '.' + decimalPart;
-                }
-                if (parseFloat(pensionRaw) === 0) {
-                        log_pension_display = '0';
-                }
-                if (entry.pension_raw === '') {
-                    log_pension_display = 'N/A';
-                }
+                if (decimalPart) log_pension_display += '.' + decimalPart;
+                if (parseFloat(pensionRaw) === 0) log_pension_display = '0';
+                if (entry.pension_raw === '') log_pension_display = 'N/A';
 
-                // Use the displayTimestamp from the log entry
-                logHTML += `<div class="p-2 border-b border-gray-200"><strong>[${entry.displayTimestamp}] ${entry.triggerSource}</strong><br>
+                // FIX: Read from all-lowercase properties
+                logHTML += `<div class="p-2 border-b border-gray-200"><strong>[${entry.displaytimestamp}] ${entry.triggersource}</strong><br>
                     <strong>DOB:</strong> ${log_dob_display}, 
                     <strong>DOE:</strong> ${log_doe_display}, 
                     <strong>SOS:</strong> ${log_sos_display}<br>
@@ -745,12 +685,10 @@
             logContainer.innerHTML = logHTML;
         }
 
-
-        // --- Logging Function (Saves to Firestore) ---
+        // --- NEW: Supabase Log Function ---
         async function logCalculation(triggerSource) {
-            if (!isFirebaseEnabled) return; // Guard clause: Don't run if Firebase isn't on
+            if (!isSupabaseEnabled) return; 
 
-            // Get DOM elements
             const dobInput = document.getElementById('dob');
             const doeInput = document.getElementById('doe');
             const sosInput = document.getElementById('sos');
@@ -758,51 +696,44 @@
             const tkAwardInput = document.getElementById('tk-award');
             const familyPensionInput = document.getElementById('family-pension');
 
-            // Only log if all key inputs are present
+
             const log_dob_raw = dobInput.value;
             const log_doe_raw = doeInput.value;
             const log_sos_raw = sosInput.value;
             const log_pension_raw = grossPensionInput.value.replace(/,/g, '') || '0';
-            const log_pension_display_check = grossPensionInput.value; // Just for the check
-            
-            if (!log_dob_raw || !log_doe_raw || !log_sos_raw || !log_pension_display_check) {
-                return; 
-            }
-
             const log_tk = tkAwardInput.value;
             const log_family = familyPensionInput.value;
             
-            // Create timestamps
             const now = new Date();
             const day = String(now.getDate()).padStart(2, '0');
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const year = now.getFullYear();
             const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
             
-            // Create log object
+            // FIX: Use all-lowercase keys to match the database
             const logEntry = {
-                displayTimestamp: `${day}-${month}-${year} ${time}`,
-                serverTimestamp: serverTimestamp(), // Use server's time for reliable sorting
-                triggerSource: triggerSource,
+                // created_at is added automatically by Supabase
+                displaytimestamp: `${day}-${month}-${year} ${time}`,
+                triggersource: triggerSource,
                 dob_raw: log_dob_raw,
                 doe_raw: log_doe_raw,
                 sos_raw: log_sos_raw,
                 pension_raw: log_pension_raw,
                 tk: log_tk,
-                family: log_family,
-                userId: userId // Optional: track which user saved
+                family: log_family
             };
 
-            // Save to Firestore
             try {
-                const logCollectionRef = collection(db, `artifacts/${appId}/public/data/logs`);
-                await addDoc(logCollectionRef, logEntry);
+                const { error } = await supabaseClient.from('logs').insert(logEntry);
+                if (error) {
+                    throw error;
+                }
+                console.log("Log entry saved:", logEntry);
             } catch (e) {
                 console.error("Error adding document: ", e);
             }
         }
         
-        // --- Modal Control Functions ---
         function openPasswordModal() {
             const passwordModal = document.getElementById('password-modal');
             const passwordInput = document.getElementById('password-input');
@@ -818,31 +749,22 @@
             passwordModal.classList.remove('visible');
         }
 
+        // --- NEW: Supabase Clear Log Function ---
         async function confirmClearLog() {
-            if (!isFirebaseEnabled) return; // Guard clause
+            if (!isSupabaseEnabled) return;
 
             const passwordInput = document.getElementById('password-input');
             const passwordError = document.getElementById('password-error');
             const password = passwordInput.value;
 
             if (password === 'Smile@786') {
-                // Correct password: Clear the GLOBAL log
                 passwordError.style.display = 'none';
                 try {
-                    // Get all documents in the logs collection
-                    const logCollectionRef = collection(db, `artifacts/${appId}/public/data/logs`);
-                    const querySnapshot = await getDocs(logCollectionRef);
-                    
-                    // Create a batch write to delete them all
-                    const batch = writeBatch(db);
-                    querySnapshot.forEach((doc) => {
-                        batch.delete(doc.ref);
-                    });
-                    
-                    // Commit the batch
-                    await batch.commit();
-                    
-                    // Snapshot listener will auto-update the UI
+                    // Call the 'clear_logs' RPC function in Supabase
+                    const { error } = await supabaseClient.rpc('clear_logs');
+                    if (error) {
+                        throw error;
+                    }
                     closePasswordModal();
                 } catch (e) {
                     console.error("Error clearing log: ", e);
@@ -850,17 +772,14 @@
                     passwordError.style.display = 'block';
                 }
             } else {
-                // Incorrect password
                 passwordError.textContent = "Incorrect password. Please try again.";
                 passwordError.style.display = 'block';
             }
         }
 
-        // --- Function to load data from log button ---
         function loadLogData(button) {
             const data = button.dataset;
             
-            // Get DOM elements
             const dobInput = document.getElementById('dob');
             const doeInput = document.getElementById('doe');
             const sosInput = document.getElementById('sos');
@@ -873,9 +792,8 @@
             sosInput.value = data.sos || '';
             
             const pensionValue = data.pension || '';
-            grossPensionInput.value = pensionValue; // Set raw value
+            grossPensionInput.value = pensionValue;
             
-            // Manually format it to add commas
             const parts = pensionValue.split('.');
             let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             let decimalPart = parts[1] ? (parts[1] + '00').substring(0, 2) : '';
@@ -894,16 +812,16 @@
             checkInputEnabling();
             calculateAndDisplayAll();
             
-            // Debounced log call
-            if (isFirebaseEnabled) {
+            if (isSupabaseEnabled) {
                 clearTimeout(logDebounceTimer);
-                logDebounceTimer = setTimeout(() => {
-                    logCalculation('Load Log Data (Debounced)');
-                }, LOG_DEBOUNCE_DELAY);
+                if (dobInput.value && doeInput.value && sosInput.value && grossPensionInput.value) {
+                    logDebounceTimer = setTimeout(() => {
+                        logCalculation('Load Log Data (Debounced)');
+                    }, LOG_DEBOUNCE_DELAY);
+                }
             }
         }
 
-        // --- Stepper Button Functions ---
         let pressTimer;
         let intervalTimer;
         const initialDelay = 500;
@@ -938,7 +856,6 @@
             grossPensionInput.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // --- Input Formatting ---
         function formatGrossPensionInput(event) {
             let input = event.target.value.replace(/[^0-9.]/g, '');
             const parts = input.split('.');
@@ -958,23 +875,25 @@
             
             calculateAndDisplayAll();
             
-            // Debounced log call
-            if (isFirebaseEnabled) {
+            if (isSupabaseEnabled) {
                 clearTimeout(logDebounceTimer);
-                logDebounceTimer = setTimeout(() => {
-                    logCalculation('Input Change (Debounced)');
-                }, LOG_DEBOUNCE_DELAY);
+                const dobInput = document.getElementById('dob');
+                const doeInput = document.getElementById('doe');
+                const sosInput = document.getElementById('sos');
+                if (dobInput.value && doeInput.value && sosInput.value && event.target.value) {
+                    logDebounceTimer = setTimeout(() => {
+                        logCalculation('Input Change (Debounced)');
+                    }, LOG_DEBOUNCE_DELAY);
+                }
             }
 
             checkInputEnabling();
         }
 
-        // --- Main Calculation Functions ---
         function populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension) {
             const tbody = document.getElementById('increase-table-body');
             tbody.innerHTML = '';
             
-            // ... [All the date constants for logic] ...
             const date1977_04_30 = parseDate('1977-04-30');
             const date1977_05_01 = parseDate('1977-05-01');
             const date1947_08_14 = parseDate('1947-08-14');
@@ -1013,7 +932,6 @@
                 let percentageToDisplay = item.percentage;
                 const year = item.year;
                 
-                // --- 1. ENTITLEMENT AND PERCENTAGE LOGIC ---
                 if (sosDate) {
                     if (year === 1991) {
                         if (sosDate > date1977_04_30) percentageToDisplay = '12%';
@@ -1031,7 +949,7 @@
                         else percentageToDisplay = '0%';
                     } else if (year === 2004) {
                         if (sosDate > date1994_06_30) percentageToDisplay = '8%';
-                        else if (sosDate < date1994_07_01) percentageToDisplay = '16%';
+                        else if (sosDate < date1994_07_01) percentageToDisplay = '16%'; // Corrected from date1T994_07_01
                         else percentageToDisplay = '0%';
                     } else if (year === 2006) {
                         if (sosDate > date1977_04_30_2006) percentageToDisplay = '15%';
@@ -1068,7 +986,6 @@
                     row.classList.add('hidden');
                 }
                 
-                // --- 2. MONETARY CALCULATION LOGIC ---
                 let currentBaseLine = previousNetValueCurrent; 
                 let currentIncreaseValue = 0;
                 let currentNetValue = currentBaseLine; 
@@ -1225,7 +1142,6 @@
                 if (isNetCalculatedCurrent) currentNetValues.push(currentNetValue);
                 if (isNetCalculatedRestored) restoredNetValues.push(restoredNetValue);
 
-                // --- 3. RENDER ROW ---
                 row.insertCell().textContent = year;
                 row.insertCell().textContent = percentageToDisplay;
                 row.insertCell().textContent = year === 2025 ? baseLineDisplayCurrent : '-'; 
@@ -1257,7 +1173,6 @@
 
         function calculateAndDisplayAll() {
             try {
-                // Get DOM elements
                 const dobInput = document.getElementById('dob');
                 const doeInput = document.getElementById('doe');
                 const sosInput = document.getElementById('sos');
@@ -1265,7 +1180,6 @@
                 const tkAwardInput = document.getElementById('tk-award');
                 const familyPensionInput = document.getElementById('family-pension');
 
-                // Get Input Values
                 const dobDate = parseDate(dobInput.value);
                 const doeDate = parseDate(doeInput.value);
                 const sosDate = parseDate(sosInput.value);
@@ -1277,7 +1191,6 @@
                 document.getElementById('doe-display').textContent = formatDateDisplay(doeDate);
                 document.getElementById('sos-display').textContent = formatDateDisplay(sosDate);
 
-                // --- CALCULATION STEP 1: Service Summary ---
                 let roundedQS = 0;
                 let ageNextBirthday = 0;
                 let commutationFactor = 0;
@@ -1308,7 +1221,6 @@
                     restorationDate.setUTCFullYear(restorationDate.getUTCFullYear() + roundedCommutationFactor);
                 }
                 
-                // --- CALCULATION STEP 2: Pension Details ---
                 let grossPension = grossPensionPPO;
                 if (isFamilyPension) {
                     grossPension = roundToTwoDecimals(grossPensionPPO * 0.75);
@@ -1326,10 +1238,8 @@
                 const basePension = roundToTwoDecimals(grossPension - commutedPension);
                 const commutationAmount = roundToTwoDecimals(grossPensionPPO * commutedPensionPercentage * commutationFactor * 12);
 
-                // --- CALCULATION STEP 3: Populate table ---
                 const netValues = populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension);
                 
-                // --- CALCULATION STEP 4: Final Pension ---
                 let finalPensionCurrent = basePension;
                 if (netValues.current.length > 0) {
                     finalPensionCurrent = Math.max(basePension, ...netValues.current);
@@ -1342,13 +1252,11 @@
                 }
                 finalPensionRestored = Math.ceil(finalPensionRestored);
 
-                // --- CALCULATION STEP 5: Final Entitlements ---
                 let tkAllowance = 0;
                 if (tkAward === '1') tkAllowance = 170;
                 else if (tkAward === '2') tkAllowance = 130;
                 else if (tkAward === '3') tkAllowance = 70;
                 
-                // --- Update UI ---
                 document.getElementById('qs-output').textContent = `${roundedQS} Years`;
                 document.getElementById('age-at-sos-output').textContent = `${ageNextBirthday} Years`;
                 document.getElementById('commutation-factor-output').textContent = commutationFactor.toFixed(4);
@@ -1395,9 +1303,7 @@
             }
         }
         
-        // --- Input Enabling Logic ---
         function checkInputEnabling() {
-            // Get DOM elements
             const dobInput = document.getElementById('dob');
             const doeInput = document.getElementById('doe');
             const sosInput = document.getElementById('sos');
@@ -1433,73 +1339,100 @@
             if (familyPensionInput.disabled) familyPensionInput.value = 'No';
         }
         
-        // --- NEW: Function to initialize the visit counter ---
+        // --- NEW: Supabase Visit Counter ---
         async function initVisitCounter() {
-            if (!isFirebaseEnabled) return; // Guard clause
+            if (!isSupabaseEnabled) return; 
             
             const visitCountSpan = document.getElementById('visit-count');
             if (!visitCountSpan) return;
 
-            // Path to the visit counter document
-            const visitDocRef = doc(db, `artifacts/${appId}/public/data/analytics`, 'visits');
-
             try {
-                // Run a transaction to safely increment the counter
-                await runTransaction(db, async (transaction) => {
-                    const visitDoc = await transaction.get(visitDocRef);
-                    let newCount = 1;
-                    if (visitDoc.exists()) {
-                        newCount = (visitDoc.data().count || 0) + 1;
-                    }
-                    transaction.set(visitDocRef, { count: newCount });
-                    return newCount;
-                });
+                // 1. Increment the count by calling the 'increment_visits' RPC function
+                const { data: rpcData, error: rpcError } = await supabaseClient.rpc('increment_visits');
+                if (rpcError) throw rpcError;
+                
+                // 2. Set the count from the RPC's return value
+                if (rpcData) {
+                    visitCountSpan.textContent = formatVisitCount(rpcData); // Use formatter
+                }
 
-                // After transaction, set up a listener to display the count
-                onSnapshot(visitDocRef, (doc) => {
-                    if (doc.exists()) {
-                        visitCountSpan.textContent = doc.data().count;
-                    } else {
-                        visitCountSpan.textContent = '1';
-                    }
-                });
+                // 3. Listen for REALTIME updates from other users
+                supabaseClient.channel('visits-channel')
+                    .on(
+                        'postgres_changes',
+                        { event: 'UPDATE', schema: 'public', table: 'visits', filter: 'id=eq.1' },
+                        (payload) => {
+                            // When an update happens, set the new count
+                            visitCountSpan.textContent = formatVisitCount(payload.new.count); // Use formatter
+                        }
+                    )
+                    .subscribe();
 
             } catch (e) {
                 console.error("Failed to update visit count:", e);
-                visitCountSpan.textContent = 'Error';
+                // If increment fails, just try to fetch the current count
+                try {
+                    const { data, error } = await supabaseClient.from('visits').select('count').eq('id', 1).single();
+                    if (error) throw error;
+                    visitCountSpan.textContent = formatVisitCount(data.count); // Use formatter
+                } catch (fetchError) {
+                     console.error("Failed to fetch visit count:", fetchError);
+                     visitCountSpan.textContent = 'Error';
+                }
             }
         }
 
-        // --- NEW: Function to listen for log updates ---
-        function initLogListener() {
-            if (!isFirebaseEnabled) return; // Guard clause
+        // --- NEW: Supabase Log Listener ---
+        
+        // This helper function fetches all logs and renders them
+        async function fetchLogs() {
+            if (!isSupabaseEnabled) return; 
 
-            // Use query() to import query
-            const logCollectionRef = query(collection(db, `artifacts/${appId}/public/data/logs`));
-            
-            // Listen for real-time updates
-            onSnapshot(logCollectionRef, (snapshot) => {
-                let logArray = [];
-                snapshot.forEach((doc) => {
-                    logArray.push(doc.data());
-                });
+            try {
+                const { data, error } = await supabaseClient
+                    .from('logs')
+                    .select('*')
+                    .order('created_at', { ascending: false }) // Get newest first
+                    .limit(50); // Get latest 50 logs
                 
-                // Sort by server timestamp, newest first
-                logArray.sort((a, b) => {
-                    const dateA = a.serverTimestamp ? a.serverTimestamp.toDate() : new Date(0);
-                    const dateB = b.serverTimestamp ? b.serverTimestamp.toDate() : new Date(0);
-                    return dateB - dateA; // Descending
-                });
-
-                renderLog(logArray);
-            }, (error) => {
-                console.error("Error listening to log: ", error);
+                if (error) throw error;
+                
+                renderLog(data || []);
+            } catch (error) {
+                console.error("Error fetching logs: ", error);
                 const logContainer = document.getElementById('log-container');
                 if(logContainer) logContainer.innerHTML = '<span class="text-red-500">Error loading log.</span>';
-            });
+            }
         }
 
-        // --- NEW: App Entry Point (DOM Ready) ---
+        function initLogListener() {
+            if (!isSupabaseEnabled) return; 
+
+            // 1. Fetch initial logs on load
+            fetchLogs();
+
+            // 2. Listen for REALTIME inserts
+            supabaseClient.channel('logs-channel')
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'logs' },
+                    (payload) => {
+                        // A new log was added, re-fetch the list
+                        fetchLogs();
+                    }
+                )
+                .on(
+                    'postgres_changes',
+                    { event: 'DELETE', schema: 'public', table: 'logs' },
+                    (payload) => {
+                        // Logs were deleted (cleared), re-fetch the (now empty) list
+                        fetchLogs();
+                    }
+                )
+                .subscribe();
+        }
+
+        // --- App Entry Point (DOM Ready) ---
         document.addEventListener('DOMContentLoaded', async () => {
             const appWarning = document.getElementById('app-warning');
             
@@ -1511,56 +1444,37 @@
                 console.warn(message);
             }
 
-            // --- 1. Try to initialize Firebase ---
-            if (typeof __app_id === 'undefined' || !__app_id) {
-                showWarning("Online features (logging, visit count) are disabled. App ID is missing.");
-            } else if (typeof __firebase_config === 'undefined' || !__firebase_config) {
-                showWarning("Online features (logging, visit count) are disabled. Firebase config is missing.");
-            } else if (typeof __initial_auth_token === 'undefined') {
-                showWarning("Online features (logging, visit count) are disabled. Auth token is missing.");
+            // --- 1. Try to initialize Supabase ---
+            if (!SUPABASE_URL || SUPABASE_URL.includes("PASTE_YOUR")) {
+                showWarning("Supabase is not configured. Online features are disabled. Please paste your URL and Key into index.html.");
+                isSupabaseEnabled = false;
+                // Hide online features
+                document.getElementById('visit-counter-wrapper').style.display = 'none';
+                document.getElementById('log-wrapper').style.display = 'none';
             } else {
-                // All variables are present, try to connect
-                appId = __app_id;
-                let firebaseConfig;
-            
+                // Config is present, try to connect
                 try {
-                    firebaseConfig = JSON.parse(__firebase_config);
-
-                    const app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    auth = getAuth(app);
-                    setLogLevel('Debug');
-
-                    if (__initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
+                    // Initialize the client
+                    supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    
+                    if (!supabaseClient) {
+                        throw new Error("Supabase client failed to initialize.");
                     }
                     
-                    if (!auth.currentUser) {
-                        throw new Error("Authentication failed, user is null.");
-                    }
+                    isSupabaseEnabled = true; 
+                    console.log("Supabase initialized successfully.");
                     
-                    userId = auth.currentUser.uid;
-                    isFirebaseEnabled = true; // SUCCESS!
-                    console.log("Firebase initialized and user authenticated:", userId);
-
-                    // Show online features
-                    document.getElementById('visit-counter-wrapper').style.display = 'flex';
-                    document.getElementById('log-wrapper').style.display = 'block';
-
                 } catch (e) {
-                    console.error("Error initializing Firebase:", e);
+                    console.error("Error initializing Supabase:", e);
                     showWarning(`Error initializing online features: ${e.message}. App is in offline mode.`);
-                    isFirebaseEnabled = false;
+                    isSupabaseEnabled = false;
+                    // Hide online features
+                    document.getElementById('visit-counter-wrapper').style.display = 'none';
+                    document.getElementById('log-wrapper').style.display = 'none';
                 }
             }
 
             // --- 2. Initialize the App (Core + Online Listeners) ---
-            // This function now runs regardless, but internal functions
-            // will check the `isFirebaseEnabled` flag.
-
-            // Get all DOM elements
             const allInputs = document.querySelectorAll('.calc-input');
             const grossPensionInput = document.getElementById('gross-pension-ppo');
             const increasePensionBtn = document.getElementById('increase-pension');
@@ -1571,26 +1485,32 @@
             const passwordInput = document.getElementById('password-input');
             const logContainer = document.getElementById('log-container');
 
-            // Attach all event listeners
             allInputs.forEach(input => {
                 if(input.id !== 'gross-pension-ppo') {
                     input.addEventListener('input', () => { 
                         calculateAndDisplayAll();
-                        if (isFirebaseEnabled) { // Check flag
+                        
+                        if (isSupabaseEnabled) {
                             clearTimeout(logDebounceTimer);
-                            logDebounceTimer = setTimeout(() => {
-                                logCalculation('Input Change (Debounced)');
-                            }, LOG_DEBOUNCE_DELAY);
+                            const dobInput = document.getElementById('dob');
+                            const doeInput = document.getElementById('doe');
+                            const sosInput = document.getElementById('sos');
+                            const grossPensionInput = document.getElementById('gross-pension-ppo');
+
+                            // FIX: Only set timer if all 4 required fields are filled
+                            if (dobInput.value && doeInput.value && sosInput.value && grossPensionInput.value && parseFloat(grossPensionInput.value.replace(/,/g, '')) > 0) {
+                                logDebounceTimer = setTimeout(() => {
+                                    logCalculation('Input Change (Debounced)');
+                                }, LOG_DEBOUNCE_DELAY);
+                            }
                         }
                         checkInputEnabling();
                     });
                 }
             });
 
-            // This listener now correctly handles both cases
-            grossPensionInput.addEventListener('input', formatGrossPensionInput);
+            grossPensionInput.addEventListener('input', formatGrossPensionInput); // This function also handles its own debouncing
             
-            // Stepper buttons
             increasePensionBtn.addEventListener('mousedown', () => startPress(1));
             decreasePensionBtn.addEventListener('mousedown', () => startPress(-1));
             document.addEventListener('mouseup', stopPress);
@@ -1600,8 +1520,8 @@
             document.addEventListener('touchend', stopPress);
             document.addEventListener('touchcancel', stopPress);
             
-            // Modal/Log buttons (only attach if Firebase is on)
-            if (isFirebaseEnabled) {
+            // Only attach these listeners if Supabase is on
+            if (isSupabaseEnabled) {
                 clearLogBtn.addEventListener('click', openPasswordModal);
                 cancelClearBtn.addEventListener('click', closePasswordModal);
                 confirmClearBtn.addEventListener('click', confirmClearLog);
@@ -1617,13 +1537,14 @@
                         confirmClearLog();
                     }
                 });
+            } else {
+                 // If Supabase is off, hide the buttons
+                clearLogBtn.style.display = 'none';
             }
             
-            // Initialize dynamic content (functions have internal checks)
-            initVisitCounter();
-            initLogListener();
+            initVisitCounter(); // Has internal check
+            initLogListener();  // Has internal check
             
-            // Run initial calculation
             calculateAndDisplayAll();
             checkInputEnabling();
         });
