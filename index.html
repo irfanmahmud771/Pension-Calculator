@@ -160,6 +160,57 @@
             display: none;
         }
 
+        /* --- NEW: Password Modal Styles --- */
+        .modal-overlay {
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Hidden by default */
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .modal-content .input-group {
+            margin-bottom: 1rem;
+        }
+        .modal-content .input-group label {
+            font-weight: 600;
+            color: #2D3748;
+        }
+        .modal-content .input-group input {
+            border-color: #A0AEC0;
+        }
+        .modal-content .input-group input:focus {
+            border-color: #3182CE;
+            box-shadow: 0 0 0 1px #3182CE;
+        }
+        /* --- End Modal Styles --- */
+
+
         /* --- Mobile Responsive Styles --- */
         @media (max-width: 768px) {
             .logo-left {
@@ -444,10 +495,74 @@
                 </table>
             </div>
         </div>
+
+        <!-- NEW: Total Visits Display -->
+        <div class="flex justify-end mt-4">
+             <p id="visit-counter" class="text-right text-sm font-medium text-gray-600">Total Visits: <span id="visit-count" class="font-bold text-gray-800">0</span></p>
+        </div>
+
+        <!-- NEW: Calculation Log -->
+        <div class="card mt-2"> <!-- Reduced margin-top from mt-8 -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="card-title font-bold text-xl">Calculation Log</h2>
+                <button id="clear-log-btn" class="text-sm bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded-lg transition-colors">
+                    Clear Log
+                </button>
+            </div>
+            <div id="log-container" class="h-48 overflow-y-auto bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs font-mono">
+                <!-- Log entries will be inserted here -->
+                <span class="text-gray-400">Log starts empty...</span>
+            </div>
+        </div>
+
     </div>
+
+    <!-- NEW: Password Modal HTML -->
+    <div id="password-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-lg font-bold mb-4">Enter Password</h3>
+            <div class="input-group">
+                <label for="password-input">Password</label>
+                <input type="password" id="password-input" class="w-full" placeholder="Enter password to clear log">
+            </div>
+            <p id="password-error" class="text-red-500 text-sm mb-4" style="display: none;">Incorrect password. Please try again.</p>
+            <div class="flex justify-end gap-3">
+                <button id="cancel-clear-btn" type="button" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button id="confirm-clear-btn" type="button" class="text-sm bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- End Modal -->
+
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+
+            // --- NEW: Visit Counter Logic ---
+            try {
+                const visitCountSpan = document.getElementById('visit-count');
+                let visitCount = localStorage.getItem('pensionAppVisitCount');
+                
+                if (visitCount) {
+                    visitCount = parseInt(visitCount, 10) + 1;
+                } else {
+                    visitCount = 1;
+                }
+                
+                localStorage.setItem('pensionAppVisitCount', visitCount);
+                if (visitCountSpan) {
+                    visitCountSpan.textContent = visitCount;
+                }
+            } catch (e) {
+                console.error("Failed to update visit count:", e);
+                // Continue running the app even if localStorage fails
+            }
+            // --- End Visit Counter Logic ---
+
 
             // --- Get DOM Elements ---
             const dobInput = document.getElementById('dob');
@@ -460,6 +575,21 @@
             // NEW: Stepper buttons
             const increasePensionBtn = document.getElementById('increase-pension');
             const decreasePensionBtn = document.getElementById('decrease-pension');
+
+            // NEW: Log Elements
+            const logContainer = document.getElementById('log-container');
+            const clearLogBtn = document.getElementById('clear-log-btn');
+            
+            // NEW: Modal Elements
+            const passwordModal = document.getElementById('password-modal');
+            const passwordInput = document.getElementById('password-input');
+            const passwordError = document.getElementById('password-error');
+            const cancelClearBtn = document.getElementById('cancel-clear-btn');
+            const confirmClearBtn = document.getElementById('confirm-clear-btn');
+            
+            // NEW: Debounce timer for logging
+            let logDebounceTimer = null;
+            const LOG_DEBOUNCE_DELAY = 10000; // 10 seconds
 
             // --- 1. HELPER FUNCTIONS ---
 
@@ -530,7 +660,7 @@
                 if (!date) return 'N/A';
                 const options = { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' };
                 // Format the UTC date string to the desired display format
-                return date.toLocaleDateString('en-GB', options).replace(/ /g, '-').toUpperCase();
+                return date.toLocaleString('en-GB', options).replace(/ /g, '-').toUpperCase();
             };
             
             // Helper to format date for table (DD-MMM-YYYY)
@@ -547,6 +677,16 @@
                     return dateForDisplay.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).replace(/ /g, '-').toUpperCase();
                 }
                 return dateString;
+            };
+            
+            // --- NEW: Helper to format date for log (YYYY-MM-DD to DD-MM-YYYY) ---
+            const formatDateForLog = (dateString) => {
+                if (!dateString) return 'N/A';
+                const parts = dateString.split('-');
+                if (parts.length === 3 && parts[0].length === 4) {
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+                return dateString; // Return original if not in expected format
             };
 
             // --- 2. CONSTANT INITIALIZATION (Uses helpers defined above) ---
@@ -642,8 +782,15 @@
                 
                 event.target.value = parts.length > 1 ? integerPart + '.' + parts[1] : integerPart;
                 
-                // Trigger calculation whenever input changes
+                // --- MODIFIED: Trigger calculation but with debounce for logging ---
                 calculateAndDisplayAll();
+                
+                // Debounce the logging function
+                clearTimeout(logDebounceTimer); // Clear existing timer
+                logDebounceTimer = setTimeout(() => {
+                    logCalculation('Input Change (Debounced)');
+                }, LOG_DEBOUNCE_DELAY); // 10-second delay
+
                 // Trigger input enabling check
                 checkInputEnabling();
             }
@@ -693,6 +840,129 @@
                 grossPensionInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
             
+            // --- NEW: Logging Function ---
+            function logCalculation(triggerSource) {
+                // Only log if all key inputs are present
+                const log_dob_raw = dobInput.value;
+                const log_doe_raw = doeInput.value;
+                const log_sos_raw = sosInput.value;
+                // --- MODIFIED: Get both raw and display values for pension ---
+                const log_pension_raw = grossPensionInput.value.replace(/,/g, '') || '0';
+                const log_pension_display = grossPensionInput.value;
+                
+                // Prevent logging incomplete entries
+                if (!log_dob_raw || !log_doe_raw || !log_sos_raw || !log_pension_display) {
+                    return; 
+                }
+
+                // --- NEW: Format dates for display in log ---
+                const log_dob_display = formatDateForLog(log_dob_raw);
+                const log_doe_display = formatDateForLog(log_doe_raw);
+                const log_sos_display = formatDateForLog(log_sos_raw);
+
+                const log_tk = tkAwardInput.value;
+                const log_family = familyPensionInput.value;
+                
+                // --- Create timestamp ---
+                const now = new Date();
+                // --- MODIFIED: Format date as DD-MM-YYYY ---
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = now.getFullYear();
+                const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const timestamp = `${day}-${month}-${year} ${time}`;
+                
+                // --- Format log message ---
+                // --- MODIFIED: Added Load Data button with data attributes ---
+                // --- MODIFIED: Use display dates (DD-MM-YYYY) ---
+                const logMessage = `<div class="p-2 border-b border-gray-200"><strong>[${timestamp}] ${triggerSource}</strong><br>
+                    <strong>DOB:</strong> ${log_dob_display}, 
+                    <strong>DOE:</strong> ${log_doe_display}, 
+                    <strong>SOS:</strong> ${log_sos_display}<br>
+                    <strong>Pension:</strong> ${log_pension_display || 'N/A'}, 
+                    <strong>TK:</strong> ${log_tk}, 
+                    <strong>Family:</strong> ${log_family}
+                    <br>
+                    <button 
+                        class="load-log-btn text-xs bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2"
+                        data-dob="${log_dob_raw || ''}"
+                        data-doe="${log_doe_raw || ''}"
+                        data-sos="${log_sos_raw || ''}"
+                        data-pension="${log_pension_raw}"
+                        data-tk="${log_tk}"
+                        data-family="${log_family}">
+                        Load this Data
+                    </button>
+                </div>`;
+
+                // --- Add to log container ---
+                // Check if it's the first log entry
+                const firstLog = logContainer.querySelector('.text-gray-400');
+                if (firstLog) {
+                    logContainer.innerHTML = logMessage; // Replace placeholder
+                } else {
+                    logContainer.innerHTML = logMessage + logContainer.innerHTML; // Prepend
+                }
+            }
+            
+            // --- NEW: Modal Control Functions ---
+            function openPasswordModal() {
+                passwordInput.value = '';
+                passwordError.style.display = 'none';
+                passwordModal.classList.add('visible');
+                passwordInput.focus();
+            }
+
+            function closePasswordModal() {
+                passwordModal.classList.remove('visible');
+            }
+
+            function confirmClearLog() {
+                const password = passwordInput.value;
+                if (password === 'Smile@786') {
+                    // Correct password
+                    logContainer.innerHTML = '<span class="text-gray-400">Log cleared...</span>';
+                    closePasswordModal();
+                } else {
+                    // Incorrect password
+                    passwordError.style.display = 'block';
+                }
+            }
+
+            // --- NEW: Function to load data from log button ---
+            function loadLogData(button) {
+                const data = button.dataset;
+                
+                // --- MODIFIED: data.dob/doe/sos now hold YYYY-MM-DD ---
+                dobInput.value = data.dob || '';
+                doeInput.value = data.doe || '';
+                sosInput.value = data.sos || '';
+                
+                // Format the pension value correctly
+                const pensionValue = data.pension || '';
+                grossPensionInput.value = pensionValue; // Set raw value
+                // Manually format it to add commas, just in case
+                const parts = pensionValue.split('.');
+                let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                grossPensionInput.value = parts.length > 1 ? integerPart + '.' + parts[1] : integerPart;
+
+                tkAwardInput.value = data.tk || 'No';
+                familyPensionInput.value = data.family || 'No';
+
+                // Manually update enabling status based on new values
+                checkInputEnabling();
+                
+                // Manually run calculation
+                calculateAndDisplayAll();
+                
+                // And reset the log timer
+                clearTimeout(logDebounceTimer);
+                logDebounceTimer = setTimeout(() => {
+                    logCalculation('Load Log Data (Debounced)');
+                }, LOG_DEBOUNCE_DELAY);
+            }
+
+
             function populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension) {
                 const tbody = document.getElementById('increase-table-body');
                 tbody.innerHTML = ''; // Clear existing rows
@@ -750,6 +1020,10 @@
                 const currentNetValues = [];
                 // Array to store all Restoration Net values for finding the maximum
                 const restoredNetValues = [];
+                
+                // --- NEW: Variables to store the Net 2024 values ---
+                let net2024_Current = 0;
+                let net2024_Restored = 0;
 
                 pensionIncreases.forEach(item => {
                     // FIX: Insert row into tbody, then call insertCell on the row
@@ -887,13 +1161,12 @@
                     
                     let restoredBaseLine = previousNetValueRestored;
                     let restoredIncreaseValue = 0;
-                    let restoredNetValue = previousNetValueRestored;
+                    let restoredNetValue = restoredBaseLine;
                     let baseLineDisplayRestored = '-'; // Default display for Restoration Base Line is '-'
 
                     // Store the Net from 2024 before the Base Line logic might override it
-                    const net2024 = previousNetValueCurrent; 
-                    // Store the Restored Net from 2024
-                    const restoredNet2024 = previousNetValueRestored;
+                    // This is now done inside the year check
+                    // const net2024 = previousNetValueCurrent; 
 
                     const percentageText = percentageToDisplay.replace('%', '');
                     const percentageValue = parseFloat(percentageText) / 100;
@@ -1044,41 +1317,46 @@
                         isNetCalculatedRestored = true;
                     } 
                     
-                    // --- 2025 BASE LINE AND INCREASE LOGIC (REVISED as per user request) ---
+                    // --- 2025 BASE LINE AND INCREASE LOGIC ---
                     if (year === 2025) {
                         
-                        // LOGIC 1: Base Line 2025 (Current) is Net amount of 2024 Current
-                        currentBaseLine = net2024;
-                        baseLineDisplayCurrent = formatCurrency(currentBaseLine, false, true);
+                        // --- REVISED 2025 FORMULAS ---
                         
-                        // 2025 Current Increase Formula: Base Line * %age
+                        // 2025 Current Base Line Formula: =NET of 2024
+                        currentBaseLine = net2024_Current; 
+                        baseLineDisplayCurrent = formatCurrency(currentBaseLine, false, true); // Use forTable=true
+                        
+                        // 2025 Current Increase Formula: =ROUND(IF(V31="Y", O31*P31, 0), 2)
+                        // (P31 is Base Line 2025, which is Net 2024)
                         if (isEntitled === 'Y' && percentageValue > 0) {
-                            currentIncreaseValue = roundToTwoDecimals(percentageValue * currentBaseLine); 
+                             currentIncreaseValue = roundToTwoDecimals(percentageValue * currentBaseLine); 
                             isIncreaseCalculatedCurrent = true;
                         } else {
                             currentIncreaseValue = 0;
                         }
 
-                        // LOGIC 2: Current Net 2025 = Increase 2025 + NET of 2024 Current
-                        currentNetValue = roundToTwoDecimals(currentIncreaseValue + net2024);
+                        // 2025 Current NET Formula: =Increase 2025 + NET of 2024
+                        currentNetValue = roundToTwoDecimals(currentIncreaseValue + net2024_Current);
                         isNetCalculatedCurrent = true;
                         
-                        // LOGIC 3 (CORRECTED): Base Line 2025 (Restored) is Net amount of 2024 After Restoration
-                        restoredBaseLine = restoredNet2024; // Use the stored Net After Restoration from the previous loop (Net of 2024 After Restoration)
-                        baseLineDisplayRestored = formatCurrency(restoredBaseLine, false, true);
+                        // 2025 Restoration Base Line Formula: =NET of 2024 (Restoration)
+                        // --- CORRECTED ---
+                        restoredBaseLine = net2024_Restored; 
+                        baseLineDisplayRestored = formatCurrency(restoredBaseLine, false, true); // Use forTable=true
 
-                        // 2025 Restoration Increase Formula: Base Line * %age
+                        // 2025 Restoration Increase
                         if (isEntitled === 'Y' && !isNaN(percentageValue)) {
-                            const restoredIncreaseRaw = restoredBaseLine * percentageValue; 
+                            const restoredIncreaseRaw = restoredBaseLine * percentageValue;
                             restoredIncreaseValue = roundToTwoDecimals(restoredIncreaseRaw);
                             isIncreaseCalculatedRestored = true;
                         } else {
                             restoredIncreaseValue = 0;
                         }
                         
-                        // 2025 Restoration Net: Base Line + Increase (Base Line is net2024 Restored)
+                        // 2025 Restoration Net
                         restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue);
                         isNetCalculatedRestored = true;
+
                     }
 
                     // --- APPLY MINIMUM PENSION LOGIC (Only for years > 1999) ---
@@ -1103,6 +1381,13 @@
                     if (isNetCalculatedRestored) {
                         previousNetValueRestored = restoredNetValue;
                     }
+
+                    // --- NEW: Store the 2024 Net values when we are on that row ---
+                    if (year === 2024) {
+                        net2024_Current = currentNetValue;
+                        net2024_Restored = restoredNetValue;
+                    }
+
 
                     // --- 4. STORE NET VALUE FOR MAX CALCULATION ---
                     if (isNetCalculatedCurrent) {
@@ -1457,6 +1742,12 @@
                     // Use 'input' for date pickers to catch changes immediately
                     input.addEventListener('input', () => { 
                         calculateAndDisplayAll();
+                        // --- NEW: Reset debounce timer on *any* input change ---
+                        clearTimeout(logDebounceTimer);
+                        logDebounceTimer = setTimeout(() => {
+                            logCalculation('Input Change (Debounced)');
+                        }, LOG_DEBOUNCE_DELAY);
+                        
                         checkInputEnabling(); // Check enabling on all other inputs too
                     });
                 }
@@ -1488,6 +1779,25 @@
             decreasePensionBtn.addEventListener('touchend', stopPress);
             increasePensionBtn.addEventListener('touchcancel', stopPress);
             decreasePensionBtn.addEventListener('touchcancel', stopPress);
+            
+            // --- NEW: Add listeners for modal buttons ---
+            clearLogBtn.addEventListener('click', openPasswordModal);
+            cancelClearBtn.addEventListener('click', closePasswordModal);
+            confirmClearBtn.addEventListener('click', confirmClearLog);
+            
+            // --- NEW: Add event delegation for log buttons ---
+            logContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('load-log-btn')) {
+                    loadLogData(e.target);
+                }
+            });
+
+            // Also allow 'Enter' key to submit password
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    confirmClearLog();
+                }
+            });
 
 
             // Initial calculation and enabling check on load
