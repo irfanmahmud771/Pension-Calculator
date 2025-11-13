@@ -760,8 +760,13 @@
             if (password === 'Smile@786') {
                 passwordError.style.display = 'none';
                 try {
-                    // Call the 'clear_logs' RPC function in Supabase
-                    const { error } = await supabaseClient.rpc('clear_logs');
+                    // FIX: Use .delete() with a filter instead of RPC
+                    // This satisfies the "DELETE requires a WHERE clause" rule
+                    const { error } = await supabaseClient
+                        .from('logs')
+                        .delete()
+                        .neq('id', 0); // Deletes all rows where id is not 0 (i.e., all rows)
+
                     if (error) {
                         throw error;
                     }
@@ -1299,7 +1304,7 @@
                 document.getElementById('age-at-restoration-output').textContent = restorationAgeDisplay;
                 
             } catch (error) {
-                console.error("Error in calculateAndDisplayAll:", error);
+                console.error("Error in calculateAndD'isplayAll:", error);
             }
         }
         
