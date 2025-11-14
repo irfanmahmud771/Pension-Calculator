@@ -685,7 +685,7 @@
             logContainer.innerHTML = logHTML;
         }
 
-        // --- NEW: Supabase Log Function ---
+        // --- NEW: Supabase Log Function (with duplicate checking) ---
         async function logCalculation(triggerSource) {
             if (!isSupabaseEnabled) return; 
 
@@ -724,11 +724,30 @@
             };
 
             try {
-                const { error } = await supabaseClient.from('logs').insert(logEntry);
-                if (error) {
-                    throw error;
+                // 1. Check for and delete duplicates
+                const { error: deleteError } = await supabaseClient
+                    .from('logs')
+                    .delete()
+                    .match({
+                        dob_raw: log_dob_raw,
+                        doe_raw: log_doe_raw,
+                        sos_raw: log_sos_raw,
+                        pension_raw: log_pension_raw,
+                        tk: log_tk,
+                        family: log_family
+                    });
+
+                if (deleteError) {
+                    console.warn("Error checking/deleting duplicate log:", deleteError);
+                    // Don't stop, proceed to insert anyway
                 }
-                console.log("Log entry saved:", logEntry);
+
+                // 2. Insert the new log entry
+                const { error: insertError } = await supabaseClient.from('logs').insert(logEntry);
+                if (insertError) {
+                    throw insertError;
+                }
+                console.log("Log entry saved (or refreshed):", logEntry);
             } catch (e) {
                 console.error("Error adding document: ", e);
             }
@@ -1304,7 +1323,7 @@
                 document.getElementById('age-at-restoration-output').textContent = restorationAgeDisplay;
                 
             } catch (error) {
-                console.error("Error in calculateAndD'isplayAll:", error);
+                console.error("Error in calculateAndDisplayAll:", error);
             }
         }
         
