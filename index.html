@@ -519,6 +519,14 @@
         let logDebounceTimer = null;
         const LOG_DEBOUNCE_DELAY = 10000; // 10 seconds
 
+        // NEW: Store calculated values for logging
+        let currentCalculatedValues = { 
+            pensionCurrent: 0, 
+            pensionRestored: 0, 
+            restorationDate: 'N/A',
+            tkAllowance: 0 // <-- ADDED
+        };
+
         // --- 1. HELPER FUNCTIONS (Remain unchanged) ---
 
         const getTodayDateString = () => {
@@ -600,8 +608,8 @@
         
         // NEW: Format visit count to K/M
         const formatVisitCount = (num) => {
-            if (num < 1000) {
-                return num;
+            if (!num || num < 1000) {
+                return num || 0;
             } else if (num < 1000000) {
                 return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'K';
             } else {
@@ -670,6 +678,14 @@
                     <strong>TK:</strong> ${entry.tk}, 
                     <strong>Family:</strong> ${entry.family}
                     <br>
+                    <!-- NEW: Added calculated values in blue -->
+                    <strong class="text-blue-600">
+                        Current: Rs. ${Math.round(entry.pension_current || 0).toLocaleString('en-IN')}, 
+                        Restored: Rs. ${Math.round(entry.pension_restored || 0).toLocaleString('en-IN')}, 
+                        TK: Rs. ${(entry.tk_allowance || 0).toLocaleString('en-IN')}, 
+                        Date: ${entry.restoration_date || 'N/A'}
+                    </strong>
+                    <br>
                     <button 
                         class="load-log-btn text-xs bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2"
                         data-dob="${entry.dob_raw || ''}"
@@ -720,7 +736,12 @@
                 sos_raw: log_sos_raw,
                 pension_raw: log_pension_raw,
                 tk: log_tk,
-                family: log_family
+                family: log_family,
+                // NEW: Add calculated values
+                pension_current: currentCalculatedValues.pensionCurrent,
+                pension_restored: currentCalculatedValues.pensionRestored,
+                restoration_date: currentCalculatedValues.restorationDate,
+                tk_allowance: currentCalculatedValues.tkAllowance // <-- ADDED
             };
 
             try {
@@ -734,7 +755,12 @@
                         sos_raw: log_sos_raw,
                         pension_raw: log_pension_raw,
                         tk: log_tk,
-                        family: log_family
+                        family: log_family,
+                        // NEW: Also match on calculated values
+                        pension_current: currentCalculatedValues.pensionCurrent,
+                        pension_restored: currentCalculatedValues.pensionRestored,
+                        restoration_date: currentCalculatedValues.restorationDate,
+                        tk_allowance: currentCalculatedValues.tkAllowance // <-- ADDED
                     });
 
                 if (deleteError) {
@@ -1293,7 +1319,9 @@
                 document.getElementById('tk-allowance-current-output').textContent = formatCurrency(tkAllowance);
                 
                 const restorationOutputSpan = document.getElementById('restoration-date-output');
-                restorationOutputSpan.textContent = restorationDate ? formatDateDisplay(restorationDate) : 'N/A';
+                const restorationDateFormatted = restorationDate ? formatDateDisplay(restorationDate) : 'N/A';
+                restorationOutputSpan.textContent = restorationDateFormatted;
+                
                 if (restorationDate) {
                     const today = parseDate(getTodayDateString());
                     restorationOutputSpan.className = 'value'; 
@@ -1321,6 +1349,12 @@
                     restorationAgeDisplay = yearsString + monthsString;
                 }
                 document.getElementById('age-at-restoration-output').textContent = restorationAgeDisplay;
+
+                // NEW: Store raw calculated values for logging
+                currentCalculatedValues.pensionCurrent = finalPensionCurrent;
+                currentCalculatedValues.pensionRestored = finalPensionRestored;
+                currentCalculatedValues.restorationDate = restorationDateFormatted;
+                currentCalculatedValues.tkAllowance = tkAllowance; // <-- ADDED
                 
             } catch (error) {
                 console.error("Error in calculateAndDisplayAll:", error);
