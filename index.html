@@ -352,7 +352,7 @@
                 </form>
             </div>
 
-            <!-- Output Section -->
+            <!-- RESTORED: Output Section -->
             <div class="card">
                 <h2 class="card-title text-center font-bold text-xl py-4">Calculated Results</h2>
                 
@@ -419,9 +419,10 @@
                      </div>
                 </div>
             </div>
+            <!-- End RESTORED Output Section -->
         </div>
 
-        <!-- Pension Increase Calculations Table -->
+        <!-- RESTORED: Pension Increase Calculations Table -->
         <div class="card mt-8">
             <h2 class="card-title text-center font-bold text-xl mb-4">Pension Increase Calculations</h2>
             <div class="increase-table-container">
@@ -456,10 +457,12 @@
                 </table>
             </div>
         </div>
+        <!-- End RESTORED Pension Increase Calculations Table -->
 
-        <!-- Total Visits Display -->
-        <div class="flex justify-end mt-4" id="visit-counter-wrapper">
-             <p id="visit-counter" class="text-right text-sm font-medium text-gray-600">Total Visits: <span id="visit-count" class="font-bold text-gray-800">0</span></p>
+        <!-- Total Visits & Log Count Display -->
+        <div class="flex justify-between items-center mt-4" id="counter-wrapper">
+            <p id="log-counter" class="text-left text-sm font-medium text-gray-600">Total Calculation Log: <span id="log-count" class="font-bold text-gray-800">0</span></p>
+            <p id="visit-counter" class="text-right text-sm font-medium text-gray-600">Total Visits: <span id="visit-count" class="font-bold text-gray-800">0</span></p>
         </div>
 
         <!-- Calculation Log -->
@@ -645,6 +648,11 @@
         // --- 3. CORE CALCULATION LOGIC (Functions) ---
         
         function renderLog(logArray) {
+            const logCountSpan = document.getElementById('log-count');
+            if (logCountSpan) {
+                logCountSpan.textContent = formatVisitCount(logArray.length);
+            }
+            
             const logContainer = document.getElementById('log-container');
             if (!logContainer) return;
 
@@ -942,7 +950,12 @@
 
         function populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension) {
             const tbody = document.getElementById('increase-table-body');
-            tbody.innerHTML = '';
+            // THIS IS THE FIX: Check if tbody exists before setting innerHTML
+            if (!tbody) {
+                console.error("Could not find 'increase-table-body'. Skipping table population.");
+                return { current: [], restored: [] }; // Return empty results
+            }
+            tbody.innerHTML = ''; // Clear existing rows
             
             const date1977_04_30 = parseDate('1977-04-30');
             const date1977_05_01 = parseDate('1977-05-01');
@@ -1358,6 +1371,7 @@
                 
             } catch (error) {
                 console.error("Error in calculateAndDisplayAll:", error);
+                throw error; // Re-throw the error to be caught by the top-level handler
             }
         }
         
@@ -1507,7 +1521,7 @@
                 showWarning("Supabase is not configured. Online features are disabled. Please paste your URL and Key into index.html.");
                 isSupabaseEnabled = false;
                 // Hide online features
-                document.getElementById('visit-counter-wrapper').style.display = 'none';
+                document.getElementById('counter-wrapper').style.display = 'none';
                 document.getElementById('log-wrapper').style.display = 'none';
             } else {
                 // Config is present, try to connect
@@ -1527,7 +1541,7 @@
                     showWarning(`Error initializing online features: ${e.message}. App is in offline mode.`);
                     isSupabaseEnabled = false;
                     // Hide online features
-                    document.getElementById('visit-counter-wrapper').style.display = 'none';
+                    document.getElementById('counter-wrapper').style.display = 'none';
                     document.getElementById('log-wrapper').style.display = 'none';
                 }
             }
@@ -1543,10 +1557,23 @@
             const passwordInput = document.getElementById('password-input');
             const logContainer = document.getElementById('log-container');
 
+            // THIS IS THE FIX: Check for elements *inside* the DOMContentLoaded listener
+            // to ensure they exist before adding event listeners.
+            if (!allInputs.length || !grossPensionInput || !increasePensionBtn || !decreasePensionBtn || !clearLogBtn || !cancelClearBtn || !confirmClearBtn || !passwordInput || !logContainer) {
+                console.error("CRITICAL ERROR: One or more required HTML elements are missing from the page.");
+                showWarning("CRITICAL ERROR: Page HTML is incomplete. Please reload.");
+                return; // Stop execution to prevent further errors
+            }
+
+
             allInputs.forEach(input => {
                 if(input.id !== 'gross-pension-ppo') {
                     input.addEventListener('input', () => { 
-                        calculateAndDisplayAll();
+                        try {
+                            calculateAndDisplayAll();
+                        } catch (e) {
+                            console.error("Error during calculation on input:", e);
+                        }
                         
                         if (isSupabaseEnabled) {
                             clearTimeout(logDebounceTimer);
@@ -1603,7 +1630,11 @@
             initVisitCounter(); // Has internal check
             initLogListener();  // Has internal check
             
-            calculateAndDisplayAll();
+            try {
+                calculateAndDisplayAll();
+            } catch (e) {
+                console.error("Error during initial calculation:", e);
+            }
             checkInputEnabling();
         });
 
