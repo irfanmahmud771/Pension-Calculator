@@ -352,7 +352,7 @@
                 </form>
             </div>
 
-            <!-- RESTORED: Output Section -->
+            <!-- Output Section -->
             <div class="card">
                 <h2 class="card-title text-center font-bold text-xl py-4">Calculated Results</h2>
                 
@@ -408,6 +408,19 @@
                             <span class="label w-1/3 whitespace-nowrap">TK Allowance</span>
                             <span class="value w-1/3 text-right text-gray-800" id="tk-allowance-current-output">0</span>
                         </div>
+
+                        <!-- NEW: Total Payable (Current) -->
+                        <div class="output-group font-bold text-blue-800 bg-blue-50 p-2 rounded-md">
+                            <span class="label w-1/3 whitespace-nowrap">Total Payable (Current)</span>
+                            <span class="value w-1/3 text-right" id="total-payable-current-output">0</span>
+                        </div>
+
+                        <!-- NEW: Total Payable (Restored) -->
+                        <div class="output-group font-bold text-green-800 bg-green-50 p-2 rounded-md">
+                            <span class="label w-1/3 whitespace-nowrap">Total Payable (Restored)</span>
+                            <span class="value w-1/3 text-right" id="total-payable-restored-output">0</span>
+                        </div>
+
                          <div class="output-group pt-4"> 
                             <span class="label w-1/3 whitespace-nowrap">Pension Restoration Date</span>
                             <span class="value text-right" id="restoration-date-output"></span>
@@ -419,10 +432,9 @@
                      </div>
                 </div>
             </div>
-            <!-- End RESTORED Output Section -->
         </div>
 
-        <!-- RESTORED: Pension Increase Calculations Table -->
+        <!-- Pension Increase Calculations Table -->
         <div class="card mt-8">
             <h2 class="card-title text-center font-bold text-xl mb-4">Pension Increase Calculations</h2>
             <div class="increase-table-container">
@@ -457,12 +469,10 @@
                 </table>
             </div>
         </div>
-        <!-- End RESTORED Pension Increase Calculations Table -->
 
-        <!-- Total Visits & Log Count Display -->
-        <div class="flex justify-between items-center mt-4" id="counter-wrapper">
-            <p id="log-counter" class="text-left text-sm font-medium text-gray-600">Total Calculation Log: <span id="log-count" class="font-bold text-gray-800">0</span></p>
-            <p id="visit-counter" class="text-right text-sm font-medium text-gray-600">Total Visits: <span id="visit-count" class="font-bold text-gray-800">0</span></p>
+        <!-- Total Visits Display -->
+        <div class="flex justify-end mt-4" id="visit-counter-wrapper">
+             <p id="visit-counter" class="text-right text-sm font-medium text-gray-600">Total Visits: <span id="visit-count" class="font-bold text-gray-800">0</span></p>
         </div>
 
         <!-- Calculation Log -->
@@ -1281,6 +1291,8 @@
 
                     const roundedCommutationFactor = Math.round(commutationFactor);
                     restorationDate = new Date(sosDate);
+                    // --- MODIFIED: Add one day to restoration date ---
+                    restorationDate.setUTCDate(restorationDate.getUTCDate() + 1);
                     restorationDate.setUTCFullYear(restorationDate.getUTCFullYear() + roundedCommutationFactor);
                 }
                 
@@ -1320,6 +1332,10 @@
                 else if (tkAward === '2') tkAllowance = 130;
                 else if (tkAward === '3') tkAllowance = 70;
                 
+                // NEW: Calculate Total Payables
+                let totalPayableCurrent = finalPensionCurrent + tkAllowance;
+                let totalPayableRestored = finalPensionRestored + tkAllowance;
+
                 document.getElementById('qs-output').textContent = `${roundedQS} Years`;
                 document.getElementById('age-at-sos-output').textContent = `${ageNextBirthday} Years`;
                 document.getElementById('commutation-factor-output').textContent = commutationFactor.toFixed(4);
@@ -1330,6 +1346,10 @@
                 document.getElementById('pension-pm-current-output').textContent = formatCurrency(finalPensionCurrent, true);
                 document.getElementById('pension-pm-restored-output').textContent = formatCurrency(finalPensionRestored, true);
                 document.getElementById('tk-allowance-current-output').textContent = formatCurrency(tkAllowance);
+                
+                // NEW: Display Total Payables
+                document.getElementById('total-payable-current-output').textContent = formatCurrency(totalPayableCurrent, true);
+                document.getElementById('total-payable-restored-output').textContent = formatCurrency(totalPayableRestored, true);
                 
                 const restorationOutputSpan = document.getElementById('restoration-date-output');
                 const restorationDateFormatted = restorationDate ? formatDateDisplay(restorationDate) : 'N/A';
