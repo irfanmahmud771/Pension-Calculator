@@ -409,16 +409,16 @@
                             <span class="value w-1/3 text-right text-gray-800" id="tk-allowance-current-output">0</span>
                         </div>
 
-                        <!-- NEW: Total Payable (Current) -->
-                        <div class="output-group font-bold text-blue-800 bg-blue-50 p-2 rounded-md">
+                        <!-- UPDATED: Total Payable (Current) - Matching other rows structure -->
+                        <div class="output-group">
                             <span class="label w-1/3 whitespace-nowrap">Total Payable (Current)</span>
-                            <span class="value w-1/3 text-right" id="total-payable-current-output">0</span>
+                            <span class="value w-1/3 text-right text-blue-600 font-bold" id="total-payable-current-output">0</span>
                         </div>
 
-                        <!-- NEW: Total Payable (Restored) -->
-                        <div class="output-group font-bold text-green-800 bg-green-50 p-2 rounded-md">
+                        <!-- UPDATED: Total Payable (Restored) - Matching other rows structure -->
+                        <div class="output-group">
                             <span class="label w-1/3 whitespace-nowrap">Total Payable (Restored)</span>
-                            <span class="value w-1/3 text-right" id="total-payable-restored-output">0</span>
+                            <span class="value w-1/3 text-right text-green-600 font-bold" id="total-payable-restored-output">0</span>
                         </div>
 
                          <div class="output-group pt-4"> 
@@ -1541,7 +1541,7 @@
                 showWarning("Supabase is not configured. Online features are disabled. Please paste your URL and Key into index.html.");
                 isSupabaseEnabled = false;
                 // Hide online features
-                document.getElementById('counter-wrapper').style.display = 'none';
+                document.getElementById('visit-counter-wrapper').style.display = 'none';
                 document.getElementById('log-wrapper').style.display = 'none';
             } else {
                 // Config is present, try to connect
@@ -1561,7 +1561,7 @@
                     showWarning(`Error initializing online features: ${e.message}. App is in offline mode.`);
                     isSupabaseEnabled = false;
                     // Hide online features
-                    document.getElementById('counter-wrapper').style.display = 'none';
+                    document.getElementById('visit-counter-wrapper').style.display = 'none';
                     document.getElementById('log-wrapper').style.display = 'none';
                 }
             }
