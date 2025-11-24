@@ -59,13 +59,27 @@
         #print-area { font-family: 'Arial', sans-serif; color: black; position: relative; overflow: hidden; }
         #print-area-wrapper { margin-top: 40px; padding: 20px; background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         
+        /* Mobile Compatibility for Payslip Preview */
+        @media screen and (max-width: 768px) {
+            #print-area-wrapper {
+                padding: 10px;
+                margin-top: 20px;
+                overflow-x: auto; /* Enables horizontal scrolling */
+                -webkit-overflow-scrolling: touch;
+            }
+            #print-area {
+                min-width: 750px; /* Ensures layout doesn't break on small screens */
+                padding: 15px;
+            }
+        }
+
         @media print {
             @page { margin: 0.5cm; size: A4 portrait; }
             body { background: white; margin: 0; padding: 0; }
             body * { visibility: hidden; }
             #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 20px 40px; display: block !important; border: none; box-shadow: none; }
-            #print-area-wrapper { border: none; box-shadow: none; margin: 0; padding: 0; position: absolute; top: 0; left: 0; width: 100%; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 20px 40px; display: block !important; border: none; box-shadow: none; min-width: 0; }
+            #print-area-wrapper { border: none; box-shadow: none; margin: 0; padding: 0; position: absolute; top: 0; left: 0; width: 100%; overflow: visible; }
             .container > .logo-container, .container > header, .container > .grid, .container > .card, #app-warning, #password-modal, #print-preview-header { display: none !important; }
         }
 
@@ -147,6 +161,8 @@
                                 <label for="rank">Rank</label>
                                 <select id="rank" class="calc-input">
                                     <option value="" disabled selected>Select</option>
+                                    <option value="Flt Lt (Hon)">Flt Lt (Hon)</option>
+                                    <option value="Flg Off (Hon)">Flg Off (Hon)</option>
                                     <option value="Chf Wrt Off">Chf Wrt Off</option>
                                     <option value="Wrt Off">Wrt Off</option>
                                     <option value="Asstt Wrt Off">Asstt Wrt Off</option>
@@ -813,7 +829,7 @@
                     totalAccumulatedIncreaseRestored += restoredIncreaseValue;
                 }
                 
-                detailedData.push({ year: year, percentage: percentageToDisplay, entitled: isEntitled, current: { base: currentBaseLine, increase: currentIncreaseValue, net: currentNetValue }, restored: { base: restoredBaseLine, increase: restoredIncreaseValue, net: restoredNetValue } });
+                detailedData.push({ year: year, percentage: percentageToDisplay, entitled: isEntitled, current: { base: currentBaseLine, increase: currentIncreaseValue, net: currentNetValue, isMin: minPensionAppliedCurrent }, restored: { base: restoredBaseLine, increase: restoredIncreaseValue, net: restoredNetValue, isMin: minPensionAppliedRestored } });
 
                 row.insertCell().textContent = year; row.insertCell().textContent = percentageToDisplay; row.insertCell().textContent = year === 2025 ? baseLineDisplayCurrent : '-'; 
                 row.insertCell().textContent = isIncreaseCalculatedCurrent ? formatCurrency(currentIncreaseValue, false, true) : '-';
@@ -913,6 +929,9 @@
                         const cellNet = row.insertCell(); 
                         cellNet.textContent = dataSrc.net > 0 ? formatCurrency(dataSrc.net, false, true) : '-'; 
                         cellNet.className = 'amount';
+                        if (dataSrc.isMin) {
+                            cellNet.style.fontWeight = 'bold';
+                        }
                     };
 
                     if (totalRows > 17) {
