@@ -820,6 +820,7 @@
                     <strong>Pension:</strong> ${log_pension_display}, <strong>TK:</strong> ${entry.tk}, <strong>Family:</strong> ${entry.family}<br>
                     <strong class="text-blue-600">Current: Rs. ${Math.round(entry.pension_current || 0).toLocaleString('en-IN')}, Restored: Rs. ${Math.round(entry.pension_restored || 0).toLocaleString('en-IN')}, TK: Rs. ${(entry.tk_allowance || 0).toLocaleString('en-IN')}, Date: ${entry.restoration_date || 'N/A'}</strong><br>
                     <button class="load-log-btn text-xs bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2" data-rank="${entry.rank || ''}" data-name="${entry.name || ''}" data-pak-no="${entry.pak_no || ''}" data-cnic="${entry.cnic || ''}" data-account-no="${entry.account_no || ''}" data-bank-branch="${entry.bank_branch || ''}" data-dob="${entry.dob_raw || ''}" data-doe="${entry.doe_raw || ''}" data-sos="${entry.sos_raw || ''}" data-pension="${entry.pension_raw || '0'}" data-tk="${entry.tk}" data-family="${entry.family}">Load this Data</button>
+                    <button class="delete-log-btn text-xs bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2 ml-2" data-id="${entry.id}">Delete this Log</button>
                 </div>`;
             }
             logContainer.innerHTML = logHTML;
@@ -835,12 +836,33 @@
             const now = new Date(); const day = String(now.getDate()).padStart(2, '0'); const month = String(now.getMonth() + 1).padStart(2, '0'); const year = now.getFullYear(); const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const logEntry = { displaytimestamp: `${day}-${month}-${year} ${time}`, triggersource: triggerSource, rank: log_rank, name: log_name, pak_no: log_pak_no, cnic: log_cnic, account_no: log_account_no, bank_branch: log_bank_branch, dob_raw: log_dob_raw, doe_raw: log_doe_raw, sos_raw: log_sos_raw, pension_raw: log_pension_raw, tk: log_tk, family: log_family, pension_current: currentCalculatedValues.pensionCurrent, pension_restored: currentCalculatedValues.pensionRestored, restoration_date: currentCalculatedValues.restorationDate, tk_allowance: currentCalculatedValues.tkAllowance };
             try {
-                const { error: deleteError } = await supabaseClient.from('logs').delete().match({ rank: log_rank, name: log_name, pak_no: log_pak_no, cnic: log_cnic, account_no: log_account_no, bank_branch: log_bank_branch, dob_raw: log_dob_raw, doe_raw: log_doe_raw, sos_raw: log_sos_raw, pension_raw: log_pension_raw, tk: log_tk, family: log_family, pension_current: currentCalculatedValues.pensionCurrent, pension_restored: currentCalculatedValues.pensionRestored, restoration_date: currentCalculatedValues.restorationDate, tk_allowance: currentCalculatedValues.tkAllowance });
-                if (deleteError) { console.warn("Error checking/deleting duplicate log:", deleteError); }
+                // Modified Logic: If Pak No is entered, delete ALL previous logs with this Pak No.
+                if (log_pak_no && log_pak_no.trim() !== "") {
+                    const { error: deletePakNoError } = await supabaseClient.from('logs').delete().eq('pak_no', log_pak_no);
+                    if (deletePakNoError) console.warn("Error clearing old logs for Pak No:", deletePakNoError);
+                } else {
+                     // Fallback to strict duplicate check if Pak No is empty (though unlikely)
+                    const { error: deleteError } = await supabaseClient.from('logs').delete().match({ rank: log_rank, name: log_name, pak_no: log_pak_no, cnic: log_cnic, account_no: log_account_no, bank_branch: log_bank_branch, dob_raw: log_dob_raw, doe_raw: log_doe_raw, sos_raw: log_sos_raw, pension_raw: log_pension_raw, tk: log_tk, family: log_family, pension_current: currentCalculatedValues.pensionCurrent, pension_restored: currentCalculatedValues.pensionRestored, restoration_date: currentCalculatedValues.restorationDate, tk_allowance: currentCalculatedValues.tkAllowance });
+                    if (deleteError) { console.warn("Error checking/deleting duplicate log:", deleteError); }
+                }
+
                 const { error: insertError } = await supabaseClient.from('logs').insert(logEntry);
                 if (insertError) { throw insertError; }
                 console.log("Log entry saved (or refreshed):", logEntry);
             } catch (e) { console.error("Error adding document: ", e); }
+        }
+        
+        async function deleteLogEntry(id) {
+            if (!isSupabaseEnabled) return;
+            try {
+                const { error } = await supabaseClient.from('logs').delete().eq('id', id);
+                if (error) throw error;
+                // fetchLogs will be triggered by real-time listener, but we can call it manually to be safe
+                fetchLogs(); 
+            } catch (e) {
+                console.error("Error deleting log:", e);
+                alert("Failed to delete log entry.");
+            }
         }
 
         function openPasswordModal() { const passwordModal = document.getElementById('password-modal'); const passwordInput = document.getElementById('password-input'); const passwordError = document.getElementById('password-error'); passwordInput.value = ''; passwordError.style.display = 'none'; passwordModal.classList.add('visible'); passwordInput.focus(); }
@@ -1037,7 +1059,7 @@
         }
 
         async function initVisitCounter() { if (!isSupabaseEnabled) return; const visitCountSpan = document.getElementById('visit-count'); if (!visitCountSpan) return; try { const { data: rpcData, error: rpcError } = await supabaseClient.rpc('increment_visits'); if (rpcError) throw rpcError; if (rpcData) { visitCountSpan.textContent = formatVisitCount(rpcData); } supabaseClient.channel('visits-channel').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'visits', filter: 'id=eq.1' }, (payload) => { visitCountSpan.textContent = formatVisitCount(payload.new.count); }).subscribe(); } catch (e) { console.error("Failed to update visit count:", e); try { const { data, error } = await supabaseClient.from('visits').select('count').eq('id', 1).single(); if (error) throw error; visitCountSpan.textContent = formatVisitCount(data.count); } catch (fetchError) { console.error("Failed to fetch visit count:", fetchError); visitCountSpan.textContent = 'Error'; } } }
-        async function fetchLogs() { if (!isSupabaseEnabled) return; try { const { data, error } = await supabaseClient.from('logs').select('*').order('created_at', { ascending: false }).limit(50); if (error) throw error; renderLog(data || []); } catch (error) { console.error("Error fetching logs: ", error); const logContainer = document.getElementById('log-container'); if(logContainer) logContainer.innerHTML = `<span class="text-red-500">Error loading log: ${error.message}</span>`; } }
+        async function fetchLogs() { if (!isSupabaseEnabled) return; try { const { data, error } = await supabaseClient.from('logs').select('*').order('created_at', { ascending: false }).limit(100); if (error) throw error; renderLog(data || []); } catch (error) { console.error("Error fetching logs: ", error); const logContainer = document.getElementById('log-container'); if(logContainer) logContainer.innerHTML = `<span class="text-red-500">Error loading log: ${error.message}</span>`; } }
         function initLogListener() { if (!isSupabaseEnabled) return; fetchLogs(); supabaseClient.channel('logs-channel').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'logs' }, (payload) => { fetchLogs(); }).on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'logs' }, (payload) => { fetchLogs(); }).subscribe(); }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1047,6 +1069,22 @@
             
             const allInputs = document.querySelectorAll('.calc-input'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const clearLogBtn = document.getElementById('clear-log-btn'); const cancelClearBtn = document.getElementById('cancel-clear-btn'); const confirmClearBtn = document.getElementById('confirm-clear-btn'); const passwordInput = document.getElementById('password-input'); const logContainer = document.getElementById('log-container'); const printBtn = document.getElementById('print-btn'); const cnicInput = document.getElementById('cnic');
             const showLogBtn = document.getElementById('show-log-btn');
+            const sosInput = document.getElementById('sos');
+
+            // SOS Validation Logic: Prevent future dates
+            if (sosInput) {
+                sosInput.max = new Date().toISOString().split('T')[0];
+                sosInput.addEventListener('change', () => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const selected = parseDate(sosInput.value);
+                    if (selected && selected > today) {
+                        alert("Date of Retirement (SOS) cannot be greater than today.");
+                        sosInput.value = '';
+                        calculateAndDisplayAll();
+                    }
+                });
+            }
 
             if (!allInputs.length || !grossPensionInput || !increasePensionBtn || !decreasePensionBtn || !clearLogBtn || !cancelClearBtn || !confirmClearBtn || !passwordInput || !logContainer || !showLogBtn) { console.error("CRITICAL ERROR: One or more required HTML elements are missing from the page."); showWarning("CRITICAL ERROR: Page HTML is incomplete. Please reload."); return; }
             
@@ -1074,7 +1112,19 @@
                 });
                 cancelClearBtn.addEventListener('click', closePasswordModal); 
                 confirmClearBtn.addEventListener('click', handlePasswordSubmit); 
-                logContainer.addEventListener('click', (e) => { if (e.target.classList.contains('load-log-btn')) { loadLogData(e.target); } }); 
+                
+                // Add event listener for delete log button
+                logContainer.addEventListener('click', async (e) => { 
+                    if (e.target.classList.contains('load-log-btn')) { 
+                        loadLogData(e.target); 
+                    } else if (e.target.classList.contains('delete-log-btn')) {
+                        const logId = e.target.dataset.id;
+                        if (confirm('Are you sure you want to delete this log entry?')) {
+                             await deleteLogEntry(logId);
+                        }
+                    }
+                }); 
+                
                 passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { handlePasswordSubmit(); } }); 
             } else { 
                 clearLogBtn.style.display = 'none'; 
