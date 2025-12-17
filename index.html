@@ -663,8 +663,22 @@
 
                 const netValues = populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension);
                 
-                let finalPensionCurrent = basePension + netValues.sumIncreasesCurrent; finalPensionCurrent = Math.round(finalPensionCurrent);
-                let finalPensionRestored = grossPension + netValues.sumIncreasesRestored; finalPensionRestored = Math.round(finalPensionRestored);
+                // UPDATED LOGIC START
+                // Pension (Current) formula be the maximum amount in current NET
+                let maxNetCurrent = basePension;
+                if (netValues.current && netValues.current.length > 0) {
+                    maxNetCurrent = Math.max(basePension, ...netValues.current);
+                }
+                let finalPensionCurrent = Math.round(maxNetCurrent); 
+
+                // Pension (After Restoration) be maximum amount in Restoration NET
+                let maxNetRestored = grossPension;
+                if (netValues.restored && netValues.restored.length > 0) {
+                    maxNetRestored = Math.max(grossPension, ...netValues.restored);
+                }
+                let finalPensionRestored = Math.round(maxNetRestored);
+                // UPDATED LOGIC END
+
                 let tkAllowance = 0; if (tkAward === '1') tkAllowance = 170; else if (tkAward === '2') tkAllowance = 130; else if (tkAward === '3') tkAllowance = 70;
                 let totalPayableCurrent = finalPensionCurrent + tkAllowance; let totalPayableRestored = finalPensionRestored + tkAllowance;
 
