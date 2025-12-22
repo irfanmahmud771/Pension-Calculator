@@ -745,22 +745,22 @@
                         }
                     };
 
-                    if (totalRows > 17) {
+                    if (totalRows > 13) {
                         // Dual Column Layout
                         detailsTable.style.fontSize = '8pt';
                         detailsHeadRow.innerHTML = `
-                            <th style="width: 4%;">S No</th>
-                            <th style="width: 6%;">Year</th>
-                            <th style="width: 6%;">%age</th>
-                            <th style="width: 11%; text-align: right;">Base Line</th>
-                            <th style="width: 11%; text-align: right;">Increase</th>
-                            <th style="width: 12%; text-align: right;">Net</th>
-                            <th style="width: 4%; border-left: 2px solid #000;">S No</th>
-                            <th style="width: 6%;">Year</th>
-                            <th style="width: 6%;">%age</th>
-                            <th style="width: 11%; text-align: right;">Base Line</th>
-                            <th style="width: 11%; text-align: right;">Increase</th>
-                            <th style="width: 12%; text-align: right;">Net</th>
+                            <th style="width: 4%; white-space: nowrap;">S No</th>
+                            <th style="width: 6%; white-space: nowrap;">Year</th>
+                            <th style="width: 6%; white-space: nowrap;">%age</th>
+                            <th style="width: 11%; text-align: right; white-space: nowrap;">Base Line</th>
+                            <th style="width: 11%; text-align: right; white-space: nowrap;">Increase</th>
+                            <th style="width: 12%; text-align: right; white-space: nowrap;">Net</th>
+                            <th style="width: 4%; border-left: 2px solid #000; white-space: nowrap;">S No</th>
+                            <th style="width: 6%; white-space: nowrap;">Year</th>
+                            <th style="width: 6%; white-space: nowrap;">%age</th>
+                            <th style="width: 11%; text-align: right; white-space: nowrap;">Base Line</th>
+                            <th style="width: 11%; text-align: right; white-space: nowrap;">Increase</th>
+                            <th style="width: 12%; text-align: right; white-space: nowrap;">Net</th>
                         `;
 
                         const midPoint = Math.ceil(totalRows / 2);
@@ -1011,15 +1011,27 @@
                     if (isEntitled === 'Y' && !isNaN(percentageValue)) { restoredIncreaseValue = roundToTwoDecimals(restoredBaseLine * percentageValue); isIncreaseCalculatedRestored = true; } else { restoredIncreaseValue = 0; }
                     restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue); isNetCalculatedRestored = true;
                 } else if (year === 2025) {
-                     if (sosDate && sosDate > date2024_12_31) { currentBaseLine = basePension; } else { currentBaseLine = net2024; }
+                    currentBaseLine = net2024;
                     baseLineDisplayCurrent = formatCurrency(currentBaseLine, false, true);
+                    
                     if (isEntitled === 'Y' && percentageValue > 0) {
-                        if (currentBaseLine > 0) { currentIncreaseValue = roundToTwoDecimals(percentageValue * currentBaseLine); } else if (currentBaseLine === 0) { currentIncreaseValue = roundToTwoDecimals(percentageValue * net2024); } else { currentIncreaseValue = 0; }
+                        currentIncreaseValue = roundToTwoDecimals(percentageValue * currentBaseLine);
                         isIncreaseCalculatedCurrent = true;
-                    } else { currentIncreaseValue = 0; }
+                    } else { 
+                        currentIncreaseValue = 0; 
+                    }
+                    
                     currentNetValue = roundToTwoDecimals(currentBaseLine + currentIncreaseValue); isNetCalculatedCurrent = true;
+                    
                     restoredBaseLine = previousNetValueRestored;
-                    if (isEntitled === 'Y' && !isNaN(percentageValue)) { const restoredIncreaseRaw = restoredBaseLine * percentageValue; restoredIncreaseValue = roundToTwoDecimals(restoredIncreaseRaw); isIncreaseCalculatedRestored = true; } else { restoredIncreaseValue = 0; }
+                    if (isEntitled === 'Y' && !isNaN(percentageValue)) { 
+                        const restoredIncreaseRaw = restoredBaseLine * percentageValue; 
+                        restoredIncreaseValue = roundToTwoDecimals(restoredIncreaseRaw); 
+                        isIncreaseCalculatedRestored = true; 
+                    } else { 
+                        restoredIncreaseValue = 0; 
+                    }
+                    
                     restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue); isNetCalculatedRestored = true;
                     baseLineDisplayRestored = formatCurrency(restoredBaseLine, false, true);
                 }
