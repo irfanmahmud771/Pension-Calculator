@@ -141,7 +141,7 @@
     <div id="app-warning" class="p-4 text-center text-yellow-800 bg-yellow-100 rounded-lg m-4" style="display: none;"></div>
     <div class="container mx-auto p-4 md:p-8 relative"> 
         <div class="logo-container flex flex-col md:flex-row justify-between items-center">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png" alt="Logo" class="logo-left md:absolute md:top-4 md:left-4 w-32 h-32 object-contain" onerror="this.src='logo.gif'; this.onerror=null;">
+            <img id="main-logo" src="logo.gif" alt="Logo" class="logo-left md:absolute md:top-4 md:left-4 w-32 h-32 object-contain" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png'; this.onerror=null;">
         </div>
         
         <header class="text-center mb-8 mt-4 md:mt-0">
@@ -159,6 +159,14 @@
                     <div class="grid grid-cols-1 gap-4 mt-2">
                          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="input-group md:col-span-1">
+                                <label for="arms">Arms</label>
+                                <select id="arms" class="calc-input">
+                                    <option value="PAF" selected>PAF</option>
+                                    <option value="Army">Army</option>
+                                    <option value="Navy">Navy</option>
+                                </select>
+                            </div>
+                            <div class="input-group md:col-span-1">
                                 <label for="rank">Rank</label>
                                 <select id="rank" class="calc-input">
                                     <option value="" disabled selected>Select</option>
@@ -174,14 +182,14 @@
                                     <option value="SAC">SAC</option>
                                 </select>
                             </div>
-                             <div class="input-group md:col-span-3">
+                             <div class="input-group md:col-span-2">
                                 <label for="name">Name</label>
                                 <input type="text" id="name" class="calc-input" placeholder="Full Name" maxlength="20" style="text-transform: uppercase;">
                             </div>
                          </div>
                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                              <div class="input-group">
-                                <label for="pak-no">Pak No</label>
+                                <label for="pak-no" id="lbl-pak-no">Pak No</label>
                                 <input type="text" id="pak-no" class="calc-input" placeholder="e.g. 123456">
                             </div>
                             <div class="input-group">
@@ -407,12 +415,12 @@
         <div id="print-area-wrapper">
             <h2 id="print-preview-header" class="text-center font-bold text-xl mb-6 text-gray-400 uppercase">Pension Slip Preview</h2>
             <div id="print-area">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png" alt="Watermark" class="print-watermark" onerror="this.src='logo.gif'; this.onerror=null;">
+                <img src="logo.gif" alt="Watermark" class="print-watermark" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png'; this.onerror=null;">
                 <div class="print-header">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png" alt="PAF Logo" class="print-logo-left" onerror="this.src='logo.gif'; this.onerror=null;">
+                    <img src="logo.gif" alt="PAF Logo" class="print-logo-left" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png'; this.onerror=null;">
                     <img src="pmad.jpeg" alt="PMAD Logo" class="print-logo-right" onerror="this.style.display='none'">
                     <h1>Government of Pakistan</h1>
-                    <h2>Pakistan Air Force</h2>
+                    <h2 id="print-service-name">Pakistan Air Force</h2>
                     <h3>Monthly Pension Statement (<span id="print-month-year"></span>)</h3>
                 </div>
                 
@@ -429,7 +437,7 @@
                     </tr>
                     <tr>
                         <td style="width: 50%; vertical-align: top;">
-                            <span class="print-info-label">Service No:</span>
+                            <span class="print-info-label" id="print-lbl-pak-no">Pak No:</span>
                             <span class="print-info-value" id="print-pak-no"></span>
                         </td>
                         <td style="width: 50%; vertical-align: top;">
@@ -1092,6 +1100,52 @@
         async function fetchLogs() { if (!isSupabaseEnabled) return; try { const { data, error } = await supabaseClient.from('logs').select('*').order('created_at', { ascending: false }).limit(100); if (error) throw error; renderLog(data || []); } catch (error) { console.error("Error fetching logs: ", error); const logContainer = document.getElementById('log-container'); if(logContainer) logContainer.innerHTML = `<span class="text-red-500">Error loading log: ${error.message}</span>`; } }
         function initLogListener() { if (!isSupabaseEnabled) return; fetchLogs(); supabaseClient.channel('logs-channel').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'logs' }, (payload) => { fetchLogs(); }).on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'logs' }, (payload) => { fetchLogs(); }).subscribe(); }
 
+        // --- NEW FUNCTION: Update Arms UI ---
+        function updateArmsUI() {
+            const armsSelect = document.getElementById('arms');
+            const selectedArm = armsSelect.value;
+            const logoMain = document.querySelector('.logo-left');
+            const logoPrintLeft = document.querySelector('.print-logo-left');
+            const watermark = document.querySelector('.print-watermark');
+            const serviceNamePrint = document.getElementById('print-service-name');
+            const pakNoLabel = document.getElementById('lbl-pak-no');
+            const printPakNoLabel = document.getElementById('print-lbl-pak-no');
+
+            // 1. Update Logos
+            let logoFile = 'logo.gif'; // Default PAF
+            if (selectedArm === 'Army') logoFile = 'logo1.gif';
+            else if (selectedArm === 'Navy') logoFile = 'logo2.gif';
+
+            const updateSrc = (el) => {
+                if (el) {
+                    el.src = logoFile;
+                    // Reset onerror just in case it triggered before
+                    el.onerror = function() { 
+                        // Fallback logic if local file not found (optional, keeping PAF wikimedia as ultimate backup if desired, or just log error)
+                        if (selectedArm === 'PAF') this.src='https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png';
+                        // For Army/Navy, no online fallback specified, so maybe just show alt text or keep broken icon.
+                        this.onerror = null; 
+                    };
+                }
+            };
+
+            updateSrc(logoMain);
+            updateSrc(logoPrintLeft);
+            updateSrc(watermark);
+
+            // 2. Update Service Name in Print Header
+            if (serviceNamePrint) {
+                if (selectedArm === 'PAF') serviceNamePrint.textContent = 'Pakistan Air Force';
+                else if (selectedArm === 'Army') serviceNamePrint.textContent = 'Pakistan Army';
+                else if (selectedArm === 'Navy') serviceNamePrint.textContent = 'Pakistan Navy';
+            }
+
+            // 3. Update Labels (Pak No vs Service No)
+            const labelText = (selectedArm === 'PAF') ? 'Pak No' : 'Service No';
+            if (pakNoLabel) pakNoLabel.textContent = labelText;
+            if (printPakNoLabel) printPakNoLabel.textContent = labelText + ':';
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const appWarning = document.getElementById('app-warning');
             function showWarning(message) { if (appWarning) { appWarning.textContent = message; appWarning.style.display = 'block'; } console.warn(message); }
@@ -1100,6 +1154,7 @@
             const allInputs = document.querySelectorAll('.calc-input'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const clearLogBtn = document.getElementById('clear-log-btn'); const cancelClearBtn = document.getElementById('cancel-clear-btn'); const confirmClearBtn = document.getElementById('confirm-clear-btn'); const passwordInput = document.getElementById('password-input'); const logContainer = document.getElementById('log-container'); const printBtn = document.getElementById('print-btn'); const cnicInput = document.getElementById('cnic');
             const showLogBtn = document.getElementById('show-log-btn');
             const sosInput = document.getElementById('sos');
+            const armsSelect = document.getElementById('arms');
 
             // SOS Validation Logic: Prevent future dates
             if (sosInput) {
@@ -1118,6 +1173,12 @@
 
             if (!allInputs.length || !grossPensionInput || !increasePensionBtn || !decreasePensionBtn || !clearLogBtn || !cancelClearBtn || !confirmClearBtn || !passwordInput || !logContainer || !showLogBtn) { console.error("CRITICAL ERROR: One or more required HTML elements are missing from the page."); showWarning("CRITICAL ERROR: Page HTML is incomplete. Please reload."); return; }
             
+            // Initialize Arms UI
+            if (armsSelect) {
+                armsSelect.addEventListener('change', updateArmsUI);
+                updateArmsUI(); // Run once on load
+            }
+
             const nameInput = document.getElementById('name');
             if (nameInput) {
                 nameInput.addEventListener('input', (e) => {
