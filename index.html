@@ -250,6 +250,15 @@
                                 <option value="Yes">Yes</option>
                             </select>
                         </div>
+                        <!-- NEW INPUT FIELDS FOR FAMILY PENSIONER -->
+                        <div class="input-group" id="grp-family-name" style="display: none;">
+                            <label for="family-pensioner-name">Family Pensioner Name</label>
+                            <input type="text" id="family-pensioner-name" class="calc-input" placeholder="W/D/S Name" maxlength="20" style="text-transform: uppercase;">
+                        </div>
+                        <div class="input-group" id="grp-family-cnic" style="display: none;">
+                            <label for="family-pensioner-cnic">Family Pensioner CNIC</label>
+                            <input type="text" id="family-pensioner-cnic" class="calc-input" placeholder="00000-0000000-0" maxlength="15">
+                        </div>
                     </div>
                 </form>
             </div>
@@ -425,6 +434,16 @@
                 </div>
                 
                 <table class="print-info-table">
+                    <!-- NEW ROW FOR FAMILY PENSIONER NAME -->
+                    <tr id="print-row-family-name" style="display: none;">
+                        <td colspan="2" style="padding-bottom: 10px;">
+                             <div style="display: flex; width: 100%; align-items: flex-end;">
+                                 <span style="font-weight: bold; white-space: nowrap; margin-right: 5px;">Family Pensioner Name:</span>
+                                 <span id="print-family-pensioner-name" style="flex-grow: 1; border-bottom: 1px dotted #000; text-align: left; padding-left: 10px; font-weight: normal;"></span>
+                                 <span style="font-weight: bold; white-space: nowrap; margin-left: 5px; font-size: 0.9em;">Widow / Daughter / Son / Father / Mother of below</span>
+                             </div>
+                        </td>
+                    </tr>
                     <tr>
                         <td style="width: 50%; vertical-align: top;">
                             <span class="print-info-label">Served as:</span>
@@ -707,6 +726,21 @@
                 
                 const rows = document.querySelectorAll('#print-table-body tr'); let serial = 1; rows.forEach(row => { if (row.style.display !== 'none') { const sNoCell = row.querySelector('td.serial-cell'); if (sNoCell) { sNoCell.textContent = serial++; } } });
                 
+                // HANDLE FAMILY PENSIONER NAME & CNIC IN PRINT
+                const familyName = document.getElementById('family-pensioner-name').value;
+                const familyCnic = document.getElementById('family-pensioner-cnic').value;
+                const printRowFamily = document.getElementById('print-row-family-name');
+                if (isFamilyPension) {
+                    printRowFamily.style.display = 'table-row';
+                    let displayText = familyName;
+                    if (familyCnic) {
+                        displayText += ` (CNIC: ${familyCnic})`;
+                    }
+                    document.getElementById('print-family-pensioner-name').textContent = displayText;
+                } else {
+                    printRowFamily.style.display = 'none';
+                }
+
                 const detailsTableBody = document.getElementById('print-details-table-body');
                 const detailsTable = document.querySelector('.details-table');
                 const detailsHeadRow = detailsTable.querySelector('thead tr');
@@ -753,7 +787,10 @@
                         }
                     };
 
-                    if (totalRows > 17) {
+                    // Threshold Logic for Dual Column
+                    const dualColumnThreshold = isFamilyPension ? 13 : 17;
+
+                    if (totalRows > dualColumnThreshold) {
                         // Dual Column Layout
                         detailsTable.style.fontSize = '8pt';
                         detailsHeadRow.innerHTML = `
@@ -839,13 +876,37 @@
                 if (decimalPart) log_pension_display += '.' + decimalPart;
                 if (parseFloat(pensionRaw) === 0) log_pension_display = '0';
                 if (entry.pension_raw === '') log_pension_display = 'N/A';
+                
+                // Show extra fields if available
+                const armsInfo = entry.arms ? `, <strong>Arms:</strong> ${entry.arms}` : '';
+                const familyInfo = (entry.family === 'Yes' && entry.family_pensioner_name) 
+                    ? `<br><strong>Family:</strong> ${entry.family_pensioner_name} ${entry.family_pensioner_cnic ? `(${entry.family_pensioner_cnic})` : ''}` 
+                    : '';
+
                 logHTML += `<div class="p-2 border-b border-gray-200">
                     <strong>[${entry.displaytimestamp}] ${entry.triggersource}</strong><br>
-                    <strong>Rank:</strong> ${entry.rank || '-'}, <strong>Name:</strong> ${entry.name || '-'}, <strong>Pak No:</strong> ${entry.pak_no || '-'}<br>
+                    <strong>Rank:</strong> ${entry.rank || '-'} ${armsInfo}, <strong>Name:</strong> ${entry.name || '-'}, <strong>Pak No:</strong> ${entry.pak_no || '-'}<br>
                     <strong>DOB:</strong> ${log_dob_display}, <strong>DOE:</strong> ${log_doe_display}, <strong>SOS:</strong> ${log_sos_display}<br>
-                    <strong>Pension:</strong> ${log_pension_display}, <strong>TK:</strong> ${entry.tk}, <strong>Family:</strong> ${entry.family}<br>
+                    <strong>Pension:</strong> ${log_pension_display}, <strong>TK:</strong> ${entry.tk}, <strong>Family Type:</strong> ${entry.family}
+                    ${familyInfo}<br>
                     <strong class="text-blue-600">Current: Rs. ${Math.round(entry.pension_current || 0).toLocaleString('en-IN')}, Restored: Rs. ${Math.round(entry.pension_restored || 0).toLocaleString('en-IN')}, TK: Rs. ${(entry.tk_allowance || 0).toLocaleString('en-IN')}, Date: ${entry.restoration_date || 'N/A'}</strong><br>
-                    <button class="load-log-btn text-xs bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2" data-rank="${entry.rank || ''}" data-name="${entry.name || ''}" data-pak-no="${entry.pak_no || ''}" data-cnic="${entry.cnic || ''}" data-account-no="${entry.account_no || ''}" data-bank-branch="${entry.bank_branch || ''}" data-dob="${entry.dob_raw || ''}" data-doe="${entry.doe_raw || ''}" data-sos="${entry.sos_raw || ''}" data-pension="${entry.pension_raw || '0'}" data-tk="${entry.tk}" data-family="${entry.family}">Load this Data</button>
+                    <button class="load-log-btn text-xs bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2" 
+                        data-rank="${entry.rank || ''}" 
+                        data-arms="${entry.arms || 'PAF'}"
+                        data-name="${entry.name || ''}" 
+                        data-pak-no="${entry.pak_no || ''}" 
+                        data-cnic="${entry.cnic || ''}" 
+                        data-account-no="${entry.account_no || ''}" 
+                        data-bank-branch="${entry.bank_branch || ''}" 
+                        data-dob="${entry.dob_raw || ''}" 
+                        data-doe="${entry.doe_raw || ''}" 
+                        data-sos="${entry.sos_raw || ''}" 
+                        data-pension="${entry.pension_raw || '0'}" 
+                        data-tk="${entry.tk}" 
+                        data-family="${entry.family}"
+                        data-family-name="${entry.family_pensioner_name || ''}"
+                        data-family-cnic="${entry.family_pensioner_cnic || ''}"
+                    >Load this Data</button>
                     <button class="delete-log-btn text-xs bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2 ml-2" data-id="${entry.id}">Delete this Log</button>
                 </div>`;
             }
@@ -856,11 +917,46 @@
             if (!isSupabaseEnabled) return;
             const rankInput = document.getElementById('rank');
             const log_rank = rankInput.value; 
+            const armsInput = document.getElementById('arms'); // New
+            const log_arms = armsInput.value;
 
             const nameInput = document.getElementById('name'); const pakNoInput = document.getElementById('pak-no'); const cnicInput = document.getElementById('cnic'); const accountNoInput = document.getElementById('account-no'); const bankBranchInput = document.getElementById('bank-branch'); const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const tkAwardInput = document.getElementById('tk-award'); const familyPensionInput = document.getElementById('family-pension');
+            
+            // New inputs
+            const familyNameInput = document.getElementById('family-pensioner-name');
+            const familyCnicInput = document.getElementById('family-pensioner-cnic');
+
             const log_name = nameInput.value; const log_pak_no = pakNoInput.value; const log_cnic = cnicInput.value; const log_account_no = accountNoInput.value; const log_bank_branch = bankBranchInput.value; const log_dob_raw = dobInput.value; const log_doe_raw = doeInput.value; const log_sos_raw = sosInput.value; const log_pension_raw = grossPensionInput.value.replace(/,/g, '') || '0'; const log_tk = tkAwardInput.value; const log_family = familyPensionInput.value;
+            
+            const log_family_name = familyNameInput.value;
+            const log_family_cnic = familyCnicInput.value;
+
             const now = new Date(); const day = String(now.getDate()).padStart(2, '0'); const month = String(now.getMonth() + 1).padStart(2, '0'); const year = now.getFullYear(); const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const logEntry = { displaytimestamp: `${day}-${month}-${year} ${time}`, triggersource: triggerSource, rank: log_rank, name: log_name, pak_no: log_pak_no, cnic: log_cnic, account_no: log_account_no, bank_branch: log_bank_branch, dob_raw: log_dob_raw, doe_raw: log_doe_raw, sos_raw: log_sos_raw, pension_raw: log_pension_raw, tk: log_tk, family: log_family, pension_current: currentCalculatedValues.pensionCurrent, pension_restored: currentCalculatedValues.pensionRestored, restoration_date: currentCalculatedValues.restorationDate, tk_allowance: currentCalculatedValues.tkAllowance };
+            
+            const logEntry = { 
+                displaytimestamp: `${day}-${month}-${year} ${time}`, 
+                triggersource: triggerSource, 
+                rank: log_rank, 
+                arms: log_arms, // Uncommented
+                name: log_name, 
+                pak_no: log_pak_no, 
+                cnic: log_cnic, 
+                account_no: log_account_no, 
+                bank_branch: log_bank_branch, 
+                dob_raw: log_dob_raw, 
+                doe_raw: log_doe_raw, 
+                sos_raw: log_sos_raw, 
+                pension_raw: log_pension_raw, 
+                tk: log_tk, 
+                family: log_family, 
+                family_pensioner_name: log_family_name, // Uncommented
+                family_pensioner_cnic: log_family_cnic, // Uncommented
+                pension_current: currentCalculatedValues.pensionCurrent, 
+                pension_restored: currentCalculatedValues.pensionRestored, 
+                restoration_date: currentCalculatedValues.restorationDate, 
+                tk_allowance: currentCalculatedValues.tkAllowance 
+            };
+
             try {
                 // Modified Logic: If Pak No is entered, delete ALL previous logs with this Pak No.
                 if (log_pak_no && log_pak_no.trim() !== "") {
@@ -868,7 +964,15 @@
                     if (deletePakNoError) console.warn("Error clearing old logs for Pak No:", deletePakNoError);
                 } else {
                      // Fallback to strict duplicate check if Pak No is empty (though unlikely)
-                    const { error: deleteError } = await supabaseClient.from('logs').delete().match({ rank: log_rank, name: log_name, pak_no: log_pak_no, cnic: log_cnic, account_no: log_account_no, bank_branch: log_bank_branch, dob_raw: log_dob_raw, doe_raw: log_doe_raw, sos_raw: log_sos_raw, pension_raw: log_pension_raw, tk: log_tk, family: log_family, pension_current: currentCalculatedValues.pensionCurrent, pension_restored: currentCalculatedValues.pensionRestored, restoration_date: currentCalculatedValues.restorationDate, tk_allowance: currentCalculatedValues.tkAllowance });
+                    const { error: deleteError } = await supabaseClient.from('logs').delete().match({ 
+                        rank: log_rank, 
+                        name: log_name, 
+                        // We check core identifiers for dupe
+                        pak_no: log_pak_no, 
+                        cnic: log_cnic, 
+                        pension_raw: log_pension_raw, 
+                        pension_current: currentCalculatedValues.pensionCurrent 
+                    });
                     if (deleteError) { console.warn("Error checking/deleting duplicate log:", deleteError); }
                 }
 
@@ -932,14 +1036,26 @@
             const data = button.dataset;
             const rankInput = document.getElementById('rank'); 
             const savedRank = data.rank || '';
+            const armsInput = document.getElementById('arms'); // New
             
             let optionFound = false; for (let i = 0; i < rankInput.options.length; i++) { if (rankInput.options[i].value === savedRank) { rankInput.selectedIndex = i; optionFound = true; break; } }
             if (!optionFound) { rankInput.selectedIndex = 0; }
+
+            // Set Arms
+            if (data.arms) {
+                armsInput.value = data.arms;
+                updateArmsUI(); // Trigger UI update
+            }
 
             document.getElementById('name').value = data.name || ''; document.getElementById('pak-no').value = data.pakNo || ''; document.getElementById('cnic').value = data.cnic || ''; document.getElementById('account-no').value = data.accountNo || ''; document.getElementById('bank-branch').value = data.bankBranch || ''; document.getElementById('dob').value = data.dob || ''; document.getElementById('doe').value = data.doe || ''; document.getElementById('sos').value = data.sos || '';
             const pensionValue = data.pension || ''; const grossPensionInput = document.getElementById('gross-pension-ppo'); grossPensionInput.value = pensionValue;
             const parts = pensionValue.split('.'); let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); let decimalPart = parts[1] ? (parts[1] + '00').substring(0, 2) : ''; grossPensionInput.value = integerPart; if (decimalPart) { grossPensionInput.value += '.' + decimalPart; } if (parseFloat(pensionValue) === 0) { grossPensionInput.value = '0'; }
             document.getElementById('tk-award').value = data.tk || 'No'; document.getElementById('family-pension').value = data.family || 'No';
+            
+            // Set Family Fields
+            document.getElementById('family-pensioner-name').value = data.familyName || '';
+            document.getElementById('family-pensioner-cnic').value = data.familyCnic || '';
+
             checkInputEnabling(); calculateAndDisplayAll();
             if (isSupabaseEnabled) { clearTimeout(logDebounceTimer); if (document.getElementById('dob').value && document.getElementById('doe').value && document.getElementById('sos').value && grossPensionInput.value) { logDebounceTimer = setTimeout(() => { logCalculation('Load Log Data (Debounced)'); }, LOG_DEBOUNCE_DELAY); } }
         }
@@ -1094,6 +1210,20 @@
             const dobFilled = dobInput.value !== ''; const doeFilled = doeInput.value !== ''; const sosFilled = sosInput.value !== ''; const grossPensionFilled = grossPensionInput.value !== '' && parseFloat(grossPensionInput.value.replace(/,/g, '')) > 0;
             doeInput.disabled = !dobFilled; sosInput.disabled = !(dobFilled && doeFilled); grossPensionInput.disabled = !(dobFilled && doeFilled && sosFilled); increasePensionBtn.disabled = !(dobFilled && doeFilled && sosFilled); decreasePensionBtn.disabled = !(dobFilled && doeFilled && sosFilled); tkAwardInput.disabled = !(dobFilled && doeFilled && sosFilled && grossPensionFilled); familyPensionInput.disabled = !(dobFilled && doeFilled && sosFilled && grossPensionFilled);
             if (doeInput.disabled) { doeInput.value = ''; document.getElementById('doe-display').textContent = ''; } if (sosInput.disabled) { sosInput.value = ''; document.getElementById('sos-display').textContent = ''; } if (grossPensionInput.disabled) grossPensionInput.value = ''; if (tkAwardInput.disabled) tkAwardInput.value = 'No'; if (familyPensionInput.disabled) familyPensionInput.value = 'No';
+            
+            // New Logic for Family Pensioner Name visibility in Input Form
+            const familyPensionVal = familyPensionInput.value;
+            const grpFamilyName = document.getElementById('grp-family-name');
+            const grpFamilyCnic = document.getElementById('grp-family-cnic');
+            if (familyPensionVal === 'Yes') {
+                grpFamilyName.style.display = 'block';
+                grpFamilyCnic.style.display = 'block';
+            } else {
+                grpFamilyName.style.display = 'none';
+                grpFamilyCnic.style.display = 'none';
+                document.getElementById('family-pensioner-name').value = ''; 
+                document.getElementById('family-pensioner-cnic').value = '';
+            }
         }
 
         async function initVisitCounter() { if (!isSupabaseEnabled) return; const visitCountSpan = document.getElementById('visit-count'); if (!visitCountSpan) return; try { const { data: rpcData, error: rpcError } = await supabaseClient.rpc('increment_visits'); if (rpcError) throw rpcError; if (rpcData) { visitCountSpan.textContent = formatVisitCount(rpcData); } supabaseClient.channel('visits-channel').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'visits', filter: 'id=eq.1' }, (payload) => { visitCountSpan.textContent = formatVisitCount(payload.new.count); }).subscribe(); } catch (e) { console.error("Failed to update visit count:", e); try { const { data, error } = await supabaseClient.from('visits').select('count').eq('id', 1).single(); if (error) throw error; visitCountSpan.textContent = formatVisitCount(data.count); } catch (fetchError) { console.error("Failed to fetch visit count:", fetchError); visitCountSpan.textContent = 'Error'; } } }
@@ -1186,7 +1316,38 @@
                 });
             }
 
-            if (cnicInput) { cnicInput.addEventListener('input', (e) => { let value = e.target.value.replace(/\D/g, ''); if (value.length > 13) value = value.substring(0, 13); let formatted = ''; if (value.length > 0) { formatted += value.substring(0, 5); } if (value.length >= 6) { formatted += '-' + value.substring(5, 12); } if (value.length >= 13) { formatted += '-' + value.substring(12, 13); } e.target.value = formatted; }); }
+            // New Listener for Family Pensioner Name Uppercase
+            const familyPensionerNameInput = document.getElementById('family-pensioner-name');
+            if (familyPensionerNameInput) {
+                familyPensionerNameInput.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                    calculateAndDisplayAll(); // Trigger update for print preview
+                });
+            }
+
+            // --- REUSABLE CNIC FORMATTING FUNCTION ---
+            const formatCNIC = (e) => {
+                let value = e.target.value.replace(/\D/g, ''); 
+                if (value.length > 13) value = value.substring(0, 13); 
+                let formatted = ''; 
+                if (value.length > 0) { formatted += value.substring(0, 5); } 
+                if (value.length >= 6) { formatted += '-' + value.substring(5, 12); } 
+                if (value.length >= 13) { formatted += '-' + value.substring(12, 13); } 
+                e.target.value = formatted;
+            };
+
+            // Main CNIC Listener
+            if (cnicInput) { cnicInput.addEventListener('input', formatCNIC); }
+
+            // Family CNIC Listener
+            const familyCnicInput = document.getElementById('family-pensioner-cnic');
+            if (familyCnicInput) { 
+                familyCnicInput.addEventListener('input', (e) => {
+                    formatCNIC(e);
+                    calculateAndDisplayAll(); // Trigger update for print preview
+                }); 
+            }
+
             allInputs.forEach(input => { if(input.id !== 'gross-pension-ppo') { input.addEventListener('input', () => { try { calculateAndDisplayAll(); } catch (e) { console.error("Error during calculation on input:", e); } if (isSupabaseEnabled) { clearTimeout(logDebounceTimer); const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); if (dobInput.value && doeInput.value && sosInput.value && grossPensionInput.value && parseFloat(grossPensionInput.value.replace(/,/g, '')) > 0) { logDebounceTimer = setTimeout(() => { logCalculation('Input Change (Debounced)'); }, LOG_DEBOUNCE_DELAY); } } checkInputEnabling(); }); } });
             grossPensionInput.addEventListener('input', formatGrossPensionInput);
             increasePensionBtn.addEventListener('mousedown', () => startPress(1)); decreasePensionBtn.addEventListener('mousedown', () => startPress(-1)); document.addEventListener('mouseup', stopPress); document.addEventListener('mouseleave', stopPress); increasePensionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(1); }); decreasePensionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(-1); }); document.addEventListener('touchend', stopPress); document.addEventListener('touchcancel', stopPress);
