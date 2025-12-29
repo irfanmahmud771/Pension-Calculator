@@ -170,16 +170,7 @@
                                 <label for="rank">Rank</label>
                                 <select id="rank" class="calc-input">
                                     <option value="" disabled selected>Select</option>
-                                    <option value="Flt Lt (Hon)">Flt Lt (Hon)</option>
-                                    <option value="Flg Off (Hon)">Flg Off (Hon)</option>
-                                    <option value="Chf Wrt Off">Chf Wrt Off</option>
-                                    <option value="Wrt Off">Wrt Off</option>
-                                    <option value="Asstt Wrt Off">Asstt Wrt Off</option>
-                                    <option value="Chf Tech">Chf Tech</option>
-                                    <option value="Snr Tech">Snr Tech</option>
-                                    <option value="Cpl Tech">Cpl Tech</option>
-                                    <option value="Jnr Tech">Jnr Tech</option>
-                                    <option value="SAC">SAC</option>
+                                    <!-- Dynamic Options based on Arms -->
                                 </select>
                             </div>
                              <div class="input-group md:col-span-2">
@@ -258,6 +249,17 @@
                         <div class="input-group" id="grp-family-cnic" style="display: none;">
                             <label for="family-pensioner-cnic">Family Pensioner CNIC</label>
                             <input type="text" id="family-pensioner-cnic" class="calc-input" placeholder="00000-0000000-0" maxlength="15">
+                        </div>
+                        <div class="input-group" id="grp-family-relation" style="display: none;">
+                            <label for="family-relation">Relation with Pensioner</label>
+                            <select id="family-relation" class="calc-input">
+                                <option value="Widow" selected>Widow</option>
+                                <option value="Daughter">Daughter</option>
+                                <option value="Son">Son</option>
+                                <option value="Father">Father</option>
+                                <option value="Mother">Mother</option>
+                                <option value="Sister">Sister</option>
+                            </select>
                         </div>
                     </div>
                 </form>
@@ -440,7 +442,7 @@
                              <div style="display: flex; width: 100%; align-items: flex-end;">
                                  <span style="font-weight: bold; white-space: nowrap; margin-right: 5px;">Family Pensioner Name:</span>
                                  <span id="print-family-pensioner-name" style="flex-grow: 1; border-bottom: 1px dotted #000; text-align: left; padding-left: 10px; font-weight: normal;"></span>
-                                 <span style="font-weight: bold; white-space: nowrap; margin-left: 5px; font-size: 0.9em;">Widow / Daughter / Son / Father / Mother of below</span>
+                                 <span id="print-family-relation-label" style="font-weight: bold; white-space: nowrap; margin-left: 5px; font-size: 0.9em;"></span>
                              </div>
                         </td>
                     </tr>
@@ -726,10 +728,12 @@
                 
                 const rows = document.querySelectorAll('#print-table-body tr'); let serial = 1; rows.forEach(row => { if (row.style.display !== 'none') { const sNoCell = row.querySelector('td.serial-cell'); if (sNoCell) { sNoCell.textContent = serial++; } } });
                 
-                // HANDLE FAMILY PENSIONER NAME & CNIC IN PRINT
+                // HANDLE FAMILY PENSIONER NAME, CNIC & RELATION IN PRINT
                 const familyName = document.getElementById('family-pensioner-name').value;
                 const familyCnic = document.getElementById('family-pensioner-cnic').value;
+                const familyRelation = document.getElementById('family-relation').value;
                 const printRowFamily = document.getElementById('print-row-family-name');
+                
                 if (isFamilyPension) {
                     printRowFamily.style.display = 'table-row';
                     let displayText = familyName;
@@ -737,6 +741,8 @@
                         displayText += ` (CNIC: ${familyCnic})`;
                     }
                     document.getElementById('print-family-pensioner-name').textContent = displayText;
+                    // Dynamic Relation
+                    document.getElementById('print-family-relation-label').textContent = `${familyRelation} of below`;
                 } else {
                     printRowFamily.style.display = 'none';
                 }
@@ -877,18 +883,23 @@
                 if (parseFloat(pensionRaw) === 0) log_pension_display = '0';
                 if (entry.pension_raw === '') log_pension_display = 'N/A';
                 
-                // Show extra fields if available
-                const armsInfo = entry.arms ? `, <strong>Arms:</strong> ${entry.arms}` : '';
-                const familyInfo = (entry.family === 'Yes' && entry.family_pensioner_name) 
-                    ? `<br><strong>Family:</strong> ${entry.family_pensioner_name} ${entry.family_pensioner_cnic ? `(${entry.family_pensioner_cnic})` : ''}` 
-                    : '';
+                // Arms/Rank modification
+                const armsDisplay = entry.arms || '-';
+                const rankDisplay = entry.rank || '-';
+
+                // Family/Relation modification
+                let familyLogLine = `<strong>Family:</strong> ${entry.family}`;
+                if (entry.family === 'Yes') {
+                     if (entry.relation_with_pensioner) familyLogLine += `, <strong>Relation:</strong> ${entry.relation_with_pensioner}`;
+                     if (entry.family_pensioner_name) familyLogLine += `, <strong>Name:</strong> ${entry.family_pensioner_name}`;
+                     if (entry.family_pensioner_cnic) familyLogLine += ` (${entry.family_pensioner_cnic})`;
+                }
 
                 logHTML += `<div class="p-2 border-b border-gray-200">
                     <strong>[${entry.displaytimestamp}] ${entry.triggersource}</strong><br>
-                    <strong>Rank:</strong> ${entry.rank || '-'} ${armsInfo}, <strong>Name:</strong> ${entry.name || '-'}, <strong>Pak No:</strong> ${entry.pak_no || '-'}<br>
+                    <strong>Arms:</strong> ${armsDisplay}, <strong>Rank:</strong> ${rankDisplay}, <strong>Name:</strong> ${entry.name || '-'}, <strong>Pak No:</strong> ${entry.pak_no || '-'}<br>
                     <strong>DOB:</strong> ${log_dob_display}, <strong>DOE:</strong> ${log_doe_display}, <strong>SOS:</strong> ${log_sos_display}<br>
-                    <strong>Pension:</strong> ${log_pension_display}, <strong>TK:</strong> ${entry.tk}, <strong>Family Type:</strong> ${entry.family}
-                    ${familyInfo}<br>
+                    <strong>Pension:</strong> ${log_pension_display}, <strong>TK:</strong> ${entry.tk}, ${familyLogLine}<br>
                     <strong class="text-blue-600">Current: Rs. ${Math.round(entry.pension_current || 0).toLocaleString('en-IN')}, Restored: Rs. ${Math.round(entry.pension_restored || 0).toLocaleString('en-IN')}, TK: Rs. ${(entry.tk_allowance || 0).toLocaleString('en-IN')}, Date: ${entry.restoration_date || 'N/A'}</strong><br>
                     <button class="load-log-btn text-xs bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2" 
                         data-rank="${entry.rank || ''}" 
@@ -906,6 +917,7 @@
                         data-family="${entry.family}"
                         data-family-name="${entry.family_pensioner_name || ''}"
                         data-family-cnic="${entry.family_pensioner_cnic || ''}"
+                        data-family-relation="${entry.relation_with_pensioner || 'Widow'}"
                     >Load this Data</button>
                     <button class="delete-log-btn text-xs bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2 ml-2" data-id="${entry.id}">Delete this Log</button>
                 </div>`;
@@ -917,7 +929,7 @@
             if (!isSupabaseEnabled) return;
             const rankInput = document.getElementById('rank');
             const log_rank = rankInput.value; 
-            const armsInput = document.getElementById('arms'); // New
+            const armsInput = document.getElementById('arms'); 
             const log_arms = armsInput.value;
 
             const nameInput = document.getElementById('name'); const pakNoInput = document.getElementById('pak-no'); const cnicInput = document.getElementById('cnic'); const accountNoInput = document.getElementById('account-no'); const bankBranchInput = document.getElementById('bank-branch'); const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const tkAwardInput = document.getElementById('tk-award'); const familyPensionInput = document.getElementById('family-pension');
@@ -925,11 +937,13 @@
             // New inputs
             const familyNameInput = document.getElementById('family-pensioner-name');
             const familyCnicInput = document.getElementById('family-pensioner-cnic');
+            const familyRelationInput = document.getElementById('family-relation');
 
             const log_name = nameInput.value; const log_pak_no = pakNoInput.value; const log_cnic = cnicInput.value; const log_account_no = accountNoInput.value; const log_bank_branch = bankBranchInput.value; const log_dob_raw = dobInput.value; const log_doe_raw = doeInput.value; const log_sos_raw = sosInput.value; const log_pension_raw = grossPensionInput.value.replace(/,/g, '') || '0'; const log_tk = tkAwardInput.value; const log_family = familyPensionInput.value;
             
             const log_family_name = familyNameInput.value;
             const log_family_cnic = familyCnicInput.value;
+            const log_family_relation = familyRelationInput.value;
 
             const now = new Date(); const day = String(now.getDate()).padStart(2, '0'); const month = String(now.getMonth() + 1).padStart(2, '0'); const year = now.getFullYear(); const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
             
@@ -937,7 +951,7 @@
                 displaytimestamp: `${day}-${month}-${year} ${time}`, 
                 triggersource: triggerSource, 
                 rank: log_rank, 
-                arms: log_arms, // Uncommented
+                arms: log_arms, // Enabled
                 name: log_name, 
                 pak_no: log_pak_no, 
                 cnic: log_cnic, 
@@ -949,8 +963,9 @@
                 pension_raw: log_pension_raw, 
                 tk: log_tk, 
                 family: log_family, 
-                family_pensioner_name: log_family_name, // Uncommented
-                family_pensioner_cnic: log_family_cnic, // Uncommented
+                family_pensioner_name: log_family_name, // Enabled
+                family_pensioner_cnic: log_family_cnic, // Enabled
+                relation_with_pensioner: log_family_relation, // Enabled
                 pension_current: currentCalculatedValues.pensionCurrent, 
                 pension_restored: currentCalculatedValues.pensionRestored, 
                 restoration_date: currentCalculatedValues.restorationDate, 
@@ -1036,15 +1051,30 @@
             const data = button.dataset;
             const rankInput = document.getElementById('rank'); 
             const savedRank = data.rank || '';
-            const armsInput = document.getElementById('arms'); // New
+            const armsInput = document.getElementById('arms'); 
             
-            let optionFound = false; for (let i = 0; i < rankInput.options.length; i++) { if (rankInput.options[i].value === savedRank) { rankInput.selectedIndex = i; optionFound = true; break; } }
-            if (!optionFound) { rankInput.selectedIndex = 0; }
-
-            // Set Arms
+            // Set Arms first to populate correct ranks
             if (data.arms) {
                 armsInput.value = data.arms;
-                updateArmsUI(); // Trigger UI update
+                updateArmsUI(); // Trigger UI update, populates ranks
+            } else {
+                armsInput.value = 'PAF';
+                updateArmsUI();
+            }
+
+            // Now set Rank - Logic moved here so options exist
+            let optionFound = false; 
+            for (let i = 0; i < rankInput.options.length; i++) { 
+                if (rankInput.options[i].value === savedRank) { 
+                    rankInput.selectedIndex = i; 
+                    optionFound = true; 
+                    break; 
+                } 
+            }
+            if (!optionFound) { 
+                // Try strictly setting value if loop fails (sometimes safer)
+                rankInput.value = savedRank;
+                if (rankInput.selectedIndex === -1) rankInput.selectedIndex = 0; 
             }
 
             document.getElementById('name').value = data.name || ''; document.getElementById('pak-no').value = data.pakNo || ''; document.getElementById('cnic').value = data.cnic || ''; document.getElementById('account-no').value = data.accountNo || ''; document.getElementById('bank-branch').value = data.bankBranch || ''; document.getElementById('dob').value = data.dob || ''; document.getElementById('doe').value = data.doe || ''; document.getElementById('sos').value = data.sos || '';
@@ -1055,6 +1085,7 @@
             // Set Family Fields
             document.getElementById('family-pensioner-name').value = data.familyName || '';
             document.getElementById('family-pensioner-cnic').value = data.familyCnic || '';
+            document.getElementById('family-relation').value = data.familyRelation || 'Widow';
 
             checkInputEnabling(); calculateAndDisplayAll();
             if (isSupabaseEnabled) { clearTimeout(logDebounceTimer); if (document.getElementById('dob').value && document.getElementById('doe').value && document.getElementById('sos').value && grossPensionInput.value) { logDebounceTimer = setTimeout(() => { logCalculation('Load Log Data (Debounced)'); }, LOG_DEBOUNCE_DELAY); } }
@@ -1215,14 +1246,56 @@
             const familyPensionVal = familyPensionInput.value;
             const grpFamilyName = document.getElementById('grp-family-name');
             const grpFamilyCnic = document.getElementById('grp-family-cnic');
+            const grpFamilyRelation = document.getElementById('grp-family-relation');
+            
             if (familyPensionVal === 'Yes') {
                 grpFamilyName.style.display = 'block';
                 grpFamilyCnic.style.display = 'block';
+                grpFamilyRelation.style.display = 'block';
             } else {
                 grpFamilyName.style.display = 'none';
                 grpFamilyCnic.style.display = 'none';
+                grpFamilyRelation.style.display = 'none';
                 document.getElementById('family-pensioner-name').value = ''; 
                 document.getElementById('family-pensioner-cnic').value = '';
+                document.getElementById('family-relation').selectedIndex = 0;
+            }
+        }
+
+        // --- NEW: Update Ranks based on Arms ---
+        function updateRanks() {
+            const armsSelect = document.getElementById('arms');
+            const rankSelect = document.getElementById('rank');
+            const selectedArm = armsSelect.value;
+            
+            // Save current selection if possible, though often it's best to reset or smart-map
+            // For simplicity, we'll reset or keep index 0 unless same value exists
+            const currentRank = rankSelect.value;
+
+            // Clear existing options
+            rankSelect.innerHTML = '<option value="" disabled selected>Select</option>';
+
+            let ranks = [];
+            if (selectedArm === 'Army') {
+                // Low to High as requested (Start with Sep)
+                ranks = ['Sep', 'L/NK', 'NK', 'Hav', 'Nb Sub', 'Sub', 'Sub Maj', 'Lt (Hon)', 'Capt (Hon)'];
+            } else if (selectedArm === 'Navy') {
+                // Low to High as requested (Start with Seaman)
+                ranks = ['Seaman', 'Able Seaman', 'Ledg Seaman', 'PO', 'CPO', 'FCPO', 'MCPO', 'Sub Lt (Hon)', 'Lt (Hon)'];
+            } else {
+                // PAF - Low to High as requested (Start with SAC)
+                ranks = ['SAC', 'Jnr Tech', 'Cpl Tech', 'Snr Tech', 'Chf Tech', 'Asstt Wrt Off', 'Wrt Off', 'Chf Wrt Off', 'Flg Off (Hon)', 'Flt Lt (Hon)'];
+            }
+
+            ranks.forEach(rank => {
+                const option = document.createElement('option');
+                option.value = rank;
+                option.textContent = rank;
+                rankSelect.appendChild(option);
+            });
+            
+            if (ranks.includes(currentRank)) {
+                rankSelect.value = currentRank;
             }
         }
 
@@ -1274,6 +1347,9 @@
             const labelText = (selectedArm === 'PAF') ? 'Pak No' : 'Service No';
             if (pakNoLabel) pakNoLabel.textContent = labelText;
             if (printPakNoLabel) printPakNoLabel.textContent = labelText + ':';
+            
+            // 4. Update Ranks List (New Requirement)
+            updateRanks();
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
