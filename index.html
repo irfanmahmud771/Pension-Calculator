@@ -80,7 +80,7 @@
             #print-area, #print-area * { visibility: visible; }
             #print-area { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 20px 40px; display: block !important; border: none; box-shadow: none; min-width: 0; }
             #print-area-wrapper { border: none; box-shadow: none; margin: 0; padding: 0; position: absolute; top: 0; left: 0; width: 100%; overflow: visible; }
-            .container > .logo-container, .container > header, .container > .grid, .container > .card, #app-warning, #password-modal, #print-preview-header { display: none !important; }
+            .container > .logo-container, .container > header, .container > .grid, .container > .card, #app-warning, #password-modal, #print-preview-header, #dob-verify-modal, #message-modal { display: none !important; }
         }
 
         .print-header { text-align: center; margin-bottom: 20px; position: relative; min-height: 130px; z-index: 1; }
@@ -181,7 +181,12 @@
                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                              <div class="input-group">
                                 <label for="pak-no" id="lbl-pak-no">Pak No</label>
-                                <input type="text" id="pak-no" class="calc-input" placeholder="e.g. 123456">
+                                <div class="flex gap-2">
+                                    <input type="text" id="pak-no" class="calc-input flex-grow" placeholder="e.g. 123456">
+                                    <button type="button" id="btn-load-data" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm whitespace-nowrap transition-colors">
+                                        Load Data
+                                    </button>
+                                </div>
                             </div>
                             <div class="input-group">
                                 <label for="cnic">CNIC</label>
@@ -421,6 +426,38 @@
             </div>
         </div>
     </div>
+
+    <!-- DOB VERIFICATION MODAL -->
+    <div id="dob-verify-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-lg font-bold mb-4">Verify Identity</h3>
+            <p class="text-sm text-gray-600 mb-4">Please enter your Date of Birth to load the data.</p>
+            <div class="input-group">
+                <label for="verify-dob-input">Date of Birth</label>
+                <input type="date" id="verify-dob-input" class="w-full">
+            </div>
+            <p id="verify-dob-error" class="text-red-500 text-sm mb-4" style="display: none;">Date of Birth does not match records.</p>
+            <div class="flex justify-end gap-3">
+                <button id="cancel-verify-btn" type="button" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors">
+                    Cancel
+                </button>
+                <button id="confirm-verify-btn" type="button" class="text-sm bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Verify & Load
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GENERIC MESSAGE MODAL -->
+    <div id="message-modal" class="modal-overlay">
+        <div class="modal-content text-center">
+            <h3 id="msg-modal-title" class="text-lg font-bold mb-2">Message</h3>
+            <p id="msg-modal-body" class="text-gray-700 mb-6"></p>
+            <button id="msg-modal-btn" type="button" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                OK
+            </button>
+        </div>
+    </div>
     
     <div class="container mx-auto p-4 md:p-8">
         <div id="print-area-wrapper">
@@ -552,8 +589,6 @@
 
     <script type="module">
         // --- MODIFIED IMPORT BLOCK ---
-        // Instead of importing from a CDN module that might cause ESM issues,
-        // we use the global variable 'supabase' that is loaded via the script tag in <head>.
         const { createClient } = window.supabase;
         
         const SUPABASE_URL = "https://xyfibnqodbisyykjrrbs.supabase.co";
@@ -564,6 +599,7 @@
         let logDebounceTimer = null;
         const LOG_DEBOUNCE_DELAY = 10000; 
         let passwordAction = ''; // 'show' or 'clear'
+        let pendingLoadData = null; // Temp storage for verification
 
         // --- DEFINE CONSTANTS AND HELPERS ---
 
@@ -1051,7 +1087,7 @@
             const data = button.dataset;
             const rankInput = document.getElementById('rank'); 
             const savedRank = data.rank || '';
-            const armsInput = document.getElementById('arms'); 
+            const armsInput = document.getElementById('arms'); // New
             
             // Set Arms first to populate correct ranks
             if (data.arms) {
@@ -1454,6 +1490,139 @@
                 }); 
                 
                 passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { handlePasswordSubmit(); } }); 
+                
+                // --- NEW BUTTON LISTENER ---
+                const btnLoadData = document.getElementById('btn-load-data');
+                if (btnLoadData) {
+                    btnLoadData.addEventListener('click', async () => {
+                        const pakNoInput = document.getElementById('pak-no');
+                        const pakNo = pakNoInput.value.trim();
+                        
+                        if (!pakNo) {
+                             openMessageModal("Input Required", "Please enter a Pak No to search.");
+                             return;
+                        }
+
+                        // Show some loading state if needed
+                        btnLoadData.disabled = true;
+                        btnLoadData.textContent = "Loading...";
+
+                        try {
+                            const { data, error } = await supabaseClient
+                                .from('logs')
+                                .select('*')
+                                .eq('pak_no', pakNo)
+                                .order('created_at', { ascending: false })
+                                .limit(1)
+                                .maybeSingle();
+
+                            if (error) throw error;
+
+                            if (!data) {
+                                openMessageModal("No Data Found", "No Data Found. Enter Now.");
+                            } else {
+                                // Data found, open DOB verification modal
+                                pendingLoadData = data;
+                                openDobVerifyModal();
+                            }
+                        } catch (err) {
+                            console.error("Error loading data:", err);
+                            openMessageModal("Error", "Failed to load data. Please check your connection.");
+                        } finally {
+                            btnLoadData.disabled = false;
+                            btnLoadData.textContent = "Load Data";
+                        }
+                    });
+                }
+                
+                // DOB Verify Modal Listeners
+                const dobVerifyModal = document.getElementById('dob-verify-modal');
+                const cancelVerifyBtn = document.getElementById('cancel-verify-btn');
+                const confirmVerifyBtn = document.getElementById('confirm-verify-btn');
+                const verifyDobInput = document.getElementById('verify-dob-input');
+                const verifyDobError = document.getElementById('verify-dob-error');
+
+                // Open Modal Helper
+                window.openDobVerifyModal = () => {
+                    verifyDobInput.value = '';
+                    verifyDobError.style.display = 'none';
+                    dobVerifyModal.classList.add('visible');
+                    verifyDobInput.focus();
+                };
+
+                // Close Modal Helper
+                const closeDobVerifyModal = () => {
+                    dobVerifyModal.classList.remove('visible');
+                    pendingLoadData = null;
+                };
+
+                cancelVerifyBtn.addEventListener('click', closeDobVerifyModal);
+
+                confirmVerifyBtn.addEventListener('click', () => {
+                    const enteredDob = verifyDobInput.value;
+                    if (!enteredDob) {
+                        verifyDobError.textContent = "Please select a date.";
+                        verifyDobError.style.display = 'block';
+                        return;
+                    }
+
+                    if (pendingLoadData && pendingLoadData.dob_raw === enteredDob) {
+                        // Match! Load data
+                        // We reuse the logic from 'loadLogData' button but pass raw object
+                        // We need a slight adapter since loadLogData expects a button with dataset
+                        
+                        // Create a fake button with dataset to reuse loadLogData logic easily
+                        // Or better, refactor loadLogData to accept data object. 
+                        // To minimize risk, I'll update loadLogData to handle both.
+                        
+                        // Let's call loadLogData with a special object
+                        const mockButton = {
+                            dataset: {
+                                rank: pendingLoadData.rank,
+                                arms: pendingLoadData.arms,
+                                name: pendingLoadData.name,
+                                pakNo: pendingLoadData.pak_no,
+                                cnic: pendingLoadData.cnic,
+                                accountNo: pendingLoadData.account_no,
+                                bankBranch: pendingLoadData.bank_branch,
+                                dob: pendingLoadData.dob_raw,
+                                doe: pendingLoadData.doe_raw,
+                                sos: pendingLoadData.sos_raw,
+                                pension: pendingLoadData.pension_raw,
+                                tk: pendingLoadData.tk,
+                                family: pendingLoadData.family,
+                                familyName: pendingLoadData.family_pensioner_name,
+                                familyCnic: pendingLoadData.family_pensioner_cnic,
+                                familyRelation: pendingLoadData.relation_with_pensioner
+                            }
+                        };
+                        
+                        loadLogData(mockButton);
+                        closeDobVerifyModal();
+                        openMessageModal("Success", "Data loaded successfully.");
+                    } else {
+                        verifyDobError.textContent = "Date of Birth does not match records.";
+                        verifyDobError.style.display = 'block';
+                    }
+                });
+
+                // Message Modal Helpers
+                const msgModal = document.getElementById('message-modal');
+                const msgTitle = document.getElementById('msg-modal-title');
+                const msgBody = document.getElementById('msg-modal-body');
+                const msgBtn = document.getElementById('msg-modal-btn');
+
+                window.openMessageModal = (title, body) => {
+                    msgTitle.textContent = title;
+                    msgBody.textContent = body;
+                    msgModal.classList.add('visible');
+                    msgBtn.focus();
+                };
+
+                msgBtn.addEventListener('click', () => {
+                    msgModal.classList.remove('visible');
+                });
+
             } else { 
                 clearLogBtn.style.display = 'none'; 
                 showLogBtn.style.display = 'none';
