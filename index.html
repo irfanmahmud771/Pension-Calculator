@@ -207,7 +207,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <div class="input-group">
                             <label for="dob">Date of Birth (DOB)</label>
-                            <input type="date" id="dob" class="calc-input">
+                            <input type="date" id="dob" class="calc-input" disabled>
                             <div id="dob-display" class="text-xs text-gray-500 mt-1"></div>
                         </div>
                         <div class="input-group">
@@ -1124,6 +1124,10 @@
             document.getElementById('family-relation').value = data.familyRelation || 'Widow';
 
             checkInputEnabling(); calculateAndDisplayAll();
+            
+            // Explicitly enable DOB since data is loaded (view/edit mode)
+            document.getElementById('dob').disabled = false;
+
             if (isSupabaseEnabled) { clearTimeout(logDebounceTimer); if (document.getElementById('dob').value && document.getElementById('doe').value && document.getElementById('sos').value && grossPensionInput.value) { logDebounceTimer = setTimeout(() => { logCalculation('Load Log Data (Debounced)'); }, LOG_DEBOUNCE_DELAY); } }
         }
 
@@ -1397,6 +1401,56 @@
             const showLogBtn = document.getElementById('show-log-btn');
             const sosInput = document.getElementById('sos');
             const armsSelect = document.getElementById('arms');
+            const dobInput = document.getElementById('dob');
+
+            // --- 1. SET DOB INITIALLY DISABLED ---
+            if (dobInput) dobInput.disabled = true;
+
+            // --- 2. PAK NO BLUR LISTENER ---
+            const pakNoInput = document.getElementById('pak-no');
+            if (pakNoInput && dobInput) {
+                pakNoInput.addEventListener('blur', async () => {
+                    const pakNo = pakNoInput.value.trim();
+                    
+                    // If empty, disable DOB
+                    if (!pakNo) {
+                        dobInput.disabled = true;
+                        return;
+                    }
+
+                    // Only check if Supabase is enabled
+                    if (isSupabaseEnabled) {
+                        try {
+                            const { data, error } = await supabaseClient
+                                .from('logs')
+                                .select('pak_no')
+                                .eq('pak_no', pakNo)
+                                .limit(1)
+                                .maybeSingle();
+
+                            if (error) throw error;
+
+                            if (data) {
+                                // Exists
+                                const selectedArm = document.getElementById('arms').value;
+                                const label = (selectedArm === 'Army' || selectedArm === 'Navy') ? 'Service No' : 'Pak No';
+                                openMessageModal("Attention", `${label} ${pakNo} already exists. Use "Load Data" button or enter New.`);
+                                dobInput.disabled = true; 
+                            } else {
+                                // Not found (New)
+                                dobInput.disabled = false;
+                            }
+                        } catch (err) {
+                            console.error("Validation error:", err);
+                            // Fallback on error: allow input to prevent blocking user
+                            dobInput.disabled = false; 
+                        }
+                    } else {
+                        // Offline mode
+                        dobInput.disabled = false;
+                    }
+                });
+            }
 
             // SOS Validation Logic: Prevent future dates
             if (sosInput) {
@@ -1568,13 +1622,6 @@
 
                     if (pendingLoadData && pendingLoadData.dob_raw === enteredDob) {
                         // Match! Load data
-                        // We reuse the logic from 'loadLogData' button but pass raw object
-                        // We need a slight adapter since loadLogData expects a button with dataset
-                        
-                        // Create a fake button with dataset to reuse loadLogData logic easily
-                        // Or better, refactor loadLogData to accept data object. 
-                        // To minimize risk, I'll update loadLogData to handle both.
-                        
                         // Let's call loadLogData with a special object
                         const mockButton = {
                             dataset: {
