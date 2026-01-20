@@ -175,7 +175,7 @@
                             </div>
                              <div class="input-group md:col-span-2">
                                 <label for="name">Name</label>
-                                <input type="text" id="name" class="calc-input" placeholder="Full Name" maxlength="20" style="text-transform: uppercase;">
+                                <input type="text" id="name" class="calc-input" placeholder="Full Name" maxlength="21" style="text-transform: uppercase;">
                             </div>
                          </div>
                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -249,7 +249,7 @@
                         <!-- NEW INPUT FIELDS FOR FAMILY PENSIONER -->
                         <div class="input-group" id="grp-family-name" style="display: none;">
                             <label for="family-pensioner-name">Family Pensioner Name</label>
-                            <input type="text" id="family-pensioner-name" class="calc-input" placeholder="W/D/S Name" maxlength="20" style="text-transform: uppercase;">
+                            <input type="text" id="family-pensioner-name" class="calc-input" placeholder="W/D/S Name" maxlength="21" style="text-transform: uppercase;">
                         </div>
                         <div class="input-group" id="grp-family-cnic" style="display: none;">
                             <label for="family-pensioner-cnic">Family Pensioner CNIC</label>
@@ -720,33 +720,56 @@
                     commutationFactor = factorsToUse[ageNextBirthday] || 0; const roundedCommutationFactor = Math.round(commutationFactor); restorationDate = new Date(sosDate); restorationDate.setUTCDate(restorationDate.getUTCDate() + 1); restorationDate.setUTCFullYear(restorationDate.getUTCFullYear() + roundedCommutationFactor);
                 }
                 
-                let grossPension = grossPensionPPO; if (isFamilyPension) { grossPension = roundToTwoDecimals(grossPensionPPO * 0.75); }
-                let commutedPensionPercentage = 0;
-                if (sosDate) { const date2005 = parseDate('2005-06-30'); const date2001 = parseDate('2001-11-30'); if (sosDate > date2005) commutedPensionPercentage = 0.35; else if (sosDate > date2001) commutedPensionPercentage = 0.40; else commutedPensionPercentage = 0.50; }
-                const commutedPension = roundToTwoDecimals(grossPension * commutedPensionPercentage);
-                const basePension = roundToTwoDecimals(grossPension - commutedPension);
-                const commutationAmount = roundToTwoDecimals(grossPensionPPO * commutedPensionPercentage * commutationFactor * 12);
+                // Initialize default values
+                let grossPension = 0;
+                let basePension = 0;
+                let commutedPension = 0;
+                let commutationAmount = 0;
+                let finalPensionCurrent = 0;
+                let finalPensionRestored = 0;
+                let tkAllowance = 0;
+                let totalPayableCurrent = 0;
+                let totalPayableRestored = 0;
+                let netValues = { current: [], restored: [], sumIncreasesCurrent: 0, sumIncreasesRestored: 0, tableData: [] };
 
-                const netValues = populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension);
-                
-                // UPDATED LOGIC START
-                // Pension (Current) formula be the maximum amount in current NET
-                let maxNetCurrent = basePension;
-                if (netValues.current && netValues.current.length > 0) {
-                    maxNetCurrent = Math.max(basePension, ...netValues.current);
+                // Only calculate if Gross Pension is > 0
+                if (grossPensionPPO > 0) {
+                     grossPension = grossPensionPPO; 
+                     if (isFamilyPension) { grossPension = roundToTwoDecimals(grossPensionPPO * 0.75); }
+                     
+                     let commutedPensionPercentage = 0;
+                     if (sosDate) { const date2005 = parseDate('2005-06-30'); const date2001 = parseDate('2001-11-30'); if (sosDate > date2005) commutedPensionPercentage = 0.35; else if (sosDate > date2001) commutedPensionPercentage = 0.40; else commutedPensionPercentage = 0.50; }
+                     
+                     commutedPension = roundToTwoDecimals(grossPension * commutedPensionPercentage);
+                     basePension = roundToTwoDecimals(grossPension - commutedPension);
+                     commutationAmount = roundToTwoDecimals(grossPensionPPO * commutedPensionPercentage * commutationFactor * 12);
+
+                     netValues = populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension);
+                    
+                    // UPDATED LOGIC START
+                    // Pension (Current) formula be the maximum amount in current NET
+                    let maxNetCurrent = basePension;
+                    if (netValues.current && netValues.current.length > 0) {
+                        maxNetCurrent = Math.max(basePension, ...netValues.current);
+                    }
+                    finalPensionCurrent = Math.round(maxNetCurrent); 
+
+                    // Pension (After Restoration) be maximum amount in Restoration NET
+                    let maxNetRestored = grossPension;
+                    if (netValues.restored && netValues.restored.length > 0) {
+                        maxNetRestored = Math.max(grossPension, ...netValues.restored);
+                    }
+                    finalPensionRestored = Math.round(maxNetRestored);
+                    // UPDATED LOGIC END
+
+                    if (tkAward === '1') tkAllowance = 170; else if (tkAward === '2') tkAllowance = 130; else if (tkAward === '3') tkAllowance = 70;
+                    totalPayableCurrent = finalPensionCurrent + tkAllowance; 
+                    totalPayableRestored = finalPensionRestored + tkAllowance;
+                } else {
+                    // Clear table if 0
+                    const tbody = document.getElementById('increase-table-body');
+                    if (tbody) tbody.innerHTML = '';
                 }
-                let finalPensionCurrent = Math.round(maxNetCurrent); 
-
-                // Pension (After Restoration) be maximum amount in Restoration NET
-                let maxNetRestored = grossPension;
-                if (netValues.restored && netValues.restored.length > 0) {
-                    maxNetRestored = Math.max(grossPension, ...netValues.restored);
-                }
-                let finalPensionRestored = Math.round(maxNetRestored);
-                // UPDATED LOGIC END
-
-                let tkAllowance = 0; if (tkAward === '1') tkAllowance = 170; else if (tkAward === '2') tkAllowance = 130; else if (tkAward === '3') tkAllowance = 70;
-                let totalPayableCurrent = finalPensionCurrent + tkAllowance; let totalPayableRestored = finalPensionRestored + tkAllowance;
 
                 document.getElementById('qs-output').textContent = `${roundedQS} Years`; document.getElementById('age-at-sos-output').textContent = `${ageNextBirthday} Years`; document.getElementById('commutation-factor-output').textContent = commutationFactor.toFixed(4); document.getElementById('gross-pension-output').textContent = formatCurrency(grossPension); document.getElementById('net-pension-pre-increase-output').textContent = formatCurrency(basePension); document.getElementById('commuted-pension-output').textContent = formatCurrency(commutedPension); document.getElementById('commutation-amount-output').textContent = formatCurrency(commutationAmount);
                 document.getElementById('pension-pm-current-output').textContent = formatCurrency(finalPensionCurrent, true); document.getElementById('pension-pm-restored-output').textContent = formatCurrency(finalPensionRestored, true); document.getElementById('tk-allowance-current-output').textContent = formatCurrency(tkAllowance);
@@ -756,11 +779,25 @@
                 const todayForPrint = new Date(); todayForPrint.setMonth(todayForPrint.getMonth() - 1); document.getElementById('print-month-year').textContent = todayForPrint.toLocaleString('default', { month: 'long', year: 'numeric' });
                 const today = parseDate(getTodayDateString()); const isRestored = restorationDate && restorationDate <= today;
                 const pensionLabel = isFamilyPension ? "Monthly Pension - Family" : "Monthly Pension - Self"; document.getElementById('print-pension-label').textContent = pensionLabel;
-                const pensionValue = isRestored ? grossPension : basePension; document.getElementById('print-pension-amount').textContent = formatCurrency(pensionValue, false, true);
+                
+                // Print Preview updates - use 0/- if grossPensionPPO <= 0
+                const pensionValue = isRestored ? grossPension : basePension; 
+                document.getElementById('print-pension-amount').textContent = (grossPensionPPO > 0) ? formatCurrency(pensionValue, false, true) : '-';
+                
                 const increaseLabel = isFamilyPension ? "Pension Increase - Family" : "Pension Increase - Self"; document.getElementById('print-increase-label').textContent = increaseLabel;
-                let increaseAmount = isRestored ? netValues.sumIncreasesRestored : netValues.sumIncreasesCurrent; document.getElementById('print-increase-amount').textContent = formatCurrency(increaseAmount, false, true);
-                const tkRow = document.getElementById('print-row-tk'); if (tkAllowance > 0) { tkRow.style.display = ''; document.getElementById('print-tk').textContent = formatCurrency(tkAllowance, false, true); } else { tkRow.style.display = 'none'; }
-                const totalPayable = isRestored ? totalPayableRestored : totalPayableCurrent; document.getElementById('print-total-payable').textContent = formatCurrency(totalPayable, true, true);
+                let increaseAmount = isRestored ? netValues.sumIncreasesRestored : netValues.sumIncreasesCurrent; 
+                document.getElementById('print-increase-amount').textContent = (grossPensionPPO > 0) ? formatCurrency(increaseAmount, false, true) : '-';
+                
+                const tkRow = document.getElementById('print-row-tk'); 
+                if (tkAllowance > 0) { 
+                    tkRow.style.display = ''; 
+                    document.getElementById('print-tk').textContent = formatCurrency(tkAllowance, false, true); 
+                } else { 
+                    tkRow.style.display = 'none'; 
+                }
+                
+                const totalPayable = isRestored ? totalPayableRestored : totalPayableCurrent; 
+                document.getElementById('print-total-payable').textContent = (grossPensionPPO > 0) ? formatCurrency(totalPayable, true, true) : '-';
                 
                 const rows = document.querySelectorAll('#print-table-body tr'); let serial = 1; rows.forEach(row => { if (row.style.display !== 'none') { const sNoCell = row.querySelector('td.serial-cell'); if (sNoCell) { sNoCell.textContent = serial++; } } });
                 
@@ -787,7 +824,8 @@
                 const detailsTable = document.querySelector('.details-table');
                 const detailsHeadRow = detailsTable.querySelector('thead tr');
 
-                if (detailsTableBody && netValues.tableData) {
+                // Only populate print table details if grossPensionPPO > 0
+                if (grossPensionPPO > 0 && detailsTableBody && netValues.tableData) {
                     detailsTableBody.innerHTML = ''; // Clear
                     
                     const entitledData = netValues.tableData.filter(d => d.entitled === 'Y');
@@ -886,6 +924,8 @@
                             addCells(row, dataItem, index + 1, false);
                         });
                     }
+                } else if (detailsTableBody) {
+                     detailsTableBody.innerHTML = ''; // Clear print table if 0
                 }
 
                 const restorationOutputSpan = document.getElementById('restoration-date-output'); const restorationDateFormatted = restorationDate ? formatDateDisplay(restorationDate) : 'N/A'; restorationOutputSpan.textContent = restorationDateFormatted;
