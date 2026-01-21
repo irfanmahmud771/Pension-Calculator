@@ -1196,7 +1196,7 @@
                 
                  if (sosDate) {
                     if (year === 1991) { if (sosDate > date1977_04_30) percentageToDisplay = '12%'; else if (sosDate < date1977_05_01) percentageToDisplay = '32%'; else percentageToDisplay = '0%'; } 
-                    else if (year === 1995) { if (sosDate > date1947_08_14 && sosDate < date1977_04_30) percentageToDisplay = '15%'; else if (sosDate > date1977_04_30 && sosDate < date1991_06_01) percentageToDisplay = '10%'; else if (sosDate < date1993_06_01) percentageToDisplay = '5%'; else percentageToDisplay = '0%'; }
+                    else if (year === 1995) { if (sosDate > date1947_08_14 && sosDate < date1977_04_30) percentageToDisplay = '15%'; else if (sosDate > date1977_05_01 && sosDate < date1991_06_01) percentageToDisplay = '10%'; else if (sosDate < date1993_06_01) percentageToDisplay = '5%'; else percentageToDisplay = '0%'; }
                     else if (year === 2001) { if (sosDate > date1993_06_30 && sosDate < date2001_12_01) percentageToDisplay = '5%'; else if (sosDate > date1991_05_31 && sosDate < date1993_07_01) percentageToDisplay = '10%'; else if (sosDate < date1991_06_01) percentageToDisplay = '15%'; else percentageToDisplay = '0%'; }
                     else if (year === 2004) { if (sosDate > date1994_06_30) percentageToDisplay = '8%'; else if (sosDate < date1994_07_01) percentageToDisplay = '16%'; else percentageToDisplay = '0%'; }
                     else if (year === 2006) { if (sosDate > date1977_04_30_2006) percentageToDisplay = '15%'; else if (sosDate < date1977_05_01_2006) percentageToDisplay = '20%'; else percentageToDisplay = '0%'; }
@@ -1311,6 +1311,11 @@
                 const netCellRestored = row.insertCell(); netCellRestored.textContent = isNetCalculatedRestored ? formatCurrency(restoredNetValue, false, true) : '-'; if (minPensionAppliedRestored) netCellRestored.classList.add('text-blue-600', 'font-bold');
                 row.insertCell().textContent = isEntitled;
                 row.cells[8].classList.add('hidden-column'); row.insertCell().textContent = formatDateTable(item.from); row.cells[9].classList.add('hidden-column'); row.insertCell().textContent = formatDateTable(item.to); row.cells[10].classList.add('hidden-column'); row.insertCell().textContent = minPensionSelf > 0 ? formatCurrency(minPensionSelf, false, true) : '-'; row.cells[11].classList.add('hidden-column'); row.insertCell().textContent = minPensionFamily > 0 ? formatCurrency(minPensionFamily, false, true) : '-'; row.cells[12].classList.add('hidden-column');
+            
+                // --- NEW REQUIREMENT: Hide if %AGE is 0% ---
+                if (isEntitled === 'N' || percentageToDisplay === '0%') { 
+                    row.classList.add('hidden'); 
+                }
             });
             
             return { current: currentNetValues, restored: restoredNetValues, sumIncreasesCurrent: totalAccumulatedIncreaseCurrent, sumIncreasesRestored: totalAccumulatedIncreaseRestored, tableData: detailedData };
