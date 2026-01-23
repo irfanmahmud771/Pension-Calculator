@@ -1512,6 +1512,31 @@
                 });
             }
 
+            // Warning on Gross Pension Click/Focus
+            if (grossPensionInput) {
+                const warnGrossPension = () => {
+                   // Reuse message modal but style the title
+                   const msgTitle = document.getElementById('msg-modal-title');
+                   const msgBody = document.getElementById('msg-modal-body');
+                   const msgModal = document.getElementById('message-modal');
+                   
+                   msgTitle.textContent = "ATTENTION";
+                   msgTitle.className = "text-lg font-bold mb-2 text-red-600 flashing"; // Add red and flashing
+                   msgBody.textContent = "Please enter Gross Pension from PPO or Pension Book. Don't enter your current Pension";
+                   
+                   msgModal.classList.add('visible');
+                   
+                   // Reset classes when closed - attach a one-time listener to the button or handle in the close logic?
+                   // The existing close logic just removes 'visible'.
+                   // I need to ensure the title classes are reset for normal messages.
+                };
+                
+                // Add listener. To avoid spamming, maybe only if value is empty? 
+                // User query: "When clicked in..."
+                // I will use 'focus' as it covers click and tab.
+                grossPensionInput.addEventListener('focus', warnGrossPension);
+            }
+
             if (!allInputs.length || !grossPensionInput || !increasePensionBtn || !decreasePensionBtn || !clearLogBtn || !cancelClearBtn || !confirmClearBtn || !passwordInput || !logContainer || !showLogBtn) { console.error("CRITICAL ERROR: One or more required HTML elements are missing from the page."); showWarning("CRITICAL ERROR: Page HTML is incomplete. Please reload."); return; }
             
             // Initialize Arms UI
@@ -1713,6 +1738,8 @@
 
                 msgBtn.addEventListener('click', () => {
                     msgModal.classList.remove('visible');
+                    // Reset title style to default black when closing
+                    msgTitle.className = "text-lg font-bold mb-2";
                 });
 
             } else { 
