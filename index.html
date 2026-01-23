@@ -600,6 +600,7 @@
         const LOG_DEBOUNCE_DELAY = 10000; 
         let passwordAction = ''; // 'show' or 'clear'
         let pendingLoadData = null; // Temp storage for verification
+        let grossPensionWarningShown = false; // Flag for warning
 
         // --- DEFINE CONSTANTS AND HELPERS ---
 
@@ -1515,20 +1516,22 @@
             // Warning on Gross Pension Click/Focus
             if (grossPensionInput) {
                 const warnGrossPension = () => {
-                   // Reuse message modal but style the title
-                   const msgTitle = document.getElementById('msg-modal-title');
-                   const msgBody = document.getElementById('msg-modal-body');
-                   const msgModal = document.getElementById('message-modal');
-                   
-                   msgTitle.textContent = "ATTENTION";
-                   msgTitle.className = "text-lg font-bold mb-2 text-red-600 flashing"; // Add red and flashing
-                   msgBody.textContent = "Please enter Gross Pension from PPO or Pension Book. Don't enter your current Pension";
-                   
-                   msgModal.classList.add('visible');
-                   
-                   // Reset classes when closed - attach a one-time listener to the button or handle in the close logic?
-                   // The existing close logic just removes 'visible'.
-                   // I need to ensure the title classes are reset for normal messages.
+                    if (grossPensionWarningShown) return; // Exit if already shown
+
+                    grossPensionInput.blur(); // Disable entry (remove focus)
+                    
+                    // Show modal logic
+                    const msgTitle = document.getElementById('msg-modal-title');
+                    const msgBody = document.getElementById('msg-modal-body');
+                    const msgModal = document.getElementById('message-modal');
+                    
+                    msgTitle.textContent = "ATTENTION";
+                    msgTitle.className = "text-lg font-bold mb-2 text-red-600 flashing";
+                    msgBody.textContent = "Please enter Gross Pension from PPO or Pension Book. Don't enter your current Pension";
+                    
+                    msgModal.classList.add('visible');
+                    
+                    grossPensionWarningShown = true; // Set flag so it doesn't show again
                 };
                 
                 // Add listener. To avoid spamming, maybe only if value is empty? 
