@@ -829,7 +829,8 @@
                 if (grossPensionPPO > 0 && detailsTableBody && netValues.tableData) {
                     detailsTableBody.innerHTML = ''; // Clear
                     
-                    const entitledData = netValues.tableData.filter(d => d.entitled === 'Y');
+                    // --- MODIFIED FILTER: Check for entitled='Y' AND percentage not '0%' ---
+                    const entitledData = netValues.tableData.filter(d => d.entitled === 'Y' && d.percentage !== '0%');
                     const totalRows = entitledData.length;
 
                     const addCells = (row, dataItem, serial, isRightSide) => {
