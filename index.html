@@ -710,7 +710,40 @@
                 const currentRank = rankInput.value; 
                 document.getElementById('print-rank').textContent = currentRank;
                 const dobDate = parseDate(dobInput.value); const doeDate = parseDate(doeInput.value); const sosDate = parseDate(sosInput.value); const tkAward = tkAwardInput.value; const isFamilyPension = familyPensionInput.value === 'Yes'; const grossPensionPPO = parseFloat(grossPensionInput.value.replace(/,/g, '')) || 0;
-                document.getElementById('dob-display').textContent = formatDateDisplay(dobDate); document.getElementById('doe-display').textContent = formatDateDisplay(doeDate); document.getElementById('sos-display').textContent = formatDateDisplay(sosDate);
+                
+                // --- MODIFICATION 1: Age Display ---
+                let ageString = '';
+                if (dobInput.value) {
+                    const parts = dobInput.value.split('-');
+                    const dY = parseInt(parts[0], 10);
+                    const dM = parseInt(parts[1], 10) - 1;
+                    const dD = parseInt(parts[2], 10);
+                    
+                    const now = new Date();
+                    let ageY = now.getFullYear() - dY;
+                    let ageM = now.getMonth() - dM;
+                    let ageD = now.getDate() - dD;
+                    
+                    if (ageD < 0) {
+                        ageM--;
+                    }
+                    if (ageM < 0) {
+                        ageY--;
+                        ageM += 12;
+                    }
+                    ageString = `(Age ${ageY} Y ${ageM} M)`;
+                }
+                
+                const dobFormatted = formatDateDisplay(dobDate);
+                // Update display to show Date AND Age on new line
+                const dobDisplayElement = document.getElementById('dob-display');
+                if (dobInput.value) {
+                    dobDisplayElement.innerHTML = `${dobFormatted}<br>${ageString}`;
+                } else {
+                    dobDisplayElement.textContent = dobFormatted; // "N/A" or empty
+                }
+
+                document.getElementById('doe-display').textContent = formatDateDisplay(doeDate); document.getElementById('sos-display').textContent = formatDateDisplay(sosDate);
 
                 let roundedQS = 0; let ageNextBirthday = 0; let commutationFactor = 0; let restorationDate = null;
                 if (doeDate && sosDate) {
@@ -718,7 +751,11 @@
                     if (dobDate) { const sosPlusOneDay = new Date(sosDate); sosPlusOneDay.setUTCDate(sosPlusOneDay.getUTCDate() + 1); const ageAtSOSInYears = (sosPlusOneDay - dobDate) / (1000 * 60 * 60 * 24 * 365.25); ageNextBirthday = Math.ceil(ageAtSOSInYears); }
                     let factorsToUse = null; const policyDate2001 = parseDate('2001-12-01'); const policyDate1986 = parseDate('1986-07-01');
                     if (sosDate >= policyDate2001) factorsToUse = factors_2001_12_01; else if (sosDate >= policyDate1986) factorsToUse = factors_1986_07_01; else factorsToUse = factors_1966_07_01;
-                    commutationFactor = factorsToUse[ageNextBirthday] || 0; const roundedCommutationFactor = Math.round(commutationFactor); restorationDate = new Date(sosDate); restorationDate.setUTCDate(restorationDate.getUTCDate() + 1); restorationDate.setUTCFullYear(restorationDate.getUTCFullYear() + roundedCommutationFactor);
+                    commutationFactor = factorsToUse[ageNextBirthday] || 0; const roundedCommutationFactor = Math.round(commutationFactor); 
+                    restorationDate = new Date(sosDate); 
+                    // --- MODIFICATION 2: Remove +1 Day ---
+                    // restorationDate.setUTCDate(restorationDate.getUTCDate() + 1);
+                    restorationDate.setUTCFullYear(restorationDate.getUTCFullYear() + roundedCommutationFactor);
                 }
                 
                 // Initialize default values
@@ -1213,6 +1250,19 @@
 
                 let currentBaseLine = previousNetValueCurrent; let currentIncreaseValue = 0; let currentNetValue = currentBaseLine; let baseLineDisplayCurrent = '-';
                 let restoredBaseLine = previousNetValueRestored; let restoredIncreaseValue = 0; let restoredNetValue = restoredBaseLine; let baseLineDisplayRestored = '-';
+                // --- Insert the age logic right BEFORE we start parsing percentages ---
+                if (year === 2016 && dobDate) {
+                     const todayDate = new Date();
+                     let currentAge = todayDate.getFullYear() - dobDate.getFullYear();
+                     const m = todayDate.getMonth() - dobDate.getMonth();
+                     if (m < 0 || (m === 0 && todayDate.getDate() < dobDate.getDate())) {
+                         currentAge--;
+                     }
+                     if (currentAge >= 85) {
+                         percentageToDisplay = '25%';
+                     }
+                }
+                
                 const percentageText = percentageToDisplay.replace('%', ''); const percentageValue = parseFloat(percentageText) / 100;
                 let isIncreaseCalculatedCurrent = false; let isNetCalculatedCurrent = false; let isIncreaseCalculatedRestored = false; let isNetCalculatedRestored = false;
                 const minPensionSelf = minPensionData[year] ? minPensionData[year].self : 0; const minPensionFamily = minPensionData[year] ? minPensionData[year].family : 0; const applicableMinPension = isFamilyPension ? minPensionFamily : minPensionSelf;
