@@ -266,6 +266,12 @@
                                 <option value="Sister">Sister</option>
                             </select>
                         </div>
+                        <!-- NEW: Family DOB Field -->
+                        <div class="input-group" id="grp-family-dob" style="display: none;">
+                            <label for="family-dob">Date of Birth (DOB) Family</label>
+                            <input type="date" id="family-dob" class="calc-input">
+                            <div id="family-dob-display" class="text-xs text-gray-500 mt-1"></div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -706,15 +712,27 @@
         function calculateAndDisplayAll() {
             try {
                 const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const tkAwardInput = document.getElementById('tk-award'); const familyPensionInput = document.getElementById('family-pension');
+                // NEW: Family DOB input
+                const familyDobInput = document.getElementById('family-dob');
+
                 const rankInput = document.getElementById('rank');
                 const currentRank = rankInput.value; 
                 document.getElementById('print-rank').textContent = currentRank;
-                const dobDate = parseDate(dobInput.value); const doeDate = parseDate(doeInput.value); const sosDate = parseDate(sosInput.value); const tkAward = tkAwardInput.value; const isFamilyPension = familyPensionInput.value === 'Yes'; const grossPensionPPO = parseFloat(grossPensionInput.value.replace(/,/g, '')) || 0;
                 
-                // --- MODIFICATION 1: Age Display ---
-                let ageString = '';
-                if (dobInput.value) {
-                    const parts = dobInput.value.split('-');
+                const dobDate = parseDate(dobInput.value); 
+                const doeDate = parseDate(doeInput.value); 
+                const sosDate = parseDate(sosInput.value); 
+                // NEW: Family DOB Date
+                const familyDobDate = parseDate(familyDobInput.value);
+                
+                const tkAward = tkAwardInput.value; 
+                const isFamilyPension = familyPensionInput.value === 'Yes'; 
+                const grossPensionPPO = parseFloat(grossPensionInput.value.replace(/,/g, '')) || 0;
+                
+                // Helper to calculate Age String
+                const getAgeDisplayString = (dateInputValue) => {
+                    if (!dateInputValue) return '';
+                    const parts = dateInputValue.split('-');
                     const dY = parseInt(parts[0], 10);
                     const dM = parseInt(parts[1], 10) - 1;
                     const dD = parseInt(parts[2], 10);
@@ -731,16 +749,27 @@
                         ageY--;
                         ageM += 12;
                     }
-                    ageString = `(Age ${ageY} Y ${ageM} M)`;
-                }
-                
+                    return `(Age ${ageY} Y ${ageM} M)`;
+                };
+
+                // --- MODIFICATION 1: Age Display (Pensioner) ---
+                let ageString = getAgeDisplayString(dobInput.value);
                 const dobFormatted = formatDateDisplay(dobDate);
-                // Update display to show Date AND Age on new line
                 const dobDisplayElement = document.getElementById('dob-display');
                 if (dobInput.value) {
                     dobDisplayElement.innerHTML = `${dobFormatted}<br>${ageString}`;
                 } else {
-                    dobDisplayElement.textContent = dobFormatted; // "N/A" or empty
+                    dobDisplayElement.textContent = dobFormatted; 
+                }
+
+                // --- MODIFICATION 2: Age Display (Family) ---
+                let familyAgeString = getAgeDisplayString(familyDobInput.value);
+                const familyDobFormatted = formatDateDisplay(familyDobDate);
+                const familyDobDisplayElement = document.getElementById('family-dob-display');
+                if (familyDobInput.value) {
+                    familyDobDisplayElement.innerHTML = `${familyDobFormatted}<br>${familyAgeString}`;
+                } else {
+                    familyDobDisplayElement.textContent = '';
                 }
 
                 document.getElementById('doe-display').textContent = formatDateDisplay(doeDate); document.getElementById('sos-display').textContent = formatDateDisplay(sosDate);
@@ -753,8 +782,6 @@
                     if (sosDate >= policyDate2001) factorsToUse = factors_2001_12_01; else if (sosDate >= policyDate1986) factorsToUse = factors_1986_07_01; else factorsToUse = factors_1966_07_01;
                     commutationFactor = factorsToUse[ageNextBirthday] || 0; const roundedCommutationFactor = Math.round(commutationFactor); 
                     restorationDate = new Date(sosDate); 
-                    // --- MODIFICATION 2: Remove +1 Day ---
-                    // restorationDate.setUTCDate(restorationDate.getUTCDate() + 1);
                     restorationDate.setUTCFullYear(restorationDate.getUTCFullYear() + roundedCommutationFactor);
                 }
                 
@@ -782,7 +809,8 @@
                      basePension = roundToTwoDecimals(grossPension - commutedPension);
                      commutationAmount = roundToTwoDecimals(grossPensionPPO * commutedPensionPercentage * commutationFactor * 12);
 
-                     netValues = populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension);
+                     // Pass familyDobDate to populateIncreaseTable
+                     netValues = populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension, familyDobDate);
                     
                     // UPDATED LOGIC START
                     // Pension (Current) formula be the maximum amount in current NET
@@ -1033,6 +1061,7 @@
                         data-family-name="${entry.family_pensioner_name || ''}"
                         data-family-cnic="${entry.family_pensioner_cnic || ''}"
                         data-family-relation="${entry.relation_with_pensioner || 'Widow'}"
+                        data-family-dob="${entry.family_dob_raw || ''}" 
                     >Load this Data</button>
                     <button class="delete-log-btn text-xs bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2 ml-2" data-id="${entry.id}">Delete this Log</button>
                 </div>`;
@@ -1053,12 +1082,15 @@
             const familyNameInput = document.getElementById('family-pensioner-name');
             const familyCnicInput = document.getElementById('family-pensioner-cnic');
             const familyRelationInput = document.getElementById('family-relation');
+            // NEW: Family DOB Input
+            const familyDobInput = document.getElementById('family-dob');
 
             const log_name = nameInput.value; const log_pak_no = pakNoInput.value; const log_cnic = cnicInput.value; const log_account_no = accountNoInput.value; const log_bank_branch = bankBranchInput.value; const log_dob_raw = dobInput.value; const log_doe_raw = doeInput.value; const log_sos_raw = sosInput.value; const log_pension_raw = grossPensionInput.value.replace(/,/g, '') || '0'; const log_tk = tkAwardInput.value; const log_family = familyPensionInput.value;
             
             const log_family_name = familyNameInput.value;
             const log_family_cnic = familyCnicInput.value;
             const log_family_relation = familyRelationInput.value;
+            const log_family_dob_raw = familyDobInput.value; // Store family dob
 
             const now = new Date(); const day = String(now.getDate()).padStart(2, '0'); const month = String(now.getMonth() + 1).padStart(2, '0'); const year = now.getFullYear(); const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
             
@@ -1081,6 +1113,7 @@
                 family_pensioner_name: log_family_name, // Enabled
                 family_pensioner_cnic: log_family_cnic, // Enabled
                 relation_with_pensioner: log_family_relation, // Enabled
+                family_dob_raw: log_family_dob_raw, // Enabled New
                 pension_current: currentCalculatedValues.pensionCurrent, 
                 pension_restored: currentCalculatedValues.pensionRestored, 
                 restoration_date: currentCalculatedValues.restorationDate, 
@@ -1201,6 +1234,7 @@
             document.getElementById('family-pensioner-name').value = data.familyName || '';
             document.getElementById('family-pensioner-cnic').value = data.familyCnic || '';
             document.getElementById('family-relation').value = data.familyRelation || 'Widow';
+            document.getElementById('family-dob').value = data.familyDob || ''; // New field
 
             checkInputEnabling(); calculateAndDisplayAll();
             
@@ -1216,7 +1250,8 @@
         function adjustPension(amount) { const grossPensionInput = document.getElementById('gross-pension-ppo'); const currentValue = parseFloat(grossPensionInput.value.replace(/,/g, '')) || 0; const newValue = Math.max(0, currentValue + amount); let newValueString = String(roundToTwoDecimals(newValue)); const parts = newValueString.split('.'); let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); grossPensionInput.value = parts.length > 1 ? integerPart + '.' + parts[1] : integerPart; grossPensionInput.dispatchEvent(new Event('input', { bubbles: true })); }
         function formatGrossPensionInput(event) { let input = event.target.value.replace(/[^0-9.]/g, ''); const parts = input.split('.'); if (parts.length > 2) { input = parts[0] + '.' + parts.slice(1).join(''); } if (parts.length === 2) { parts[1] = parts[1].substring(0, 2); input = parts.join('.'); } let integerPart = parts[0].replace(/,/g, ''); integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ","); event.target.value = parts.length > 1 ? integerPart + '.' + parts[1] : integerPart; calculateAndDisplayAll(); if (isSupabaseEnabled) { clearTimeout(logDebounceTimer); const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); if (dobInput.value && doeInput.value && sosInput.value && event.target.value) { logDebounceTimer = setTimeout(() => { logCalculation('Input Change (Debounced)'); }, LOG_DEBOUNCE_DELAY); } } checkInputEnabling(); }
 
-        function populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension) {
+        // Updated populateIncreaseTable to accept isFamilyPension and familyDobDate
+        function populateIncreaseTable(sosDate, grossPension, basePension, dobDate, isFamilyPension, familyDobDate) {
              const tbody = document.getElementById('increase-table-body'); tbody.innerHTML = '';
              const date1977_04_30 = parseDate('1977-04-30'); const date1977_05_01 = parseDate('1977-05-01'); const date1947_08_14 = parseDate('1947-08-14'); const date1991_06_01 = parseDate('1991-06-01'); const date1993_06_01 = parseDate('1993-06-01'); const date1993_06_30 = parseDate('1993-06-30'); const date2001_12_01 = parseDate('2001-12-01'); const date1991_05_31 = parseDate('1991-05-31'); const date1993_07_01 = parseDate('1993-07-01'); const date1994_06_30 = parseDate('1994-06-30'); const date1994_07_01 = parseDate('1994-07-01'); const date1977_04_30_2006 = parseDate('1977-04-30'); const date1977_05_01_2006 = parseDate('1977-05-01'); const date1997_06_30_2007 = parseDate('1997-06-30'); const date2007_07_01_2007 = parseDate('2007-07-01'); const date1997_07_01_2007 = parseDate('1997-07-01'); const date2001_06_30_2009 = parseDate('2001-06-30'); const date2001_07_01_2009 = parseDate('2001-07-01'); const date2001_11_30_2010 = parseDate('2001-11-30'); const date2001_07_01_2010 = parseDate('2001-07-01'); const date2002_06_30_2011 = parseDate('2002-06-30'); 
              const date2024_12_31 = parseDate('2024-12-31');
@@ -1250,12 +1285,16 @@
 
                 let currentBaseLine = previousNetValueCurrent; let currentIncreaseValue = 0; let currentNetValue = currentBaseLine; let baseLineDisplayCurrent = '-';
                 let restoredBaseLine = previousNetValueRestored; let restoredIncreaseValue = 0; let restoredNetValue = restoredBaseLine; let baseLineDisplayRestored = '-';
+                
                 // --- Insert the age logic right BEFORE we start parsing percentages ---
-                if (year === 2016 && dobDate) {
+                // Determine which date to use for calculation
+                const targetDobForIncrease = (isFamilyPension && familyDobDate) ? familyDobDate : dobDate;
+
+                if (year === 2016 && targetDobForIncrease) {
                      const todayDate = new Date();
-                     let currentAge = todayDate.getFullYear() - dobDate.getFullYear();
-                     const m = todayDate.getMonth() - dobDate.getMonth();
-                     if (m < 0 || (m === 0 && todayDate.getDate() < dobDate.getDate())) {
+                     let currentAge = todayDate.getFullYear() - targetDobForIncrease.getFullYear();
+                     const m = todayDate.getMonth() - targetDobForIncrease.getMonth();
+                     if (m < 0 || (m === 0 && todayDate.getDate() < targetDobForIncrease.getDate())) {
                          currentAge--;
                      }
                      if (currentAge >= 85) {
@@ -1384,18 +1423,26 @@
             const grpFamilyName = document.getElementById('grp-family-name');
             const grpFamilyCnic = document.getElementById('grp-family-cnic');
             const grpFamilyRelation = document.getElementById('grp-family-relation');
-            
+            // NEW: Family DOB Group
+            const grpFamilyDob = document.getElementById('grp-family-dob');
+
             if (familyPensionVal === 'Yes') {
                 grpFamilyName.style.display = 'block';
                 grpFamilyCnic.style.display = 'block';
                 grpFamilyRelation.style.display = 'block';
+                grpFamilyDob.style.display = 'block'; // Show DOB
             } else {
                 grpFamilyName.style.display = 'none';
                 grpFamilyCnic.style.display = 'none';
                 grpFamilyRelation.style.display = 'none';
+                grpFamilyDob.style.display = 'none'; // Hide DOB
+                
                 document.getElementById('family-pensioner-name').value = ''; 
                 document.getElementById('family-pensioner-cnic').value = '';
                 document.getElementById('family-relation').selectedIndex = 0;
+                // Clear family DOB input
+                document.getElementById('family-dob').value = '';
+                document.getElementById('family-dob-display').textContent = '';
             }
         }
 
@@ -1499,6 +1546,8 @@
             const sosInput = document.getElementById('sos');
             const armsSelect = document.getElementById('arms');
             const dobInput = document.getElementById('dob');
+            // NEW: Family DOB
+            const familyDobInput = document.getElementById('family-dob');
 
             // --- 1. SET DOB INITIALLY DISABLED ---
             if (dobInput) dobInput.disabled = true;
@@ -1562,6 +1611,12 @@
                         calculateAndDisplayAll();
                     }
                 });
+            }
+            
+            // NEW: Family DOB Validation Logic (optional but good practice)
+            if (familyDobInput) {
+                familyDobInput.max = new Date().toISOString().split('T')[0];
+                // Listener already covered by allInputs logic
             }
 
             // Warning on Gross Pension Click/Focus
@@ -1764,7 +1819,8 @@
                                 family: pendingLoadData.family,
                                 familyName: pendingLoadData.family_pensioner_name,
                                 familyCnic: pendingLoadData.family_pensioner_cnic,
-                                familyRelation: pendingLoadData.relation_with_pensioner
+                                familyRelation: pendingLoadData.relation_with_pensioner,
+                                familyDob: pendingLoadData.family_dob_raw || ''
                             }
                         };
                         
