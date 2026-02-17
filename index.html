@@ -782,6 +782,8 @@
                     if (sosDate >= policyDate2001) factorsToUse = factors_2001_12_01; else if (sosDate >= policyDate1986) factorsToUse = factors_1986_07_01; else factorsToUse = factors_1966_07_01;
                     commutationFactor = factorsToUse[ageNextBirthday] || 0; const roundedCommutationFactor = Math.round(commutationFactor); 
                     restorationDate = new Date(sosDate); 
+                    // --- MODIFICATION 2: Remove +1 Day ---
+                    // restorationDate.setUTCDate(restorationDate.getUTCDate() + 1);
                     restorationDate.setUTCFullYear(restorationDate.getUTCFullYear() + roundedCommutationFactor);
                 }
                 
@@ -841,7 +843,16 @@
                 document.getElementById('pension-pm-current-output').textContent = formatCurrency(finalPensionCurrent, true); document.getElementById('pension-pm-restored-output').textContent = formatCurrency(finalPensionRestored, true); document.getElementById('tk-allowance-current-output').textContent = formatCurrency(tkAllowance);
                 document.getElementById('total-payable-current-output').textContent = formatCurrency(totalPayableCurrent, true); document.getElementById('total-payable-restored-output').textContent = formatCurrency(totalPayableRestored, true);
                 
-                document.getElementById('print-rank').textContent = document.getElementById('rank').value; document.getElementById('print-name').textContent = document.getElementById('name').value; document.getElementById('print-pak-no').textContent = document.getElementById('pak-no').value; document.getElementById('print-cnic').textContent = document.getElementById('cnic').value; document.getElementById('print-account').textContent = document.getElementById('account-no').value; document.getElementById('print-bank').textContent = document.getElementById('bank-branch').value; document.getElementById('print-dob').textContent = formatDateDisplay(dobDate); document.getElementById('print-sos').textContent = formatDateDisplay(sosDate);
+                document.getElementById('print-rank').textContent = document.getElementById('rank').value; document.getElementById('print-name').textContent = document.getElementById('name').value; document.getElementById('print-pak-no').textContent = document.getElementById('pak-no').value; document.getElementById('print-cnic').textContent = document.getElementById('cnic').value; document.getElementById('print-account').textContent = document.getElementById('account-no').value; document.getElementById('print-bank').textContent = document.getElementById('bank-branch').value; 
+                
+                // Update Print Preview DOB
+                let printDobText = formatDateDisplay(dobDate);
+                if (isFamilyPension && familyDobDate) {
+                    printDobText += ` (${formatDateDisplay(familyDobDate)} FDOB)`;
+                }
+                document.getElementById('print-dob').textContent = printDobText;
+
+                document.getElementById('print-sos').textContent = formatDateDisplay(sosDate);
                 const todayForPrint = new Date(); todayForPrint.setMonth(todayForPrint.getMonth() - 1); document.getElementById('print-month-year').textContent = todayForPrint.toLocaleString('default', { month: 'long', year: 'numeric' });
                 const today = parseDate(getTodayDateString()); const isRestored = restorationDate && restorationDate <= today;
                 const pensionLabel = isFamilyPension ? "Monthly Pension - Family" : "Monthly Pension - Self"; document.getElementById('print-pension-label').textContent = pensionLabel;
@@ -1423,26 +1434,30 @@
             const grpFamilyName = document.getElementById('grp-family-name');
             const grpFamilyCnic = document.getElementById('grp-family-cnic');
             const grpFamilyRelation = document.getElementById('grp-family-relation');
-            // NEW: Family DOB Group
+            
+            // --- FIXED: ADDED MISSING REFERENCE AND LOGIC ---
             const grpFamilyDob = document.getElementById('grp-family-dob');
 
             if (familyPensionVal === 'Yes') {
                 grpFamilyName.style.display = 'block';
                 grpFamilyCnic.style.display = 'block';
                 grpFamilyRelation.style.display = 'block';
-                grpFamilyDob.style.display = 'block'; // Show DOB
+                if (grpFamilyDob) grpFamilyDob.style.display = 'block'; // SHOW DOB
             } else {
                 grpFamilyName.style.display = 'none';
                 grpFamilyCnic.style.display = 'none';
                 grpFamilyRelation.style.display = 'none';
-                grpFamilyDob.style.display = 'none'; // Hide DOB
+                if (grpFamilyDob) grpFamilyDob.style.display = 'none'; // HIDE DOB
                 
                 document.getElementById('family-pensioner-name').value = ''; 
                 document.getElementById('family-pensioner-cnic').value = '';
                 document.getElementById('family-relation').selectedIndex = 0;
+                
                 // Clear family DOB input
-                document.getElementById('family-dob').value = '';
-                document.getElementById('family-dob-display').textContent = '';
+                const famDob = document.getElementById('family-dob');
+                if (famDob) famDob.value = '';
+                const famDobDisp = document.getElementById('family-dob-display');
+                if (famDobDisp) famDobDisp.textContent = '';
             }
         }
 
@@ -1546,8 +1561,6 @@
             const sosInput = document.getElementById('sos');
             const armsSelect = document.getElementById('arms');
             const dobInput = document.getElementById('dob');
-            // NEW: Family DOB
-            const familyDobInput = document.getElementById('family-dob');
 
             // --- 1. SET DOB INITIALLY DISABLED ---
             if (dobInput) dobInput.disabled = true;
@@ -1611,12 +1624,6 @@
                         calculateAndDisplayAll();
                     }
                 });
-            }
-            
-            // NEW: Family DOB Validation Logic (optional but good practice)
-            if (familyDobInput) {
-                familyDobInput.max = new Date().toISOString().split('T')[0];
-                // Listener already covered by allInputs logic
             }
 
             // Warning on Gross Pension Click/Focus
@@ -1863,4 +1870,4 @@
         });
     </script>
 </body>
-</html>                                                                                                                                                                                                                                                                                      
+</html>
