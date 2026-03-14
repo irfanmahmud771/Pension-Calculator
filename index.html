@@ -362,6 +362,10 @@
                             <span class="label w-full md:w-1/3 whitespace-nowrap">Age on Pension Restoration</span>
                             <span class="value w-full md:w-1/3 text-left md:text-right text-gray-800 whitespace-nowrap" id="age-at-restoration-output">0 Years</span>
                         </div>
+                        <div class="output-group">
+                            <span class="label w-full md:w-1/3 whitespace-nowrap">Period Remaing in Restoration</span>
+                            <span class="value w-full md:w-1/3 text-left md:text-right text-gray-800 whitespace-nowrap" id="period-remaining-restoration-output">0 Years</span>
+                        </div>
                      </div>
                 </div>
             </div>
@@ -380,7 +384,7 @@
                             <th rowspan="2" class="bg-blue-100 text-blue-600 hidden-column">Entitled</th>
                             <th rowspan="2" class="bg-blue-100 text-blue-600 hidden-column">From</th>
                             <th rowspan="2" class="bg-blue-100 text-blue-600 hidden-column">To</th>
-                            <th colspan="4" class="bg-cyan-200 text-cyan-700">Minimum Pension</th>
+                            <th colspan="2" class="bg-cyan-200 text-cyan-700 hidden-column">Minimum Pension</th>
                         </tr>
                         <tr class="sub-header">
                             <th>Base Line</th>
@@ -389,10 +393,8 @@
                             <th>Base Line</th>
                             <th>Increase</th>
                             <th>Net</th>
-                            <th>Normal Self</th>
-                            <th>Normal Family</th>
-                            <th>Special (75) Self</th>
-                            <th>Special (75) Family</th>
+                            <th class="hidden-column">Self</th>
+                            <th class="hidden-column">Family</th>
                         </tr>
                     </thead>
                     <tbody id="increase-table-body">
@@ -1016,7 +1018,13 @@
 
                 const restorationOutputSpan = document.getElementById('restoration-date-output'); const restorationDateFormatted = restorationDate ? formatDateDisplay(restorationDate) : 'N/A'; restorationOutputSpan.textContent = restorationDateFormatted;
                 if (restorationDate) { const today2 = parseDate(getTodayDateString()); restorationOutputSpan.className = 'value'; if (restorationDate > today2) { restorationOutputSpan.classList.add('text-red-600', 'font-bold'); } else { restorationOutputSpan.classList.add('text-green-600', 'font-bold', 'flashing'); } } else { restorationOutputSpan.className = 'value text-gray-800'; }
-                let restorationAgeDisplay = 'N/A'; if (dobDate && restorationDate && restorationDate > dobDate) { let totalMonths = (restorationDate.getUTCFullYear() - dobDate.getUTCFullYear()) * 12; totalMonths -= dobDate.getUTCMonth(); totalMonths += restorationDate.getUTCMonth(); if (restorationDate.getUTCDate() < dobDate.getUTCDate()) { totalMonths--; } const restorationAgeYears = Math.floor(totalMonths / 12); const restorationAgeMonths = totalMonths % 12; let yearsString = `${restorationAgeYears} Years`; let monthsString = (restorationAgeMonths === 1) ? `, 1 Month` : (restorationAgeMonths > 1) ? `, ${restorationAgeMonths} Months` : ''; restorationAgeDisplay = yearsString + monthsString; } document.getElementById('age-at-restoration-output').textContent = restorationAgeDisplay;
+                const formatYearsMonthsDisplay = (fromDate, toDate) => { let totalMonths = (toDate.getUTCFullYear() - fromDate.getUTCFullYear()) * 12; totalMonths -= fromDate.getUTCMonth(); totalMonths += toDate.getUTCMonth(); if (toDate.getUTCDate() < fromDate.getUTCDate()) { totalMonths--; } if (totalMonths < 0) { return 'N/A'; } const years = Math.floor(totalMonths / 12); const months = totalMonths % 12; let yearsString = `${years} Years`; let monthsString = (months === 1) ? `, 1 Month` : (months > 1) ? `, ${months} Months` : ''; return yearsString + monthsString; };
+                let restorationAgeDisplay = 'N/A'; if (dobDate && restorationDate && restorationDate > dobDate) { restorationAgeDisplay = formatYearsMonthsDisplay(dobDate, restorationDate); } document.getElementById('age-at-restoration-output').textContent = restorationAgeDisplay;
+                const periodRemainingOutputSpan = document.getElementById('period-remaining-restoration-output');
+                let periodRemainingDisplay = 'N/A';
+                periodRemainingOutputSpan.className = 'value w-full md:w-1/3 text-left md:text-right whitespace-nowrap text-gray-800';
+                if (restorationDate) { const today3 = parseDate(getTodayDateString()); if (restorationDate <= today3) { periodRemainingDisplay = 'Restored'; periodRemainingOutputSpan.classList.remove('text-gray-800'); periodRemainingOutputSpan.classList.add('text-green-600', 'font-bold'); } else { periodRemainingDisplay = formatYearsMonthsDisplay(today3, restorationDate); } }
+                periodRemainingOutputSpan.textContent = periodRemainingDisplay;
                 currentCalculatedValues.pensionCurrent = finalPensionCurrent; currentCalculatedValues.pensionRestored = finalPensionRestored; currentCalculatedValues.restorationDate = restorationDateFormatted; currentCalculatedValues.tkAllowance = tkAllowance;
             } catch (error) { console.error("Error in calculateAndDisplayAll:", error); }
         }
@@ -1324,11 +1332,44 @@
                 const percentageText = percentageToDisplay.replace('%', ''); const percentageValue = parseFloat(percentageText) / 100;
                 let isIncreaseCalculatedCurrent = false; let isNetCalculatedCurrent = false; let isIncreaseCalculatedRestored = false; let isNetCalculatedRestored = false;
 
-                const minPensionSelf = minPensionData[year] ? minPensionData[year].self : 0;
-                const minPensionFamily = minPensionData[year] ? minPensionData[year].family : 0;
-                const isSpecialMinDisplayYear = year >= 2018 && year <= 2025;
-                const specialMinDisplaySelf = isSpecialMinDisplayYear ? 15000 : 0;
-                const specialMinDisplayFamily = isSpecialMinDisplayYear ? 11200 : 0;
+                const getSelfNormalMinimumPension = (increaseYear, selfDobDate) => {
+                    const baseSelfMin = minPensionData[increaseYear] ? minPensionData[increaseYear].self : 0;
+                    if (!selfDobDate || ![2018, 2019, 2021, 2022, 2023, 2024, 2025].includes(increaseYear)) return baseSelfMin;
+
+                    const seventyFifthBirthday = new Date(selfDobDate.getFullYear() + 75, selfDobDate.getMonth(), selfDobDate.getDate());
+                    const isBeforeOrOnCutoff = (cutoffDate) => seventyFifthBirthday <= parseDate(cutoffDate);
+
+                    if (increaseYear === 2018) return isBeforeOrOnCutoff('2019-06-30') ? 15000 : 10000;
+                    if (increaseYear === 2019) return isBeforeOrOnCutoff('2021-06-30') ? 15000 : 0;
+                    if (increaseYear === 2021) return isBeforeOrOnCutoff('2022-06-30') ? 15000 : 0;
+                    if (increaseYear === 2022) return isBeforeOrOnCutoff('2023-06-30') ? 15000 : 0;
+                    if (increaseYear === 2023) return isBeforeOrOnCutoff('2024-06-30') ? 15000 : 12000;
+                    if (increaseYear === 2024) return isBeforeOrOnCutoff('2025-06-30') ? 15000 : 0;
+                    if (increaseYear === 2025) return isBeforeOrOnCutoff('2026-06-30') ? 15000 : 0;
+
+                    return baseSelfMin;
+                };
+
+                const getFamilyNormalMinimumPension = (increaseYear, familyPensionDobDate) => {
+                    const baseFamilyMin = minPensionData[increaseYear] ? minPensionData[increaseYear].family : 0;
+                    if (!familyPensionDobDate || ![2018, 2019, 2021, 2022, 2023, 2024, 2025].includes(increaseYear)) return baseFamilyMin;
+
+                    const seventyFifthBirthday = new Date(familyPensionDobDate.getFullYear() + 75, familyPensionDobDate.getMonth(), familyPensionDobDate.getDate());
+                    const isBeforeOrOnCutoff = (cutoffDate) => seventyFifthBirthday <= parseDate(cutoffDate);
+
+                    if (increaseYear === 2018) return isBeforeOrOnCutoff('2019-06-30') ? 11200 : 7500;
+                    if (increaseYear === 2019) return isBeforeOrOnCutoff('2021-06-30') ? 11200 : 0;
+                    if (increaseYear === 2021) return isBeforeOrOnCutoff('2022-06-30') ? 11200 : 0;
+                    if (increaseYear === 2022) return isBeforeOrOnCutoff('2023-06-30') ? 11200 : 0;
+                    if (increaseYear === 2023) return isBeforeOrOnCutoff('2024-06-30') ? 11200 : 9000;
+                    if (increaseYear === 2024) return isBeforeOrOnCutoff('2025-06-30') ? 11200 : 0;
+                    if (increaseYear === 2025) return isBeforeOrOnCutoff('2026-06-30') ? 11200 : 0;
+
+                    return baseFamilyMin;
+                };
+
+                const minPensionSelf = getSelfNormalMinimumPension(year, dobDate);
+                const minPensionFamily = getFamilyNormalMinimumPension(year, familyDobDate);
                 const applicableMinPension = isFamilyPension ? minPensionFamily : minPensionSelf;
                 let minPensionAppliedCurrent = false; let minPensionAppliedRestored = false;
 
@@ -1426,7 +1467,7 @@
                 row.insertCell().textContent = isIncreaseCalculatedRestored ? formatCurrency(restoredIncreaseValue, false, true) : '-';
                 const netCellRestored = row.insertCell(); netCellRestored.textContent = isNetCalculatedRestored ? formatCurrency(restoredNetValue, false, true) : '-'; if (minPensionAppliedRestored) netCellRestored.classList.add('text-blue-600', 'font-bold');
                 row.insertCell().textContent = isEntitled;
-                row.cells[8].classList.add('hidden-column'); row.insertCell().textContent = formatDateTable(item.from); row.cells[9].classList.add('hidden-column'); row.insertCell().textContent = formatDateTable(item.to); row.cells[10].classList.add('hidden-column'); const minSelfCell = row.insertCell(); minSelfCell.textContent = minPensionSelf > 0 ? formatCurrency(minPensionSelf, false, true) : '-'; const minFamilyCell = row.insertCell(); minFamilyCell.textContent = minPensionFamily > 0 ? formatCurrency(minPensionFamily, false, true) : '-'; const specialMinSelfCell = row.insertCell(); specialMinSelfCell.textContent = specialMinDisplaySelf > 0 ? formatCurrency(specialMinDisplaySelf, false, true) : '-'; const specialMinFamilyCell = row.insertCell(); specialMinFamilyCell.textContent = specialMinDisplayFamily > 0 ? formatCurrency(specialMinDisplayFamily, false, true) : '-';
+                row.cells[8].classList.add('hidden-column'); row.insertCell().textContent = formatDateTable(item.from); row.cells[9].classList.add('hidden-column'); row.insertCell().textContent = formatDateTable(item.to); row.cells[10].classList.add('hidden-column'); const minSelfCell = row.insertCell(); minSelfCell.textContent = minPensionSelf > 0 ? formatCurrency(minPensionSelf, false, true) : '-'; minSelfCell.classList.add('hidden-column'); const minFamilyCell = row.insertCell(); minFamilyCell.textContent = minPensionFamily > 0 ? formatCurrency(minPensionFamily, false, true) : '-'; minFamilyCell.classList.add('hidden-column');
             
                 // --- NEW REQUIREMENT: Hide if %AGE is 0% ---
                 if (isEntitled === 'N' || percentageToDisplay === '0%') { 
