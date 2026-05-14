@@ -97,6 +97,7 @@
 
         /* Print Logos - Increased Size */
         .print-logo-left { position: absolute; top: 0; left: 0; width: 120px; height: auto; z-index: 1; }
+        .print-logo-left.navy-monogram { width: 120px; height: 120px; object-fit: contain; }
         .print-logo-right { position: absolute; top: 0; right: 0; width: 120px; height: auto; z-index: 1; }
 
         /* Watermark */
@@ -1869,6 +1870,10 @@
             updateSrc(logoMain);
             updateSrc(logoPrintLeft);
             updateSrc(watermark);
+
+            if (logoPrintLeft) {
+                logoPrintLeft.classList.toggle('navy-monogram', selectedArm === 'Navy');
+            }
 
             // 2. Update Service Name in Print Header
             if (serviceNamePrint) {
