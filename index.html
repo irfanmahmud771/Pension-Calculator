@@ -292,16 +292,20 @@
             <div class="card">
                 <h2 class="card-title text-center font-bold text-xl">Printing Jobs</h2>
                 
-                <div class="text-center mt-4 mb-6">
-                    <button id="print-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition-colors">
-                        <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 8h-1V3H6v5H5a3 3 0 0 0-3 3v5h4v5h12v-5h4v-5a3 3 0 0 0-3-3zm-9-3h4v3h-4zm6 14H8v-5h8zm2-7H6v-2h12z"/></svg>
+                <div class="flex flex-wrap justify-center items-center gap-2 mt-4 mb-6">
+                    <button id="print-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-2 rounded inline-flex items-center transition-colors text-xs sm:text-sm">
+                        <svg class="fill-current w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 8h-1V3H6v5H5a3 3 0 0 0-3 3v5h4v5h12v-5h4v-5a3 3 0 0 0-3-3zm-9-3h4v3h-4zm6 14H8v-5h8zm2-7H6v-2h12z"/></svg>
                         Pension Slip
                     </button>
-                    <button id="print-restoration-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition-colors ml-2 mt-2 md:mt-0">
-                        <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 8h-1V3H6v5H5a3 3 0 0 0-3 3v5h4v5h12v-5h4v-5a3 3 0 0 0-3-3zm-9-3h4v3h-4zm6 14H8v-5h8zm2-7H6v-2h12z"/></svg>
+                    <button id="print-restoration-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-2 rounded inline-flex items-center transition-colors text-xs sm:text-sm">
+                        <svg class="fill-current w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 8h-1V3H6v5H5a3 3 0 0 0-3 3v5h4v5h12v-5h4v-5a3 3 0 0 0-3-3zm-9-3h4v3h-4zm6 14H8v-5h8zm2-7H6v-2h12z"/></svg>
                         Restoration Application
                     </button>
-                    <button id="install-app-btn" type="button" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition-colors ml-2 mt-2 md:mt-0">
+                    <button id="print-85-years-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-2 rounded inline-flex items-center transition-colors text-xs sm:text-sm">
+                        <svg class="fill-current w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 8h-1V3H6v5H5a3 3 0 0 0-3 3v5h4v5h12v-5h4v-5a3 3 0 0 0-3-3zm-9-3h4v3h-4zm6 14H8v-5h8zm2-7H6v-2h12z"/></svg>
+                        85 Years Application
+                    </button>
+                    <button id="install-app-btn" type="button" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded inline-flex items-center transition-colors text-xs sm:text-sm">
                         Install App (Windows/Android)
                     </button>
                 </div>
@@ -774,24 +778,32 @@
         };
 
         const drawJustifiedParagraphWithHangingIndent = (doc, text, firstX, otherX, y, firstWidth, otherWidth, lineHeight = 7) => {
-            const words = text.split(/\s+/).filter(Boolean);
             const lines = [];
-            let currentLine = '';
 
-            words.forEach((word) => {
-                const candidate = currentLine ? `${currentLine} ${word}` : word;
-                const lineIndex = lines.length;
-                const maxWidth = lineIndex === 0 ? firstWidth : otherWidth;
-                if (!currentLine || doc.getTextWidth(candidate) <= maxWidth) {
-                    currentLine = candidate;
-                } else {
-                    lines.push(currentLine);
-                    currentLine = word;
+            const forcedLines = text.split('\n');
+            forcedLines.forEach((textLine, forcedLineIndex) => {
+                const words = textLine.split(/\s+/).filter(Boolean);
+                let currentLine = '';
+
+                words.forEach((word) => {
+                    const candidate = currentLine ? `${currentLine} ${word}` : word;
+                    const lineIndex = lines.length;
+                    const maxWidth = lineIndex === 0 ? firstWidth : otherWidth;
+                    if (!currentLine || doc.getTextWidth(candidate) <= maxWidth) {
+                        currentLine = candidate;
+                    } else {
+                        lines.push({ text: currentLine, forcedEnd: false });
+                        currentLine = word;
+                    }
+                });
+
+                if (currentLine) {
+                    lines.push({ text: currentLine, forcedEnd: forcedLineIndex < forcedLines.length - 1 });
                 }
             });
-            if (currentLine) lines.push(currentLine);
 
-            lines.forEach((line, index) => {
+            lines.forEach((lineInfo, index) => {
+                const line = lineInfo.text;
                 const isLastLine = index === lines.length - 1;
                 const x = index === 0 ? firstX : otherX;
                 const maxWidth = index === 0 ? firstWidth : otherWidth;
@@ -836,13 +848,14 @@
             const signatureName = isFamilyPension ? familyPensionerName : name;
             const servicePrefix = arm === 'Army' ? 'PA' : arm === 'Navy' ? 'PN' : 'PAF';
             const isArmyOrNavy = arm === 'Army' || arm === 'Navy';
-            const serviceNumberLabel = isArmyOrNavy ? 'Service No  ' : 'Pak No  ';
             const signatureServiceNumber = isArmyOrNavy ? `Service No ${pakNo}` : `Pak/${pakNo}`;
             const dobDate = parseDate(document.getElementById('dob')?.value);
-            const sosDate = parseDate(document.getElementById('sos')?.value);
-            const restorationDateText = currentCalculatedValues.restorationDate || 'N/A';
-            const dobText = dobDate ? formatDateDisplay(dobDate) : '____________';
-            const sosText = sosDate ? formatDateDisplay(sosDate) : '____________';
+            const familyDobDate = parseDate(document.getElementById('family-dob')?.value);
+            const dateFor85Years = (isFamilyPension && familyDobDate) ? familyDobDate : dobDate;
+            const eightyFifthBirthday = dateFor85Years
+                ? new Date(Date.UTC(dateFor85Years.getUTCFullYear() + 85, dateFor85Years.getUTCMonth(), dateFor85Years.getUTCDate()))
+                : null;
+            const eightyFifthBirthdayText = eightyFifthBirthday ? formatDateLong(eightyFifthBirthday) : '____________';
             const todayText = formatDateLong(new Date());
 
             const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -874,73 +887,61 @@
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(15);
             const headingText = isFamilyPension
-                ? 'RESTORATION OF COMMUTED PORTION OF FAMILY PENSION'
-                : 'RESTORATION OF COMMUTED PORTION OF PENSION';
+                ? 'GRANT OF 25% INCREASE IN FAMILY PENSION ON 85 YEARS AGE'
+                : 'GRANT OF 25% INCREASE IN PENSION ON 85 YEARS AGE';
             doc.text(headingText, pageWidth / 2, y, { align: 'center' });
 
             y += sectionGap;
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(12);
             doc.text('1.', left, y);
-            doc.text('Appended below please find data for restoration of commuted portion of pension:-', left + 12, y);
+            const para1 = 'With reference to the subject cited above and under the provisions of\nOffice Memorandum issued by the Finance Division (Regulation Wing) vide\nNo. F.4 (1)-Reg-6/2016-1082 dated 26 September 2016 & F.4 (1)-Reg-6/2016-870 dated\n01 July, 2016.';
+            const paragraphFirstLineX = left + 12;
+            const paragraphRemainingLineX = left;
+            const paragraphWidth = pageWidth - paragraphFirstLineX - 20;
+            const paragraphRemainingWidth = pageWidth - paragraphRemainingLineX - 20;
+            const paragraphLineHeight = 7;
+            const para1LineCount = drawJustifiedParagraphWithHangingIndent(
+                doc,
+                para1,
+                paragraphFirstLineX,
+                paragraphRemainingLineX,
+                y,
+                paragraphWidth,
+                paragraphRemainingWidth,
+                paragraphLineHeight
+            );
+            y += para1LineCount * paragraphLineHeight + 7;
 
-            y += 14;
-            doc.text('Rank  ', left + 12, y);
-            doc.text('Name  ', left + 86, y);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`${rank}`, left + 12 + doc.getTextWidth('Rank  '), y);
-            doc.text(`${name}`, left + 86 + doc.getTextWidth('Name  '), y);
-            doc.setFont('helvetica', 'normal');
-            y += 10;
-            doc.text(serviceNumberLabel, left + 12, y);
-            doc.text('Date of Birth  ', left + 86, y);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`${pakNo}`, left + 12 + doc.getTextWidth(serviceNumberLabel), y);
-            doc.text(`${dobText}`, left + 86 + doc.getTextWidth('Date of Birth  '), y);
-            doc.setFont('helvetica', 'normal');
-            y += 10;
-            doc.text('Date of SOS  ', left + 12, y);
-            doc.text('Date of Restoration  ', left + 86, y);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`${sosText}`, left + 12 + doc.getTextWidth('Date of SOS  '), y);
-            doc.text(`${restorationDateText}`, left + 86 + doc.getTextWidth('Date of Restoration  '), y);
-            doc.setFont('helvetica', 'normal');
-            y += 10;
-            const addressX = left + 12;
-            const addressText = 'Address';
-            const lineEndX = pageWidth - 20;
-            const addressWidth = doc.getTextWidth(addressText);
-            const spaceWidth = doc.getTextWidth(' ');
-            doc.text(addressText, addressX, y);
-            const line1StartX = addressX + addressWidth + (spaceWidth * 3);
-            const line2StartX = addressX + addressWidth;
-            const addressLine1Text = buildUnderlineForWidth(doc, lineEndX - line1StartX);
-            const addressLine2Text = buildUnderlineForWidth(doc, lineEndX - line2StartX);
-            doc.text(addressLine1Text, line1StartX, y);
-            y += 10;
-            doc.text(addressLine2Text, line2StartX, y);
-
-            y += 18;
             doc.text('2.', left, y);
-            const para2 = 'It is, therefore, requested that commuted portion of pension may please be restored. Kindly dispatch copy of Corrigendum PPO to the address given above.';
-            const para2FirstLineX = left + 12;
-            const para2RemainingLineX = left;
-            const para2Width = pageWidth - para2FirstLineX - 20;
-            const para2RemainingWidth = pageWidth - para2RemainingLineX - 20;
-            const para2LineHeight = 7;
+            const para2 = `I respectfully submit that I have attained the age of 85 years on ${eightyFifthBirthdayText}.\nIn accordance with the above mentioned Office Memorandum, now I am entitled to a 25% increase in pension instead of 10% granted in July 2016.`;
             const para2LineCount = drawJustifiedParagraphWithHangingIndent(
                 doc,
                 para2,
-                para2FirstLineX,
-                para2RemainingLineX,
+                paragraphFirstLineX,
+                paragraphRemainingLineX,
                 y,
-                para2Width,
-                para2RemainingWidth,
-                para2LineHeight
+                paragraphWidth,
+                paragraphRemainingWidth,
+                paragraphLineHeight
             );
-            y += para2LineCount * para2LineHeight + 7;
+            y += para2LineCount * paragraphLineHeight + 7;
 
             doc.text('3.', left, y);
+            const para3 = 'It is, therefore, requested that the referred increase in my pension may please be granted and dispatch a copy of Corrigendum PPO to my home address.';
+            const para3LineCount = drawJustifiedParagraphWithHangingIndent(
+                doc,
+                para3,
+                paragraphFirstLineX,
+                paragraphRemainingLineX,
+                y,
+                paragraphWidth,
+                paragraphRemainingWidth,
+                paragraphLineHeight
+            );
+            y += para3LineCount * paragraphLineHeight + 7;
+
+            doc.text('4.', left, y);
             doc.text('Submitted, please.', left + 12, y);
 
             y += 34;
@@ -967,7 +968,11 @@
             doc.text(cellLabel, signatureX, y);
             doc.text(cellUnderline, cellLineStartX, y);
 
-            doc.save(`Restoration-Application-${pakNo || 'pensioner'}.pdf`);
+            doc.save(`85-Years-Application-${pakNo || 'pensioner'}.pdf`);
+        };
+
+        const generate85YearsApplicationPdf = () => {
+            generateRestorationApplicationPdf();
         };
         
         const formatVisitCount = (num) => {
@@ -1760,12 +1765,13 @@
         }
 
         function checkInputEnabling() {
-            const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const tkAwardInput = document.getElementById('tk-award'); const familyPensionInput = document.getElementById('family-pension'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const printBtn = document.getElementById('print-btn'); const printRestorationBtn = document.getElementById('print-restoration-btn');
+            const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const tkAwardInput = document.getElementById('tk-award'); const familyPensionInput = document.getElementById('family-pension'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const printBtn = document.getElementById('print-btn'); const printRestorationBtn = document.getElementById('print-restoration-btn'); const print85YearsBtn = document.getElementById('print-85-years-btn');
             const dobFilled = dobInput.value !== ''; const doeFilled = doeInput.value !== ''; const sosFilled = sosInput.value !== ''; const grossPensionFilled = grossPensionInput.value !== '' && parseFloat(grossPensionInput.value.replace(/,/g, '')) > 0;
             doeInput.disabled = !dobFilled; sosInput.disabled = !(dobFilled && doeFilled); grossPensionInput.disabled = !(dobFilled && doeFilled && sosFilled); increasePensionBtn.disabled = !(dobFilled && doeFilled && sosFilled); decreasePensionBtn.disabled = !(dobFilled && doeFilled && sosFilled); tkAwardInput.disabled = !(dobFilled && doeFilled && sosFilled && grossPensionFilled); familyPensionInput.disabled = !(dobFilled && doeFilled && sosFilled && grossPensionFilled);
             const hasCalculationData = dobFilled && doeFilled && sosFilled && grossPensionFilled;
             if (printBtn) printBtn.disabled = !hasCalculationData;
             if (printRestorationBtn) printRestorationBtn.disabled = !hasCalculationData;
+            if (print85YearsBtn) print85YearsBtn.disabled = !hasCalculationData;
             if (doeInput.disabled) { doeInput.value = ''; document.getElementById('doe-display').textContent = ''; } if (sosInput.disabled) { sosInput.value = ''; document.getElementById('sos-display').textContent = ''; } if (grossPensionInput.disabled) grossPensionInput.value = ''; if (tkAwardInput.disabled) tkAwardInput.value = 'No'; if (familyPensionInput.disabled) familyPensionInput.value = 'No';
             
             // New Logic for Family Pensioner Name visibility in Input Form
@@ -1939,7 +1945,7 @@
             function showWarning(message) { if (appWarning) { appWarning.textContent = message; appWarning.style.display = 'block'; } console.warn(message); }
             if (!SUPABASE_URL || SUPABASE_URL.includes("PASTE_YOUR")) { showWarning("Supabase is not configured. Online features are disabled. Please paste your URL and Key into index.html."); isSupabaseEnabled = false; document.getElementById('visit-counter-wrapper').style.display = 'none'; document.getElementById('log-wrapper').style.display = 'none'; } else if (!createClient) { showWarning("Supabase library failed to load. Online features are disabled. Please refresh and check internet connection."); isSupabaseEnabled = false; document.getElementById('visit-counter-wrapper').style.display = 'none'; document.getElementById('log-wrapper').style.display = 'none'; } else { try { supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY); if (!supabaseClient) { throw new Error("Supabase client failed to initialize."); } isSupabaseEnabled = true; console.log("Supabase initialized successfully."); } catch (e) { console.error("Error initializing Supabase:", e); showWarning(`Error initializing online features: ${e.message}. App is in offline mode.`); isSupabaseEnabled = false; document.getElementById('visit-counter-wrapper').style.display = 'none'; document.getElementById('log-wrapper').style.display = 'none'; } }
             
-            const allInputs = document.querySelectorAll('.calc-input'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const cancelClearBtn = document.getElementById('cancel-clear-btn'); const confirmClearBtn = document.getElementById('confirm-clear-btn'); const passwordInput = document.getElementById('password-input'); const logContainer = document.getElementById('log-container'); const printBtn = document.getElementById('print-btn'); const printRestorationBtn = document.getElementById('print-restoration-btn'); const cnicInput = document.getElementById('cnic');
+            const allInputs = document.querySelectorAll('.calc-input'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const cancelClearBtn = document.getElementById('cancel-clear-btn'); const confirmClearBtn = document.getElementById('confirm-clear-btn'); const passwordInput = document.getElementById('password-input'); const logContainer = document.getElementById('log-container'); const printBtn = document.getElementById('print-btn'); const printRestorationBtn = document.getElementById('print-restoration-btn'); const print85YearsBtn = document.getElementById('print-85-years-btn'); const cnicInput = document.getElementById('cnic');
             const showLogBtn = document.getElementById('show-log-btn');
             const sosInput = document.getElementById('sos');
             const armsSelect = document.getElementById('arms');
@@ -2133,6 +2139,7 @@
             increasePensionBtn.addEventListener('mousedown', () => startPress(1)); decreasePensionBtn.addEventListener('mousedown', () => startPress(-1)); document.addEventListener('mouseup', stopPress); document.addEventListener('mouseleave', stopPress); increasePensionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(1); }); decreasePensionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(-1); }); document.addEventListener('touchend', stopPress); document.addEventListener('touchcancel', stopPress);
             if (printBtn) { printBtn.addEventListener('click', () => { window.print(); }); }
             if (printRestorationBtn) { printRestorationBtn.addEventListener('click', generateRestorationApplicationPdf); }
+            if (print85YearsBtn) { print85YearsBtn.addEventListener('click', generate85YearsApplicationPdf); }
             
             if (isSupabaseEnabled) { 
                 showLogBtn.addEventListener('click', () => {
