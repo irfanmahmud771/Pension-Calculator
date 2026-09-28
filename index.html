@@ -757,7 +757,7 @@
         let supabaseClient;
         let isSupabaseEnabled = false;
         let logDebounceTimer = null;
-        const LOG_DEBOUNCE_DELAY = 10000; 
+        const LOG_DEBOUNCE_DELAY = 0; // saved straight away (was 10000 ms) 
         let passwordAction = ''; // 'show' or 'clear'
         let pendingLoadData = null; // Temp storage for verification
         let grossPensionWarningShown = false; // Flag for warning
@@ -1884,7 +1884,18 @@
             logContainer.innerHTML = logHTML;
         }
 
+        let logSaveRunning = false, logSaveQueued = null;
         async function logCalculation(triggerSource) {
+            if (!isSupabaseEnabled) return;
+            if (logSaveRunning) { logSaveQueued = triggerSource; return; } // a save is in progress: run once more afterwards with the latest values
+            logSaveRunning = true;
+            try { await logCalculationNow(triggerSource); }
+            finally {
+                logSaveRunning = false;
+                if (logSaveQueued !== null) { const next = logSaveQueued; logSaveQueued = null; logCalculation(next); }
+            }
+        }
+        async function logCalculationNow(triggerSource) {
             if (!isSupabaseEnabled) return;
             const rankInput = document.getElementById('rank');
             const log_rank = rankInput.value; 
