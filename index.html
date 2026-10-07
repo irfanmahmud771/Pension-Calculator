@@ -193,14 +193,14 @@
                             </div>
                              <div class="input-group md:col-span-2">
                                 <label for="name">Name</label>
-                                <input type="text" id="name" class="calc-input" placeholder="Full Name" maxlength="22" inputmode="text" title="Numbers are not allowed" style="text-transform: uppercase;">
+                                <input type="text" id="name" class="calc-input" placeholder="Select Rank first" maxlength="22" inputmode="text" title="Numbers are not allowed" style="text-transform: uppercase;" disabled>
                             </div>
                          </div>
                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                              <div class="input-group">
                                 <label for="pak-no" id="lbl-pak-no">Pak No</label>
                                 <div class="flex gap-2">
-                                    <input type="text" id="pak-no" class="calc-input flex-grow" placeholder="e.g. 123456" inputmode="numeric" maxlength="8" pattern="\d{1,8}" title="Enter up to 8 digits">
+                                    <input type="text" id="pak-no" class="calc-input flex-grow" placeholder="Enter Name first" inputmode="numeric" maxlength="8" pattern="\d{1,8}" title="Enter up to 8 digits" disabled>
                                     <button type="button" id="btn-load-data" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm whitespace-nowrap transition-colors">
                                         Load Data
                                     </button>
@@ -208,17 +208,17 @@
                             </div>
                             <div class="input-group">
                                 <label for="cnic">CNIC</label>
-                                <input type="text" id="cnic" class="calc-input" placeholder="00000-0000000-0" maxlength="15">
+                                <input type="text" id="cnic" class="calc-input" placeholder="00000-0000000-0" maxlength="15" disabled>
                                 <div id="cnic-error" class="text-red-600 text-xs mt-1" style="display: none;">Incomplete CNIC</div>
                             </div>
                          </div>
                         <div class="input-group">
                             <label for="account-no">Account No (IBAN)</label>
-                            <input type="text" id="account-no" class="calc-input" placeholder="PK..." maxlength="24">
+                            <input type="text" id="account-no" class="calc-input" placeholder="PK..." maxlength="24" disabled>
                         </div>
                          <div class="input-group">
                             <label for="bank-branch">Bank & Branch</label>
-                            <input type="text" id="bank-branch" class="calc-input" placeholder="Bank Name, Branch Code">
+                            <input type="text" id="bank-branch" class="calc-input" placeholder="Bank Name, Branch Code" disabled>
                         </div>
                     </div>
 
@@ -2324,7 +2324,35 @@
             return { current: currentNetValues, restored: restoredNetValues, sumIncreasesCurrent: totalAccumulatedIncreaseCurrent, sumIncreasesRestored: totalAccumulatedIncreaseRestored, tableData: detailedData };
         }
 
+        // --- Entry sequence: Rank -> Name (>=5 chars) -> Pak No -> CNIC/Account No/Bank & Branch/DOB ---
+        function applyEntrySequenceGating() {
+            const rankSelSeq = document.getElementById('rank');
+            const nameInputSeq = document.getElementById('name');
+            const pakNoInputSeq = document.getElementById('pak-no');
+            const cnicInputSeq = document.getElementById('cnic');
+            const accountNoInputSeq = document.getElementById('account-no');
+            const bankBranchInputSeq = document.getElementById('bank-branch');
+            const dobInputSeq = document.getElementById('dob');
+            if (!rankSelSeq || !nameInputSeq || !pakNoInputSeq || !cnicInputSeq || !accountNoInputSeq || !bankBranchInputSeq) return;
+
+            const rankChosen = !!rankSelSeq.value;
+            if (!rankChosen) { nameInputSeq.disabled = true; nameInputSeq.value = ''; }
+            else { nameInputSeq.disabled = false; }
+
+            const nameReady = rankChosen && nameInputSeq.value.trim().length >= 5;
+            if (!nameReady) { pakNoInputSeq.disabled = true; pakNoInputSeq.value = ''; }
+            else { pakNoInputSeq.disabled = false; }
+
+            const pakNoReady = nameReady && pakNoInputSeq.value.trim().length > 0;
+            [cnicInputSeq, accountNoInputSeq, bankBranchInputSeq].forEach((el) => {
+                el.disabled = !pakNoReady;
+                if (!pakNoReady) el.value = '';
+            });
+            if (!pakNoReady && dobInputSeq) { dobInputSeq.disabled = true; dobInputSeq.value = ''; }
+        }
+
         function checkInputEnabling() {
+            applyEntrySequenceGating();
             const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const tkAwardInput = document.getElementById('tk-award'); const familyPensionInput = document.getElementById('family-pension'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const printBtn = document.getElementById('print-btn'); const printRestorationBtn = document.getElementById('print-restoration-btn'); const print85YearsBtn = document.getElementById('print-85-years-btn');
             const dobFilled = dobInput.value !== ''; const doeFilled = doeInput.value !== ''; const sosFilled = sosInput.value !== ''; const grossPensionFilled = grossPensionInput.value !== '' && parseFloat(grossPensionInput.value.replace(/,/g, '')) > 0;
             doeInput.disabled = !dobFilled; sosInput.disabled = !(dobFilled && doeFilled); grossPensionInput.disabled = !(dobFilled && doeFilled && sosFilled); increasePensionBtn.disabled = !(dobFilled && doeFilled && sosFilled); decreasePensionBtn.disabled = !(dobFilled && doeFilled && sosFilled); tkAwardInput.disabled = !sosFilled; familyPensionInput.disabled = !sosFilled;
@@ -2408,9 +2436,10 @@
                 rankSelect.value = currentRank;
             }
             applyPayFieldEnabling();
+            applyEntrySequenceGating();
         }
 
-        async function initVisitCounter() { 
+        async function initVisitCounter() {
             if (!isSupabaseEnabled) return; 
             const visitCountSpan = document.getElementById('visit-count'); 
             if (!visitCountSpan) return; 
