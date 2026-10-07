@@ -151,8 +151,40 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
-    <!-- No in-page splash screen: the Army/Navy/PAF row lives in the app icon itself (icon-192.png /
-         icon-512.png), so the single native splash screen the OS shows on launch already carries it -->
+    <!-- App splash: only for the installed Android app / installed PWA (Windows etc.) - a normal browser tab
+         never sees it. The OS's own native splash (icon-only, small, fixed size - not controllable from here)
+         flashes for an instant first; this one then takes over at near-full screen width for 3 seconds minimum. -->
+    <div id="app-splash-screen" style="position:fixed;inset:0;z-index:9999;background:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity 0.3s ease;">
+        <img src="icon-192.png" alt="Army, Navy, PAF" style="width:92vw;max-width:92vw;height:auto;object-fit:contain;" onerror="this.style.display='none'">
+        <div style="font-family:'Inter',Arial,sans-serif;font-size:1.3rem;font-weight:700;color:#2563eb;text-align:center;padding:0 24px;">Pension Calculator Armed Forces</div>
+    </div>
+    <script>
+        (function () {
+            var el = document.getElementById('app-splash-screen');
+            var isInstalled = (window.matchMedia && (
+                window.matchMedia('(display-mode: standalone)').matches ||
+                window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+                window.matchMedia('(display-mode: fullscreen)').matches ||
+                window.matchMedia('(display-mode: minimal-ui)').matches
+            )) || window.navigator.standalone === true; // iOS "Add to Home Screen"
+            if (!isInstalled) {
+                if (el) el.style.display = 'none'; // ordinary browser tab: no splash at all
+                return;
+            }
+            var SPLASH_MIN_MS = 3000;
+            var startTime = Date.now();
+            var hide = function () {
+                if (!el) return;
+                el.style.opacity = '0';
+                setTimeout(function () { el.style.display = 'none'; }, 300);
+            };
+            window.addEventListener('load', function () {
+                var elapsed = Date.now() - startTime;
+                var remaining = Math.max(0, SPLASH_MIN_MS - elapsed);
+                setTimeout(hide, remaining);
+            });
+        })();
+    </script>
     <div id="app-warning" class="p-4 text-center text-yellow-800 bg-yellow-100 rounded-lg m-4" style="display: none;"></div>
     <div class="container mx-auto p-4 md:p-8 relative"> 
         <div class="logo-container flex flex-col md:flex-row justify-between items-center">
@@ -193,14 +225,14 @@
                             </div>
                              <div class="input-group md:col-span-2">
                                 <label for="name">Name</label>
-                                <input type="text" id="name" class="calc-input" placeholder="Select Rank first" maxlength="22" inputmode="text" title="Numbers are not allowed" style="text-transform: uppercase;" disabled>
+                                <input type="text" id="name" class="calc-input" placeholder="Full Name" maxlength="22" inputmode="text" title="Numbers are not allowed" style="text-transform: uppercase;">
                             </div>
                          </div>
                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                              <div class="input-group">
                                 <label for="pak-no" id="lbl-pak-no">Pak No</label>
                                 <div class="flex gap-2">
-                                    <input type="text" id="pak-no" class="calc-input flex-grow" placeholder="Enter Name first" inputmode="numeric" maxlength="8" pattern="\d{1,8}" title="Enter up to 8 digits" disabled>
+                                    <input type="text" id="pak-no" class="calc-input flex-grow" placeholder="e.g. 123456" inputmode="numeric" maxlength="8" pattern="\d{1,8}" title="Enter up to 8 digits">
                                     <button type="button" id="btn-load-data" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm whitespace-nowrap transition-colors">
                                         Load Data
                                     </button>
@@ -208,17 +240,17 @@
                             </div>
                             <div class="input-group">
                                 <label for="cnic">CNIC</label>
-                                <input type="text" id="cnic" class="calc-input" placeholder="00000-0000000-0" maxlength="15" disabled>
+                                <input type="text" id="cnic" class="calc-input" placeholder="00000-0000000-0" maxlength="15">
                                 <div id="cnic-error" class="text-red-600 text-xs mt-1" style="display: none;">Incomplete CNIC</div>
                             </div>
                          </div>
                         <div class="input-group">
                             <label for="account-no">Account No (IBAN)</label>
-                            <input type="text" id="account-no" class="calc-input" placeholder="PK..." maxlength="24" disabled>
+                            <input type="text" id="account-no" class="calc-input" placeholder="PK..." maxlength="24">
                         </div>
                          <div class="input-group">
                             <label for="bank-branch">Bank & Branch</label>
-                            <input type="text" id="bank-branch" class="calc-input" placeholder="Bank Name, Branch Code" disabled>
+                            <input type="text" id="bank-branch" class="calc-input" placeholder="Bank Name, Branch Code">
                         </div>
                     </div>
 
@@ -2324,35 +2356,7 @@
             return { current: currentNetValues, restored: restoredNetValues, sumIncreasesCurrent: totalAccumulatedIncreaseCurrent, sumIncreasesRestored: totalAccumulatedIncreaseRestored, tableData: detailedData };
         }
 
-        // --- Entry sequence: Rank -> Name (>=5 chars) -> Pak No -> CNIC/Account No/Bank & Branch/DOB ---
-        function applyEntrySequenceGating() {
-            const rankSelSeq = document.getElementById('rank');
-            const nameInputSeq = document.getElementById('name');
-            const pakNoInputSeq = document.getElementById('pak-no');
-            const cnicInputSeq = document.getElementById('cnic');
-            const accountNoInputSeq = document.getElementById('account-no');
-            const bankBranchInputSeq = document.getElementById('bank-branch');
-            const dobInputSeq = document.getElementById('dob');
-            if (!rankSelSeq || !nameInputSeq || !pakNoInputSeq || !cnicInputSeq || !accountNoInputSeq || !bankBranchInputSeq) return;
-
-            const rankChosen = !!rankSelSeq.value;
-            if (!rankChosen) { nameInputSeq.disabled = true; nameInputSeq.value = ''; }
-            else { nameInputSeq.disabled = false; }
-
-            const nameReady = rankChosen && nameInputSeq.value.trim().length >= 5;
-            if (!nameReady) { pakNoInputSeq.disabled = true; pakNoInputSeq.value = ''; }
-            else { pakNoInputSeq.disabled = false; }
-
-            const pakNoReady = nameReady && pakNoInputSeq.value.trim().length > 0;
-            [cnicInputSeq, accountNoInputSeq, bankBranchInputSeq].forEach((el) => {
-                el.disabled = !pakNoReady;
-                if (!pakNoReady) el.value = '';
-            });
-            if (!pakNoReady && dobInputSeq) { dobInputSeq.disabled = true; dobInputSeq.value = ''; }
-        }
-
         function checkInputEnabling() {
-            applyEntrySequenceGating();
             const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const tkAwardInput = document.getElementById('tk-award'); const familyPensionInput = document.getElementById('family-pension'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const printBtn = document.getElementById('print-btn'); const printRestorationBtn = document.getElementById('print-restoration-btn'); const print85YearsBtn = document.getElementById('print-85-years-btn');
             const dobFilled = dobInput.value !== ''; const doeFilled = doeInput.value !== ''; const sosFilled = sosInput.value !== ''; const grossPensionFilled = grossPensionInput.value !== '' && parseFloat(grossPensionInput.value.replace(/,/g, '')) > 0;
             doeInput.disabled = !dobFilled; sosInput.disabled = !(dobFilled && doeFilled); grossPensionInput.disabled = !(dobFilled && doeFilled && sosFilled); increasePensionBtn.disabled = !(dobFilled && doeFilled && sosFilled); decreasePensionBtn.disabled = !(dobFilled && doeFilled && sosFilled); tkAwardInput.disabled = !sosFilled; familyPensionInput.disabled = !sosFilled;
@@ -2436,10 +2440,9 @@
                 rankSelect.value = currentRank;
             }
             applyPayFieldEnabling();
-            applyEntrySequenceGating();
         }
 
-        async function initVisitCounter() {
+        async function initVisitCounter() { 
             if (!isSupabaseEnabled) return; 
             const visitCountSpan = document.getElementById('visit-count'); 
             if (!visitCountSpan) return; 
