@@ -151,6 +151,39 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
+    <!-- App splash: only for the installed Android app / installed PWA (Windows etc.) - a normal browser tab
+         never sees it. Shown instantly for exactly 3 seconds minimum when running installed. -->
+    <div id="app-splash-screen" style="position:fixed;inset:0;z-index:9999;background:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity 0.3s ease;">
+        <img src="splash-logo.png" alt="Pakistan Armed Forces" style="width:160px;height:160px;object-fit:contain;" onerror="this.style.display='none'">
+        <div style="font-family:'Inter',Arial,sans-serif;font-size:1.15rem;font-weight:700;color:#2563eb;text-align:center;padding:0 24px;">Pension Calculator Armed Forces</div>
+    </div>
+    <script>
+        (function () {
+            var el = document.getElementById('app-splash-screen');
+            var isInstalled = (window.matchMedia && (
+                window.matchMedia('(display-mode: standalone)').matches ||
+                window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+                window.matchMedia('(display-mode: fullscreen)').matches ||
+                window.matchMedia('(display-mode: minimal-ui)').matches
+            )) || window.navigator.standalone === true; // iOS "Add to Home Screen"
+            if (!isInstalled) {
+                if (el) el.style.display = 'none'; // ordinary browser tab: no splash at all
+                return;
+            }
+            var SPLASH_MIN_MS = 3000;
+            var startTime = Date.now();
+            var hide = function () {
+                if (!el) return;
+                el.style.opacity = '0';
+                setTimeout(function () { el.style.display = 'none'; }, 300);
+            };
+            window.addEventListener('load', function () {
+                var elapsed = Date.now() - startTime;
+                var remaining = Math.max(0, SPLASH_MIN_MS - elapsed);
+                setTimeout(hide, remaining);
+            });
+        })();
+    </script>
     <div id="app-warning" class="p-4 text-center text-yellow-800 bg-yellow-100 rounded-lg m-4" style="display: none;"></div>
     <div class="container mx-auto p-4 md:p-8 relative"> 
         <div class="logo-container flex flex-col md:flex-row justify-between items-center">
