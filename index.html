@@ -133,7 +133,10 @@
         .print-bank-value { flex-grow: 1; border-bottom: 1px dotted #000; padding-left: 5px; }
 
         /* Custom Splash Screen */
-        #pwa-splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #f8fafc; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
+        #pwa-splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #f8fafc; z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
+        @media all and (display-mode: standalone) {
+            #pwa-splash { display: flex; }
+        }
         #pwa-splash.fade-out { opacity: 0; visibility: hidden; }
         .splash-logos { display: flex; justify-content: center; align-items: center; gap: 20px; width: 100%; max-width: 600px; padding: 0 20px; }
         .splash-logos img { width: 30%; max-width: 150px; object-fit: contain; }
@@ -142,7 +145,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
     <!-- Custom Splash Screen for Installed PWA -->
-    <div id="pwa-splash" style="display: none;">
+    <div id="pwa-splash">
         <div class="splash-logos">
             <img src="logo1.gif" alt="Army Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png'; this.onerror=null;">
             <img src="logo2.gif" alt="Navy Logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png'; this.onerror=null;">
@@ -2895,17 +2898,17 @@
             updateInstallButtonVisibility();
         });
 
-        // Show custom splash screen only in standalone mode
-        window.addEventListener('DOMContentLoaded', () => {
+        // Hide custom splash screen smoothly in standalone mode
+        window.addEventListener('load', () => {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
             if (isStandalone) {
                 const splash = document.getElementById('pwa-splash');
                 if (splash) {
-                    splash.style.display = 'flex';
-                    // Hide splash after 2.5 seconds
+                    // Hide splash after 2 seconds
                     setTimeout(() => {
                         splash.classList.add('fade-out');
-                    }, 2500);
+                        setTimeout(() => { splash.style.display = 'none'; }, 500);
+                    }, 2000);
                 }
             }
         });
