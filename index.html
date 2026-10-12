@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="app-build-version" content="2026-09-25T16:35:57Z">
+    <meta name="app-build-version" content="2026-10-12T03:43:00Z">
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -14,6 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         #update-banner { position: fixed; left: 0; right: 0; bottom: 0; z-index: 200; background: #1f2937; color: #fff; padding: 10px 16px; display: none; align-items: center; justify-content: center; gap: 14px; font-size: 0.85rem; flex-wrap: wrap; text-align: center; }
@@ -49,13 +50,42 @@
         .increase-table .sub-header th { font-weight: 500; }
         .hidden-column { display: none; }
         
-        /* Modal Styles */
         .modal-overlay { position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal-content { background-color: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); width: 90%; max-width: 400px; transform: scale(0.95); transition: transform 0.3s ease; }
         .modal-overlay.visible { display: flex; opacity: 1; }
         .modal-overlay.visible .modal-content { transform: scale(1); }
 
-        /* Responsive */
+        body.lang-ur { font-family: 'Noto Nastaliq Urdu', serif; }
+        @font-face { font-family: 'Noori Nastaleeq'; src: local('Noori Nastaleeq'), local('Jameel Noori Nastaleeq'), local('JameelNooriNastaleeq'), local('Noori Nastaliq'), url('NooriNastaleeq.ttf') format('truetype'); }
+        body.lang-ur .print-info-label { white-space: nowrap; vertical-align: bottom; }
+        body.lang-ur .print-info-value { vertical-align: bottom; }
+        body.lang-ur .print-info-table td:nth-child(2) { padding-left: 0 !important; padding-right: 16px !important; }
+        body.lang-ur header h1 { line-height: 2 !important; margin-bottom: 0.5rem; }
+        body.lang-ur #log-container { direction: ltr; text-align: left; }
+        body.lang-ur header p { line-height: 2.3 !important; margin-top: 0.5rem !important; }
+        body.lang-ur .print-info-table td:first-child .print-info-label { width: 112px !important; }
+        body.lang-ur .print-info-table td:first-child .print-info-value { width: calc(100% - 122px) !important; }
+        body.lang-ur .print-info-table td:nth-child(2) .print-info-label { width: 140px !important; }
+        body.lang-ur .print-info-table td:nth-child(2) .print-info-value { width: calc(100% - 150px) !important; }
+        body.lang-ur #print-area, body.lang-ur #print-area * { font-family: 'Noori Nastaleeq', 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; }
+        body[dir="rtl"] .text-left { text-align: right !important; }
+        body[dir="rtl"] .text-right { text-align: left !important; }
+        @media (min-width: 768px) {
+            body[dir="rtl"] .md\:text-right { text-align: left !important; }
+            body[dir="rtl"] .md\:text-left { text-align: right !important; }
+        }
+        body[dir="rtl"] .logo-left { right: 1rem; left: auto; }
+        body[dir="rtl"] .print-logo-left { right: 0; left: auto; }
+        body[dir="rtl"] .print-logo-right { left: 0; right: auto; }
+        body[dir="rtl"] #pak-no, body[dir="rtl"] #account-no, body[dir="rtl"] #cnic, body[dir="rtl"] #family-pensioner-cnic, body[dir="rtl"] input[type="date"], body[dir="rtl"] input[inputmode="decimal"], body[dir="rtl"] #password-input {
+            direction: ltr;
+            text-align: left;
+        }
+        body[dir="rtl"] .input-group label { text-align: right; }
+        body[dir="rtl"] .output-group { flex-direction: row; }
+        body[dir="rtl"] .pension-input-wrapper input { direction: ltr; text-align: left; }
+        body[dir="rtl"] .increase-table th { text-align: center; }
+
         @media (max-width: 768px) {
             .logo-left { display: none; }
             .container { padding: 1rem; }
@@ -67,21 +97,12 @@
             .output-group .value { font-size: 1rem; padding-left: 0.5rem; }
         }
 
-        /* Print Styles */
         #print-area { font-family: 'Arial', sans-serif; color: black; position: relative; overflow: hidden; }
         #print-area-wrapper { margin-top: 40px; padding: 20px; background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         
         @media screen and (max-width: 768px) {
-            #print-area-wrapper {
-                padding: 10px;
-                margin-top: 20px;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            #print-area {
-                min-width: 750px; 
-                padding: 15px;
-            }
+            #print-area-wrapper { padding: 10px; margin-top: 20px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            #print-area { min-width: 750px; padding: 15px; }
         }
 
         @media print {
@@ -105,7 +126,6 @@
         .print-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; opacity: 0.2; z-index: 0; pointer-events: none; }
 
         .print-info-table, .print-table, .print-section-header, .print-bank-section, .print-footer { position: relative; z-index: 1; }
-
         .print-info-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11pt; border: none; }
         .print-info-table td { padding: 4px 0; border: none; }
         .print-info-label { font-weight: bold; width: 130px; display: inline-block; }
@@ -134,10 +154,9 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
-    <!-- No in-page splash screen: the Army/Navy/PAF row lives in the app icon itself (icon-192.png /
-         icon-512.png), so the single native splash screen the OS shows on launch already carries it -->
     <div id="app-warning" class="p-4 text-center text-yellow-800 bg-yellow-100 rounded-lg m-4" style="display: none;"></div>
     <div class="container mx-auto p-4 md:p-8 relative"> 
+        <button id="lang-toggle-btn" type="button" class="absolute top-4 right-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-4 rounded text-sm transition-colors shadow-md z-50" style="font-family: 'Noto Nastaliq Urdu', serif;" onclick="window.toggleLanguage()">اردو</button>
         <div class="logo-container flex flex-col md:flex-row justify-between items-center">
             <img id="main-logo" src="logo.gif" alt="Logo" class="logo-left md:absolute md:top-4 md:left-4 w-32 h-32 object-contain" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png'; this.onerror=null;">
         </div>
@@ -560,7 +579,6 @@
         </div>
     </div>
 
-    <!-- GENERIC MESSAGE MODAL -->
     <div id="message-modal" class="modal-overlay">
         <div class="modal-content text-center">
             <h3 id="msg-modal-title" class="text-lg font-bold mb-2">Message</h3>
@@ -571,14 +589,13 @@
         </div>
     </div>
 
-    <!-- GENERIC CONFIRM MODAL -->
     <div id="confirm-modal" class="modal-overlay">
         <div class="modal-content text-center">
             <h3 id="confirm-modal-title" class="text-lg font-bold mb-2">Confirm</h3>
             <p id="confirm-modal-body" class="text-gray-700 mb-6"></p>
-            <div class="flex justify-center gap-4">
-                <button id="confirm-modal-cancel" type="button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-6 rounded-lg transition-colors">Cancel</button>
-                <button id="confirm-modal-ok" type="button" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-6 rounded-lg transition-colors">Delete</button>
+            <div class="flex justify-center gap-3">
+                <button id="confirm-modal-cancel" type="button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-lg transition-colors">Cancel</button>
+                <button id="confirm-modal-ok" type="button" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg transition-colors">Confirm</button>
             </div>
         </div>
     </div>
@@ -593,7 +610,7 @@
                     <img src="pmad.jpeg" alt="PMAD Logo" class="print-logo-right" onerror="this.style.display='none'">
                     <h1>Government of Pakistan</h1>
                     <h2 id="print-service-name">Pakistan Air Force</h2>
-                    <h3>Monthly Pension Statement (<span id="print-month-year"></span>)</h3>
+                    <h3><span id="print-statement-title">Monthly Pension Statement</span> (<span id="print-month-year"></span>)</h3>
                 </div>
                 
                 <table class="print-info-table">
@@ -710,7 +727,7 @@
     </div>
 
     <script type="module">
-        const APP_BUILD_VERSION = '2026-09-25T16:35:57Z';
+        const APP_BUILD_VERSION = '2026-10-12T03:43:00Z';
         (() => {
             const extractVersion = (html) => { const m = html.match(/<meta\s+name="app-build-version"\s+content="([^"]*)"/i); return m ? m[1] : null; };
             const showUpdateBanner = () => { const b = document.getElementById('update-banner'); if (b) b.classList.add('visible'); };
@@ -730,7 +747,7 @@
                 setTimeout(checkForUpdate, 3000);
             });
         })();
-        
+
         const createClient = window.supabase?.createClient;
         const SUPABASE_URL = "https://xyfibnqodbisyykjrrbs.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5ZmlibnFvZGJpc3l5a2pycmJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwNTc1NjMsImV4cCI6MjA3ODYzMzU2M30.GodY0oqueaXq15tRYM1Lyaw5regYnPOg6v4aAaBPqgM";
@@ -740,8 +757,330 @@
         let logDebounceTimer = null;
         const LOG_DEBOUNCE_DELAY = 0; 
         let passwordAction = ''; 
+
         let pendingLoadData = null; 
         let grossPensionWarningShown = false; 
+
+        let currentLang = 'en';
+        const urduDict = {
+            "Pension Calculator Armed Forces": "پینشن کیلکولیٹر مسلح افواج",
+            "(For Retirement date 01 July, 1986 to till now)": "(یکم جولائی 1986 سے اب تک کی ریٹائرمنٹ کے لیے)",
+            "Designed by Flt Lt (Hon) Irfan Mahmud Sect Asstt": "ڈیزائن کردہ: فلائٹ لیفٹیننٹ (آنریری) عرفان محمود، سیکرٹریٹ اسسٹنٹ",
+            "Install App (Windows/Android)": "ایپ انسٹال کریں",
+            "Input Details": "تفصیلات درج کریں",
+            "Personal Details": "ذاتی تفصیلات",
+            "Arms": "فورس",
+            "Army": "آرمی",
+            "Navy": "نیوی",
+            "PAF": "پی اے ایف",
+            "Rank": "رینک",
+            "Select": "منتخب کریں",
+            "Name": "نام",
+            "Full Name": "پورا نام",
+            "Pak No": "پاک نمبر",
+            "Service No": "سروس نمبر",
+            "Load Data": "ڈیٹا لوڈ کریں",
+            "CNIC": "شناختی کارڈ نمبر",
+            "Incomplete CNIC": "نامکمل شناختی کارڈ",
+            "Account No (IBAN)": "اکاؤنٹ نمبر (آئی بی اے این)",
+            "Bank & Branch": "بینک اور برانچ",
+            "Bank Name, Branch Code": "بینک کا نام، برانچ کوڈ",
+            "Service Details": "سروس کی تفصیلات",
+            "Date of Birth (DOB)": "تاریخ پیدائش (DOB)",
+            "Date of Enrollment (DOE)": "تاریخ بھرتی (DOE)",
+            "Date of Retirment (SOS)": "تاریخ ریٹائرمنٹ (SOS)",
+            "Date of Retirement (SOS)": "تاریخ ریٹائرمنٹ (SOS)",
+            "Gross Pension": "گراس پینشن",
+            "(Mark check to calculate from Pay)": "(تنخواہ سے حساب کرنے کے لیے چیک لگائیں)",
+            "Medical Board": "میڈیکل بورڈ",
+            "TK Award": "تمغہ خدمت",
+            "Family Pension": "فیملی پینشن",
+            "Family Pensioner Name": "فیملی پینشنر کا نام",
+            "W/D/S Name": "نام",
+            "Family Pensioner CNIC": "فیملی پینشنر کا شناختی کارڈ",
+            "Relation with Pensioner": "پینشنر سے رشتہ",
+            "Date of Birth (DOB) Family": "فیملی کی تاریخ پیدائش",
+            "Pay Components (for Gross Pension)": "تنخواہ کے اجزاء (گراس پینشن کے لیے)",
+            "Basic Pay": "بنیادی تنخواہ",
+            "24 Months Avg Pay Emoluments": "24 ماہ کی اوسط تنخواہ",
+            "Disturbance Pay": "ڈسٹربنس پے",
+            "GCB Pay/Other Pay": "جی سی بی / دیگر پے",
+            "Usual Increment": "معمول کا انکریمنٹ",
+            "Total Pay": "کل تنخواہ",
+            "JCO Additional Pension": "جے سی او اضافی پینشن",
+            "(calculated)": "(حساب شدہ)",
+            "Printing Jobs": "پرنٹنگ",
+            "Pension Slip": "پینشن سلپ",
+            "Restoration Application": "بحالی کی درخواست",
+            "85 Years Application": "85 سالہ درخواست",
+            "Calculated Results": "حساب کے نتائج",
+            "Service Summary": "سروس کا خلاصہ",
+            "Qualifying Service (QS)": "کوالیفائنگ سروس (QS)",
+            "Age on next Birthday after SOS": "ریٹائرمنٹ کے بعد اگلی سالگرہ پر عمر",
+            "Commutation Purchase Value": "کمیوٹیشن پرچیز ویلیو",
+            "Disability Pension Details": "معذوری پینشن کی تفصیلات",
+            "Pay for Disability Pension": "معذوری پینشن کی تنخواہ",
+            "Gross Disability Pension": "گراس معذوری پینشن",
+            "Commuted Disability Pension": "کمیوٹڈ معذوری پینشن",
+            "Disability Purchase Value": "معذوری پرچیز ویلیو",
+            "Disability Commute": "معذوری کمیوٹ",
+            "Pension Details": "پینشن کی تفصیلات",
+            "Commuted Pension": "کمیوٹڈ پینشن",
+            "Commutation Amount": "کمیوٹیشن کی رقم",
+            "Commutation Amount (Normal+Disability)": "کمیوٹیشن کی رقم (نارمل+معذوری)",
+            "Total Gross Pension (Normal+Disability)": "کل گراس پینشن (نارمل+معذوری)",
+            "Total Gross Pension": "کل گراس پینشن",
+            "Net Pension (Before Increases)": "نیٹ پینشن (اضافے سے پہلے)",
+            "Final Pension After Increases": "اضافے کے بعد حتمی پینشن",
+            "Pension (Current)": "پینشن (موجودہ)",
+            "Pension (After Restoration)": "پینشن (بحالی کے بعد)",
+            "TK Allowance": "ٹی کے الاؤنس",
+            "Total Payable (Current)": "کل قابل ادائیگی (موجودہ)",
+            "Total Payable (Restored)": "کل قابل ادائیگی (بحال شدہ)",
+            "Pension Restoration Date": "پینشن کی بحالی کی تاریخ",
+            "Age on Pension Restoration": "پینشن کی بحالی پر عمر",
+            "Period Remaing in Restoration": "بحالی میں باقی ماندہ مدت",
+            "Period Remaining in Restoration": "بحالی میں باقی ماندہ مدت",
+            "Pension Increase Calculations": "پینشن میں اضافے کا حساب",
+            "Increase Year": "اضافے کا سال",
+            "%age": "فیصد",
+            "Year": "سال",
+            "Current": "موجودہ",
+            "After Restoration": "بحالی کے بعد",
+            "Base Line": "بیس لائن",
+            "Increase": "اضافہ",
+            "Net": "نیٹ",
+            "Entitled": "حقدار",
+            "From": "سے",
+            "To": "تک",
+            "Minimum Pension": "کم از کم پینشن",
+            "Self": "ذاتی",
+            "Family": "فیملی",
+            "Total Calculation Log:": "کل کیلکولیشن لاگ:",
+            "Total Visits:": "کل وزٹس:",
+            "Calculation Log": "کیلکولیشن لاگ",
+            "Show Log": "لاگ دیکھیں",
+            "Verify Identity": "شناخت کی تصدیق",
+            "Please enter your Date of Birth to load the data.": "ڈیٹا لوڈ کرنے کے لیے براہ کرم اپنی تاریخ پیدائش درج کریں۔",
+            "Cancel": "منسوخ کریں",
+            "Verify & Load": "تصدیق اور لوڈ کریں",
+            "Message": "پیغام",
+            "OK": "ٹھیک ہے",
+            "Enter Password": "پاس ورڈ درج کریں",
+            "Confirm": "تصدیق کریں",
+            "Delete": "حذف کریں",
+            "No": "نہیں",
+            "Yes": "ہاں",
+            "Widow": "بیوہ",
+            "Daughter": "بیٹی",
+            "Son": "بیٹا",
+            "Father": "والد",
+            "Mother": "والدہ",
+            "Sister": "بہن",
+            "Pension Slip Preview": "پینشن سلپ کا پیش نظارہ",
+            "Government of Pakistan": "حکومت پاکستان",
+            "Pakistan Air Force": "پاکستان ایئر فورس",
+            "Pakistan Army": "پاکستان آرمی",
+            "Pakistan Navy": "پاکستان نیوی",
+            "Monthly Pension Statement": "ماہانہ پنشن گوشوارہ",
+            "Family Pensioner Name:": "فیملی پینشنر کا نام:",
+            "Served as:": "عہدہ:",
+            "Name:": "نام:",
+            "Pak No:": "پاک نمبر:",
+            "Service No:": "سروس نمبر:",
+            "CNIC:": "شناختی کارڈ:",
+            "Date of Birth:": "تاریخ پیدائش:",
+            "Retirement Date:": "تاریخ ریٹائرمنٹ:",
+            "S No": "نمبر",
+            "Pension Payment Details": "پینشن کی ادائیگی کی تفصیلات",
+            "Amount (Rs.)": "رقم (روپے)",
+            "Remarks": "ریمارکس",
+            "Monthly Pension - Self": "ماہانہ پینشن - ذاتی",
+            "Monthly Pension - Family": "ماہانہ پینشن - فیملی",
+            "Pension Increase - Self": "پینشن میں اضافہ - ذاتی",
+            "Pension Increase - Family": "پینشن میں اضافہ - فیملی",
+            "Total Pension Transferred": "کل منتقل شدہ پینشن",
+            "Details of Pension Increases": "پینشن میں اضافے کی تفصیلات",
+            "Bank Details :": "بینک کی تفصیلات:",
+            "Account No:": "اکاؤنٹ نمبر:",
+            "Bank & Branch:": "بینک اور برانچ:",
+            "This is a system generated document and does not require any signatures.": "یہ کمپیوٹر سے تیار کردہ دستاویز ہے اور اس پر دستخط کی ضرورت نہیں ہے۔",
+            "Loading...": "لوڈ ہو رہا ہے...",
+            "Total of all ranks: Rs. ": "تمام رینکس کا کل: روپے ",
+            "Maximum for the highest rank held": "اعلیٰ ترین رینک کی زیادہ سے زیادہ حد",
+            "JCO Additional Pension:": "جے سی او اضافی پینشن:",
+            "January": "جنوری", "February": "فروری", "March": "مارچ", "April": "اپریل",
+            "May": "مئی", "June": "جون", "July": "جولائی", "August": "اگست",
+            "September": "ستمبر", "October": "اکتوبر", "November": "نومبر", "December": "دسمبر"
+        };
+        const enDict = {};
+        for (const [key, val] of Object.entries(urduDict)) { enDict[val] = key; }
+
+        window.toggleLanguage = () => {
+            currentLang = currentLang === 'en' ? 'ur' : 'en';
+            applyTranslation();
+            calculateAndDisplayAll();
+        };
+
+        function applyTranslation() { relabelRankOptions();
+            if (currentLang === 'ur') {
+                document.documentElement.setAttribute('dir', 'rtl');
+                document.body.classList.add('lang-ur');
+                document.getElementById('lang-toggle-btn').textContent = 'English';
+                document.getElementById('lang-toggle-btn').style.fontFamily = "'Inter', sans-serif";
+            } else {
+                document.documentElement.setAttribute('dir', 'ltr');
+                document.body.classList.remove('lang-ur');
+                document.getElementById('lang-toggle-btn').textContent = 'اردو';
+                document.getElementById('lang-toggle-btn').style.fontFamily = "'Noto Nastaliq Urdu', serif";
+            }
+            walkAndTranslate(document.body);
+        }
+
+        function walkAndTranslate(node) {
+            if (node.nodeType === 3) {
+                let text = node.nodeValue;
+                let trimmed = text.trim();
+                if (trimmed.length > 0 && node.parentNode.id !== 'lang-toggle-btn') {
+                    let replaced = false;
+                    if (currentLang === 'ur') {
+                        if (urduDict[trimmed]) {
+                            text = text.replace(trimmed, urduDict[trimmed]);
+                            replaced = true;
+                        } else {
+                            let orig = text;
+                            text = text.replace(/ Years/g, ' سال')
+                                       .replace(/ Months/g, ' ماہ')
+                                       .replace(/, 1 Month/g, '، 1 ماہ')
+                                       .replace(/Rs\. /g, 'روپے ')
+                                       .replace(/\(Age /g, '(عمر ')
+                                       .replace(/ Y /g, ' سال ')
+                                       .replace(/ M\)/g, ' ماہ)')
+                                       .replace(/Restored/g, 'بحال شدہ')
+                                       .replace(/Total of all ranks: Rs\. /g, 'تمام رینکس کا کل: روپے ')
+                                       .replace(/Maximum for the highest rank held \((.*?)\): Rs\. /g, 'اعلیٰ ترین رینک ($1) کی زیادہ سے زیادہ حد: روپے ')
+                                       .replace(/JCO Additional Pension: Rs\. /g, 'جے سی او اضافی پینشن: روپے ')
+                                       .replace(/Days /g, 'دن ')
+                                       .replace(/ rolled down/g, ' رول ڈاؤن')
+                                       .replace(/No service entered\./g, 'کوئی سروس درج نہیں کی گئی۔');
+                            
+                            ['January','February','March','April','May','June','July','August','September','October','November','December'].forEach(m => {
+                                if (text.includes(m)) text = text.replace(new RegExp(m, 'g'), urduDict[m]);
+                            });
+                            if (text !== orig) replaced = true;
+                        }
+                    } else {
+                        if (enDict[trimmed]) {
+                            text = text.replace(trimmed, enDict[trimmed]);
+                            replaced = true;
+                        } else {
+                            let orig = text;
+                            text = text.replace(/ سال(?!\s)/g, ' Years')
+                                       .replace(/ ماہ(?!\))/g, ' Months')
+                                       .replace(/، 1 ماہ/g, ', 1 Month')
+                                       .replace(/روپے /g, 'Rs. ')
+                                       .replace(/\(عمر /g, '(Age ')
+                                       .replace(/ سال /g, ' Y ')
+                                       .replace(/ ماہ\)/g, ' M)')
+                                       .replace(/بحال شدہ/g, 'Restored')
+                                       .replace(/تمام رینکس کا کل: روپے /g, 'Total of all ranks: Rs. ')
+                                       .replace(/اعلیٰ ترین رینک \((.*?)\) کی زیادہ سے زیادہ حد: روپے /g, 'Maximum for the highest rank held ($1): Rs. ')
+                                       .replace(/جے سی او اضافی پینشن: روپے /g, 'JCO Additional Pension: Rs. ')
+                                       .replace(/دن /g, 'Days ')
+                                       .replace(/ رول ڈاؤن/g, ' rolled down')
+                                       .replace(/کوئی سروس درج نہیں کی گئی۔/g, 'No service entered.');
+                            
+                            ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'].forEach(m => {
+                                if (text.includes(m)) text = text.replace(new RegExp(m, 'g'), enDict[m]);
+                            });
+                            if (text !== orig) replaced = true;
+                        }
+                    }
+                    if (replaced) node.nodeValue = text;
+                }
+            } else if (node.nodeType === 1) {
+                if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') return;
+                
+                if (node.placeholder) {
+                    let p = node.placeholder.trim();
+                    if (currentLang === 'ur' && urduDict[p]) node.placeholder = urduDict[p];
+                    else if (currentLang === 'en' && enDict[p]) node.placeholder = enDict[p];
+                }
+                if (node.title) {
+                    let p = node.title.trim();
+                    if (currentLang === 'ur' && urduDict[p]) node.title = urduDict[p];
+                    else if (currentLang === 'en' && enDict[p]) node.title = enDict[p];
+                }
+                node.childNodes.forEach(walkAndTranslate);
+            }
+        }
+
+        const rankUrdu = {
+            'Sep': 'سپاہی', 'L/NK': 'لانس نائیک', 'NK': 'نائیک', 'Hav': 'حوالدار', 'Nb Sub': 'نائب صوبیدار', 'Sub': 'صوبیدار', 'Sub Maj': 'صوبیدار میجر', 'Lt (Hon)': 'لیفٹیننٹ (اعزازی)', 'Capt (Hon)': 'کیپٹن (اعزازی)',
+            'Seaman': 'سیمین', 'Able Seaman': 'ایبل سیمین', 'Ledg Seaman': 'لیڈنگ سیمین', 'PO': 'پیٹی آفیسر', 'CPO': 'چیف پیٹی آفیسر', 'FCPO': 'فلیٹ چیف پیٹی آفیسر', 'MCPO': 'ماسٹر چیف پیٹی آفیسر', 'Sub Lt (Hon)': 'سب لیفٹیننٹ (اعزازی)',
+            'SAC': 'سینئر ایئر کرافٹ مین', 'Jnr Tech': 'جونیئر ٹیکنیشن', 'Cpl Tech': 'کارپورل ٹیکنیشن', 'Snr Tech': 'سینئر ٹیکنیشن', 'Chf Tech': 'چیف ٹیکنیشن', 'Asstt Wrt Off': 'اسسٹنٹ وارنٹ آفیسر', 'Wrt Off': 'وارنٹ آفیسر', 'Chf Wrt Off': 'چیف وارنٹ آفیسر', 'Flg Off (Hon)': 'فلائنگ آفیسر (اعزازی)', 'Flt Lt (Hon)': 'فلائٹ لیفٹیننٹ (اعزازی)'
+        };
+        const rankLabel = (r) => (currentLang === 'ur' && rankUrdu[r]) ? rankUrdu[r] : r;
+        const trU = (s) => (currentLang === 'ur' && urduDict[s]) ? urduDict[s] : s;
+        const relabelRankOptions = () => {
+            const sel = document.getElementById('rank');
+            if (!sel) return;
+            Array.from(sel.options).forEach(o => { o.textContent = o.value ? rankLabel(o.value) : trU('Select'); });
+        };
+
+        const nameWordUrdu = {
+            'MUHAMMAD': 'محمد', 'MOHAMMAD': 'محمد', 'MOHAMMED': 'محمد', 'MUHAMMED': 'محمد', 'MUHAMAD': 'محمد', 'MOHD': 'محمد', 'MUHD': 'محمد', 'MD': 'محمد',
+            'ALI': 'علی', 'AHMAD': 'احمد', 'AHMED': 'احمد', 'HUSSAIN': 'حسین', 'HUSAIN': 'حسین', 'HUSEIN': 'حسین', 'HASSAN': 'حسن', 'HASAN': 'حسن', 'HAIDER': 'حیدر', 'HYDER': 'حیدر',
+            'KHAN': 'خان', 'SHAH': 'شاہ', 'ULLAH': 'اللہ', 'ULLA': 'اللہ', 'ABDULLAH': 'عبداللہ', 'ABDUL': 'عبد', 'ABDUR': 'عبد', 'RAHMAN': 'رحمٰن', 'REHMAN': 'رحمٰن', 'RAHIM': 'رحیم', 'KARIM': 'کریم',
+            'HAMID': 'حمید', 'HAMEED': 'حمید', 'MAHMOOD': 'محمود', 'MEHMOOD': 'محمود', 'MAHMUD': 'محمود', 'IRFAN': 'عرفان', 'IMRAN': 'عمران', 'ASLAM': 'اسلم', 'AKRAM': 'اکرم', 'NAWAZ': 'نواز',
+            'SHAHID': 'شاہد', 'JAVED': 'جاوید', 'JAVAID': 'جاوید', 'IQBAL': 'اقبال', 'TARIQ': 'طارق', 'RASHID': 'راشد', 'RAFIQ': 'رفیق', 'SADIQ': 'صادق', 'SALEEM': 'سلیم', 'NASEER': 'نصیر', 'MUNIR': 'منیر',
+            'BASHIR': 'بشیر', 'ZAFAR': 'ظفر', 'AKHTAR': 'اختر', 'ANWAR': 'انور', 'ASHRAF': 'اشرف', 'AFZAL': 'افضل', 'AZIZ': 'عزیز', 'FAROOQ': 'فاروق', 'GUL': 'گل', 'JAN': 'جان', 'DIN': 'دین', 'UDDIN': 'الدین',
+            'MIR': 'میر', 'MALIK': 'ملک', 'CHAUDHRY': 'چوہدری', 'CHAUDHARY': 'چوہدری', 'CHOUDHRY': 'چوہدری', 'RAJA': 'راجہ', 'SYED': 'سید', 'SAYED': 'سید', 'SAYYED': 'سید', 'HAJI': 'حاجی', 'QURESHI': 'قریشی',
+            'BUTT': 'بٹ', 'AWAN': 'اعوان', 'ABBASI': 'عباسی', 'MUGHAL': 'مغل', 'MIRZA': 'مرزا', 'BEGUM': 'بیگم', 'BIBI': 'بی بی', 'BANO': 'بانو',
+            'ZAHID': 'زاہد', 'ZAHEER': 'ظہیر', 'NADEEM': 'ندیم', 'NAEEM': 'نعیم', 'KAMRAN': 'کامران', 'FAISAL': 'فیصل', 'SHABBIR': 'شبیر', 'SHAFIQ': 'شفیق', 'SHAKEEL': 'شکیل', 'SAJID': 'ساجد', 'SAEED': 'سعید',
+            'SARFRAZ': 'سرفراز', 'SHAUKAT': 'شوکت', 'LIAQAT': 'لیاقت', 'MUSHTAQ': 'مشتاق', 'MUMTAZ': 'ممتاز', 'MANZOOR': 'منظور', 'MASOOD': 'مسعود', 'NAZIR': 'نذیر', 'NISAR': 'نثار', 'RIAZ': 'ریاض',
+            'RIZWAN': 'رضوان', 'SHAHZAD': 'شہزاد', 'SULTAN': 'سلطان', 'WAHEED': 'وحید', 'YOUSAF': 'یوسف', 'YASIN': 'یاسین', 'YAQOOB': 'یعقوب', 'ZUBAIR': 'زبیر', 'ISMAIL': 'اسماعیل', 'IBRAHIM': 'ابراہیم',
+            'ISHAQ': 'اسحاق', 'USMAN': 'عثمان', 'UMAR': 'عمر', 'OMAR': 'عمر', 'BILAL': 'بلال', 'FAZAL': 'فضل', 'HAQ': 'حق', 'NOOR': 'نور', 'DAD': 'داد', 'BAKHSH': 'بخش', 'ELAHI': 'الٰہی', 'ILYAS': 'الیاس',
+            'KHALID': 'خالد', 'KHURSHID': 'خورشید', 'MAQSOOD': 'مقصود', 'MUKHTAR': 'مختار', 'NASIR': 'ناصر', 'PERVAIZ': 'پرویز', 'PARVEZ': 'پرویز', 'QAISER': 'قیصر', 'RASOOL': 'رسول', 'SABIR': 'صابر',
+            'SAGHEER': 'صغیر', 'SARWAR': 'سرور', 'SIDDIQUE': 'صدیق', 'TAHIR': 'طاہر', 'TANVEER': 'تنویر', 'ZAMAN': 'زمان'
+        };
+        const letterNamesUrdu = { A: 'اے', B: 'بی', C: 'سی', D: 'ڈی', E: 'ای', F: 'ایف', G: 'جی', H: 'ایچ', I: 'آئی', J: 'جے', K: 'کے', L: 'ایل', M: 'ایم', N: 'این', O: 'او', P: 'پی', Q: 'کیو', R: 'آر', S: 'ایس', T: 'ٹی', U: 'یو', V: 'وی', W: 'ڈبلیو', X: 'ایکس', Y: 'وائی', Z: 'زیڈ' };
+        const transliterateWord = (word) => {
+            if (nameWordUrdu[word]) return nameWordUrdu[word];
+            const s = word.replace(/[^A-Z]/g, '');
+            if (!s) return word;
+            if (s.length === 1) return letterNamesUrdu[s] || s;
+            const cons = { B: 'ب', C: 'ک', D: 'د', F: 'ف', G: 'گ', H: 'ہ', J: 'ج', K: 'ک', L: 'ل', M: 'م', N: 'ن', P: 'پ', Q: 'ق', R: 'ر', S: 'س', T: 'ت', V: 'و', W: 'و', X: 'کس', Z: 'ز' };
+            const di = { KH: 'خ', GH: 'غ', SH: 'ش', CH: 'چ', ZH: 'ژ', BH: 'بھ', PH: 'پھ', DH: 'دھ', TH: 'تھ', JH: 'جھ' };
+            const isV = (c) => 'AEIOU'.includes(c);
+            const n = s.length; let out = ''; let i = 0;
+            while (i < n) {
+                const c = s[i], c2 = s[i + 1] || '';
+                if (di[c + c2]) { out += di[c + c2]; i += 2; continue; }
+                if (c === c2 && !isV(c)) { i++; continue; }
+                if (c === 'Y') { out += 'ی'; i++; continue; }
+                if (!isV(c)) { out += cons[c] || ''; i++; continue; }
+                if (c === 'A') {
+                    if (i === 0) { out += (c2 === 'A') ? 'آ' : 'ا'; i += (c2 === 'A') ? 2 : 1; continue; }
+                    if (c2 === 'A') { out += 'ا'; i += 2; continue; }
+                    const rest = s.slice(i + 1);
+                    if (rest === '' || rest === 'H' || /^[^AEIOU]$/.test(rest)) out += 'ا';
+                    i++; continue;
+                }
+                if (i === 0) { out += 'ا'; i++; continue; }
+                if (c === 'E') { if (c2 === 'E') { out += 'ی'; i += 2; } else { if (c2 !== 'H') out += 'ی'; i++; } continue; }
+                if (c === 'I') { out += 'ی'; i += (c2 === 'E' || c2 === 'I') ? 2 : 1; continue; }
+                if (c === 'O') { out += 'و'; i += (c2 === 'O') ? 2 : 1; continue; }
+                if (c === 'U') { if (c2 === 'U' || c2 === 'O') { out += 'و'; i += 2; } else { if (i === n - 1) out += 'و'; i++; } continue; }
+                i++;
+            }
+            return out;
+        };
+        const nameForPrint = (value) => {
+            const v = String(value || '');
+            if (currentLang !== 'ur' || !v.trim()) return v;
+            return v.toUpperCase().split(/\s+/).filter(Boolean).map(tok => tok.split('-').map(p => transliterateWord(p.replace(/\./g, ''))).join('-')).join(' ');
+        };
 
         let currentCalculatedValues = { 
             pensionCurrent: 0, 
@@ -898,7 +1237,7 @@
             const totalPayPositive = (() => { const v = parseAmount(document.getElementById('total-pay')?.value); return !isNaN(v) && v > 0; })();
             const newPayRule = sosFilled && sos.value > '2024-12-31';
             const basicPayLabel = document.querySelector('label[for="basic-pay"]');
-            if (basicPayLabel) basicPayLabel.textContent = newPayRule ? '24 Months Avg Pay Emoluments' : 'Basic Pay';
+            if (basicPayLabel) basicPayLabel.textContent = trU(newPayRule ? '24 Months Avg Pay Emoluments' : 'Basic Pay');
             const medicalBoard = document.getElementById('medical-board'); 
             if (medicalBoard) { medicalBoard.disabled = !sosFilled; if (!sosFilled) medicalBoard.value = 'No'; }
             const confirmChk = document.getElementById('gross-pension-confirmed');
@@ -989,8 +1328,11 @@
                 minimumFractionDigits = 2;
                 maximumFractionDigits = 2;
             }
-            const prefix = forTable ? '' : 'Rs. ';
-            return prefix + roundedValue.toLocaleString('en-IN', { minimumFractionDigits, maximumFractionDigits });
+            
+            const prefix = forTable ? '' : (currentLang === 'ur' ? ' روپے' : 'Rs. ');
+            const numberString = roundedValue.toLocaleString('en-IN', { minimumFractionDigits, maximumFractionDigits });
+            
+            return currentLang === 'ur' && !forTable ? numberString + prefix : prefix + numberString;
         };
         
         const parseDate = (dateString) => {
@@ -1001,6 +1343,13 @@
 
         const formatDateDisplay = (date) => {
             if (!date) return 'N/A';
+            if (currentLang === 'ur') {
+                const y = date.getUTCFullYear();
+                const mEn = date.toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' });
+                const mUr = urduDict[mEn] || mEn;
+                const d = String(date.getUTCDate()).padStart(2, '0');
+                return `${d}-${mUr}-${y}`;
+            }
             const options = { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' };
             return date.toLocaleString('en-GB', options).replace(/ /g, '-').toUpperCase();
         };
@@ -1012,6 +1361,11 @@
                 const month = parseInt(parts[1]) - 1;
                 const day = parts[2];
                 const dateForDisplay = new Date(Date.UTC(year, month, day));
+                if (currentLang === 'ur') {
+                    const mEn = dateForDisplay.toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' });
+                    const mUr = urduDict[mEn] || mEn;
+                    return `${day}-${mUr}-${year}`;
+                }
                 return dateForDisplay.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).replace(/ /g, '-').toUpperCase();
             }
             return dateString;
@@ -1087,6 +1441,7 @@
 
         const drawJustifiedParagraphWithHangingIndent = (doc, text, firstX, otherX, y, firstWidth, otherWidth, lineHeight = 7) => {
             const lines = [];
+
             const forcedLines = text.split('\n');
             forcedLines.forEach((textLine, forcedLineIndex) => {
                 const words = textLine.split(/\s+/).filter(Boolean);
@@ -1242,7 +1597,101 @@
             doc.save(`${filePrefix}-${pakNo || 'pensioner'}.pdf`);
         };
 
+        const urduRelation = { Widow: 'بیوہ', Daughter: 'بیٹی', Son: 'بیٹا', Father: 'والد', Mother: 'والدہ', Sister: 'بہن' };
+        const printUrduApplication = (kind) => {
+            const g = (id) => document.getElementById(id)?.value || '';
+            const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const monthsEn = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const urduDate = (d, utc) => `${utc ? d.getUTCDate() : d.getDate()} ${urduDict[monthsEn[utc ? d.getUTCMonth() : d.getMonth()]]}، ${utc ? d.getUTCFullYear() : d.getFullYear()}`;
+            const arm = g('arms') || 'PAF';
+            const isFamily = g('family-pension') === 'Yes';
+            const isAN = arm === 'Army' || arm === 'Navy';
+            const servicePrefix = arm === 'Army' ? 'PA' : arm === 'Navy' ? 'PN' : 'PAF';
+            const pakNo = g('pak-no') || '____________';
+            const rankUr = esc(rankLabel(g('rank')) || '____________');
+            const nameUr = esc(g('name') ? nameForPrint(g('name')) : '____________');
+            const famNameUr = esc(g('family-pensioner-name') ? nameForPrint(g('family-pensioner-name')) : '____________');
+            const signName = isFamily ? famNameUr : nameUr;
+            const rel = urduRelation[g('family-relation')] || '';
+            const todayText = urduDate(new Date(), false);
+            const ltr = (s) => `<span class="ltr">${esc(s)}</span>`;
+            let heading = '', paras = [], dataHtml = '';
+            if (kind === '85') {
+                const dobDate = parseDate(g('dob'));
+                const familyDobDate = parseDate(g('family-dob'));
+                const base = (isFamily && familyDobDate) ? familyDobDate : dobDate;
+                const bday = base ? urduDate(new Date(Date.UTC(base.getUTCFullYear() + 85, base.getUTCMonth(), base.getUTCDate())), true) : '____________';
+                heading = isFamily ? 'فیملی پینشن میں 85 سال کی عمر پر 25 فیصد اضافے کی منظوری' : 'پینشن میں 85 سال کی عمر پر 25 فیصد اضافے کی منظوری';
+                paras = [
+                    `مندرجہ بالا موضوع کے حوالے سے اور فنانس ڈویژن (ریگولیشن ونگ) کے جاری کردہ آفس میمورنڈم نمبر ${ltr('F.4 (1)-Reg-6/2016-870')} مورخہ 01 جولائی 2016 اور نمبر ${ltr('F.4 (1)-Reg-6/2016-1082')} مورخہ 26 ستمبر 2016 کی شقوں کے تحت۔`,
+                    `گزارش ہے کہ میری عمر ${bday} کو 85 سال ہو چکی ہے۔ مذکورہ آفس میمورنڈم کے مطابق اب میں جولائی 2016 میں دی گئی 10 فیصد کے بجائے پینشن میں 25 فیصد اضافے کا حقدار ہوں۔`,
+                    'لہٰذا استدعا ہے کہ مذکورہ اضافہ میری پینشن میں منظور کیا جائے اور اصلاحی پی پی او (Corrigendum PPO) کی نقل میرے گھر کے پتے پر ارسال کی جائے۔'
+                ];
+            } else {
+                const dobDate = parseDate(g('dob')); const sosDate = parseDate(g('sos'));
+                heading = isFamily ? 'فیملی پینشن کے کمیوٹ شدہ حصے کی بحالی' : 'پینشن کے کمیوٹ شدہ حصے کی بحالی';
+                const idLabel = isAN ? 'سروس نمبر' : 'پاک نمبر';
+                dataHtml = `<table class="data">
+                    <tr><td>رینک: <b>${rankUr}</b></td><td>نام: <b>${nameUr}</b></td></tr>
+                    <tr><td>${idLabel}: <b>${ltr(pakNo)}</b></td><td>تاریخ پیدائش: <b>${dobDate ? esc(urduDate(dobDate, true)) : '____________'}</b></td></tr>
+                    <tr><td>تاریخ ریٹائرمنٹ: <b>${sosDate ? esc(urduDate(sosDate, true)) : '____________'}</b></td><td>تاریخ بحالی: <b>${esc((currentCalculatedValues.restorationDate || 'N/A').split('-').length === 3 ? (p => `${p[0]} ${p[1]}، ${p[2]}`)((currentCalculatedValues.restorationDate).split('-')) : (currentCalculatedValues.restorationDate || 'N/A'))}</b></td></tr>
+                    <tr><td colspan="2">پتہ: <span class="fill"></span></td></tr>
+                    <tr><td colspan="2"><span class="fill"></span></td></tr>
+                </table>`;
+                paras = [
+                    'ذیل میں پینشن کے کمیوٹ شدہ حصے کی بحالی کے لیے ڈیٹا درج ہے:-',
+                    'لہٰذا استدعا ہے کہ پینشن کا کمیوٹ شدہ حصہ بحال کیا جائے۔ برائے مہربانی اصلاحی پی پی او کی نقل مندرجہ بالا پتے پر ارسال فرمائیں۔'
+                ];
+            }
+            const addressee = isAN ? '<div class="blank"></div><div class="blank"></div>' : '<div>ڈائریکٹوریٹ آف پینشن</div><div>ایئر ہیڈ کوارٹرز، پشاور</div>';
+            let n = 0;
+            const paraHtml = (t) => `<div class="para"><span class="num">${++n}.</span><span class="txt">${t}</span></div>`;
+            let body = '';
+            if (kind === '85') { body = paras.map(paraHtml).join(''); }
+            else { body = paraHtml(paras[0]) + dataHtml + paraHtml(paras[1]); }
+            body += paraHtml('آپ کی عین نوازش ہوگی۔');
+            const sigRank = isFamily ? `${rankUr} (ریٹائرڈ) کی ${rel}` : `${rankUr} (ریٹائرڈ)`;
+            const sigNo = isAN ? `سروس نمبر ${ltr(pakNo)}` : `پاک/${ltr(pakNo)}`;
+            const html = `<!DOCTYPE html><html lang="ur" dir="rtl"><head><meta charset="UTF-8"><title>${esc(heading)}</title>
+                <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+                <style>
+                    @font-face { font-family: 'Noori Nastaleeq'; src: local('Noori Nastaleeq'), local('Jameel Noori Nastaleeq'), local('JameelNooriNastaleeq'), local('Noori Nastaliq'), url('NooriNastaleeq.ttf') format('truetype'); }
+                    @page { size: A4; margin: 16mm 20mm; }
+                    body { direction: rtl; margin: 0; color: #000; font-family: 'Noori Nastaleeq', 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; font-size: 15.5pt; line-height: 2.05; }
+                    .ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+                    .row { display: flex; justify-content: space-between; margin-bottom: 14px; }
+                    h1 { text-align: center; font-size: 18.5pt; font-weight: bold; margin: 26px 0; line-height: 2; }
+                    .para { display: flex; gap: 12px; margin-bottom: 6px; text-align: justify; }
+                    .num { flex: none; }
+                    .data { width: 100%; margin: 4px 0 10px; border-collapse: collapse; }
+                    .data td { padding: 2px 6px; width: 50%; }
+                    .fill { display: inline-block; border-bottom: 1px solid #000; width: 80%; height: 1.2em; vertical-align: bottom; }
+                    .data td[colspan] .fill { width: 90%; }
+                    .blank { border-bottom: 1px solid #000; width: 220px; height: 1.6em; }
+                    .sig { width: 45%; margin: 36px auto 0 0; }
+                    .sig .gap { height: 56px; }
+                    .cell { display: inline-block; border-bottom: 1px solid #000; width: 110px; height: 1.2em; vertical-align: bottom; }
+                </style></head><body>
+                <div class="row"><div>${ltr(`PF/${pakNo}/${servicePrefix}`)}</div><div>${todayText}</div></div>
+                <div>${addressee}</div>
+                <div style="margin-top: 14px;">جناب عالی،</div>
+                <h1>${esc(heading)}</h1>
+                ${body}
+                <div class="sig"><div>آپ کا مخلص</div><div class="gap"></div><div><b>(${signName})</b></div><div>${sigRank}</div><div>${sigNo}</div><div>موبائل نمبر: <span class="cell"></span></div></div>
+                </body></html>`;
+            const frame = document.createElement('iframe');
+            frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+            document.body.appendChild(frame);
+            const w = frame.contentWindow; const d = frame.contentDocument;
+            let printed = false;
+            const go = () => { if (printed) return; printed = true; try { w.focus(); w.print(); } catch (e) { } setTimeout(() => frame.remove(), 60000); };
+            d.open(); d.write(html); d.close();
+            frame.onload = () => { (d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve()).then(() => setTimeout(go, 300)); };
+            setTimeout(go, 3000);
+        };
+
         const generate85YearsApplicationPdf = () => {
+            if (currentLang === 'ur') { printUrduApplication('85'); return; }
             const isFamilyPension = document.getElementById('family-pension')?.value === 'Yes';
             const dobDate = parseDate(document.getElementById('dob')?.value);
             const familyDobDate = parseDate(document.getElementById('family-dob')?.value);
@@ -1266,6 +1715,7 @@
         };
 
         const generateRestorationApplicationPdf = () => {
+            if (currentLang === 'ur') { printUrduApplication('restoration'); return; }
             const { jsPDF } = window.jspdf || {};
             if (!jsPDF) {
                 if (window.openMessageModal) {
@@ -1453,7 +1903,7 @@
 
                 const rankInput = document.getElementById('rank');
                 const currentRank = rankInput.value; 
-                document.getElementById('print-rank').textContent = currentRank;
+                document.getElementById('print-rank').textContent = rankLabel(currentRank);
                 
                 const dobDate = parseDate(dobInput.value); 
                 const doeDate = parseDate(doeInput.value); 
@@ -1476,33 +1926,20 @@
                     let ageM = now.getMonth() - dM;
                     let ageD = now.getDate() - dD;
                     
-                    if (ageD < 0) {
-                        ageM--;
-                    }
-                    if (ageM < 0) {
-                        ageY--;
-                        ageM += 12;
-                    }
+                    if (ageD < 0) { ageM--; }
+                    if (ageM < 0) { ageY--; ageM += 12; }
                     return `(Age ${ageY} Y ${ageM} M)`;
                 };
 
                 let ageString = getAgeDisplayString(dobInput.value);
                 const dobFormatted = formatDateDisplay(dobDate);
                 const dobDisplayElement = document.getElementById('dob-display');
-                if (dobInput.value) {
-                    dobDisplayElement.innerHTML = `${dobFormatted}<br>${ageString}`;
-                } else {
-                    dobDisplayElement.textContent = dobFormatted; 
-                }
+                if (dobInput.value) { dobDisplayElement.innerHTML = `${dobFormatted}<br>${ageString}`; } else { dobDisplayElement.textContent = dobFormatted; }
 
                 let familyAgeString = getAgeDisplayString(familyDobInput.value);
                 const familyDobFormatted = formatDateDisplay(familyDobDate);
                 const familyDobDisplayElement = document.getElementById('family-dob-display');
-                if (familyDobInput.value) {
-                    familyDobDisplayElement.innerHTML = `${familyDobFormatted}<br>${familyAgeString}`;
-                } else {
-                    familyDobDisplayElement.textContent = '';
-                }
+                if (familyDobInput.value) { familyDobDisplayElement.innerHTML = `${familyDobFormatted}<br>${familyAgeString}`; } else { familyDobDisplayElement.textContent = ''; }
 
                 document.getElementById('doe-display').textContent = formatDateDisplay(doeDate); document.getElementById('sos-display').textContent = formatDateDisplay(sosDate);
 
@@ -1517,17 +1954,7 @@
                     restorationDate.setUTCFullYear(restorationDate.getUTCFullYear() + roundedCommutationFactor);
                 }
                 
-                let grossPension = 0;
-                let basePension = 0;
-                let totalGrossPension = 0; 
-                let netPensionPreIncrease = 0; 
-                let commutedPension = 0;
-                let commutationAmount = 0;
-                let finalPensionCurrent = 0;
-                let finalPensionRestored = 0;
-                let tkAllowance = 0;
-                let totalPayableCurrent = 0;
-                let totalPayableRestored = 0;
+                let grossPension = 0; let basePension = 0; let totalGrossPension = 0; let netPensionPreIncrease = 0; let commutedPension = 0; let commutationAmount = 0; let finalPensionCurrent = 0; let finalPensionRestored = 0; let tkAllowance = 0; let totalPayableCurrent = 0; let totalPayableRestored = 0;
                 let netValues = { current: [], restored: [], sumIncreasesCurrent: 0, sumIncreasesRestored: 0, tableData: [] };
 
                 if (grossPensionPPO > 0) {
@@ -1547,15 +1974,11 @@
                      netValues = populateIncreaseTable(sosDate, totalGrossPension, netPensionPreIncrease, dobDate, isFamilyPension, familyDobDate);
                     
                     let maxNetCurrent = netPensionPreIncrease;
-                    if (netValues.current && netValues.current.length > 0) {
-                        maxNetCurrent = Math.max(netPensionPreIncrease, ...netValues.current);
-                    }
+                    if (netValues.current && netValues.current.length > 0) { maxNetCurrent = Math.max(netPensionPreIncrease, ...netValues.current); }
                     finalPensionCurrent = Math.round(maxNetCurrent); 
 
                     let maxNetRestored = totalGrossPension;
-                    if (netValues.restored && netValues.restored.length > 0) {
-                        maxNetRestored = Math.max(totalGrossPension, ...netValues.restored);
-                    }
+                    if (netValues.restored && netValues.restored.length > 0) { maxNetRestored = Math.max(totalGrossPension, ...netValues.restored); }
                     finalPensionRestored = Math.round(maxNetRestored);
 
                     if (tkAward === '1') tkAllowance = 350; else if (tkAward === '2') tkAllowance = 250; else if (tkAward === '3') tkAllowance = 150;
@@ -1570,33 +1993,34 @@
                 document.getElementById('pension-pm-current-output').textContent = formatCurrency(finalPensionCurrent, true); document.getElementById('pension-pm-restored-output').textContent = formatCurrency(finalPensionRestored, true); document.getElementById('tk-allowance-current-output').textContent = formatCurrency(tkAllowance);
                 document.getElementById('total-payable-current-output').textContent = formatCurrency(totalPayableCurrent, true); document.getElementById('total-payable-restored-output').textContent = formatCurrency(totalPayableRestored, true);
                 
-                document.getElementById('print-rank').textContent = document.getElementById('rank').value; document.getElementById('print-name').textContent = document.getElementById('name').value; document.getElementById('print-pak-no').textContent = document.getElementById('pak-no').value; document.getElementById('print-cnic').textContent = document.getElementById('cnic').value; document.getElementById('print-account').textContent = document.getElementById('account-no').value; document.getElementById('print-bank').textContent = document.getElementById('bank-branch').value; 
+                document.getElementById('print-rank').textContent = rankLabel(document.getElementById('rank').value); document.getElementById('print-name').textContent = nameForPrint(document.getElementById('name').value); document.getElementById('print-pak-no').textContent = document.getElementById('pak-no').value; document.getElementById('print-cnic').textContent = document.getElementById('cnic').value; document.getElementById('print-account').textContent = document.getElementById('account-no').value; document.getElementById('print-bank').textContent = document.getElementById('bank-branch').value; 
                 
                 let printDobText = formatDateDisplay(dobDate);
-                if (isFamilyPension && familyDobDate) {
-                    printDobText += ` (${formatDateDisplay(familyDobDate)} F)`;
-                }
+                if (isFamilyPension && familyDobDate) { printDobText += ` (${formatDateDisplay(familyDobDate)} F)`; }
                 document.getElementById('print-dob').textContent = printDobText;
 
                 document.getElementById('print-sos').textContent = formatDateDisplay(sosDate);
-                const todayForPrint = new Date(); todayForPrint.setMonth(todayForPrint.getMonth() - 1); document.getElementById('print-month-year').textContent = todayForPrint.toLocaleString('default', { month: 'long', year: 'numeric' });
+                const todayForPrint = new Date(); todayForPrint.setMonth(todayForPrint.getMonth() - 1); 
+                let monthNameEn = todayForPrint.toLocaleString('en-US', { month: 'long' });
+                if (currentLang === 'ur') {
+                    const mUr = urduDict[monthNameEn] || monthNameEn;
+                    document.getElementById('print-month-year').textContent = `${mUr}-${todayForPrint.getFullYear()}`;
+                } else {
+                    document.getElementById('print-month-year').textContent = todayForPrint.toLocaleString('default', { month: 'long', year: 'numeric' });
+                }
+
                 const today = parseDate(getTodayDateString()); const isRestored = restorationDate && restorationDate <= today;
-                const pensionLabel = isFamilyPension ? "Monthly Pension - Family" : "Monthly Pension - Self"; document.getElementById('print-pension-label').textContent = pensionLabel;
+                const pensionLabel = isFamilyPension ? "Monthly Pension - Family" : "Monthly Pension - Self"; document.getElementById('print-pension-label').textContent = trU(pensionLabel);
                 
                 const pensionValue = isRestored ? totalGrossPension : netPensionPreIncrease; 
                 document.getElementById('print-pension-amount').textContent = (grossPensionPPO > 0) ? formatCurrency(pensionValue, false, true) : '-';
                 
-                const increaseLabel = isFamilyPension ? "Pension Increase - Family" : "Pension Increase - Self"; document.getElementById('print-increase-label').textContent = increaseLabel;
+                const increaseLabel = isFamilyPension ? "Pension Increase - Family" : "Pension Increase - Self"; document.getElementById('print-increase-label').textContent = trU(increaseLabel);
                 let increaseAmount = isRestored ? netValues.sumIncreasesRestored : netValues.sumIncreasesCurrent; 
                 document.getElementById('print-increase-amount').textContent = (grossPensionPPO > 0) ? formatCurrency(increaseAmount, false, true) : '-';
                 
                 const tkRow = document.getElementById('print-row-tk'); 
-                if (tkAllowance > 0) { 
-                    tkRow.style.display = ''; 
-                    document.getElementById('print-tk').textContent = formatCurrency(tkAllowance, false, true); 
-                } else { 
-                    tkRow.style.display = 'none'; 
-                }
+                if (tkAllowance > 0) { tkRow.style.display = ''; document.getElementById('print-tk').textContent = formatCurrency(tkAllowance, false, true); } else { tkRow.style.display = 'none'; }
                 
                 const totalPayable = isRestored ? totalPayableRestored : totalPayableCurrent; 
                 document.getElementById('print-total-payable').textContent = (grossPensionPPO > 0) ? formatCurrency(totalPayable, true, true) : '-';
@@ -1610,15 +2034,11 @@
                 
                 if (isFamilyPension) {
                     printRowFamily.style.display = 'table-row';
-                    let displayText = familyName;
-                    if (familyCnic) {
-                        displayText += ` (CNIC: ${familyCnic})`;
-                    }
+                    let displayText = nameForPrint(familyName);
+                    if (familyCnic) { displayText += ` (CNIC: ${familyCnic})`; }
                     document.getElementById('print-family-pensioner-name').textContent = displayText;
                     document.getElementById('print-family-relation-label').textContent = `${familyRelation} of below`;
-                } else {
-                    printRowFamily.style.display = 'none';
-                }
+                } else { printRowFamily.style.display = 'none'; }
 
                 const detailsTableBody = document.getElementById('print-details-table-body');
                 const detailsTable = document.querySelector('.details-table');
@@ -1626,44 +2046,24 @@
 
                 if (grossPensionPPO > 0 && detailsTableBody && netValues.tableData) {
                     detailsTableBody.innerHTML = ''; 
-                    
                     const entitledData = netValues.tableData.filter(d => d.entitled === 'Y' && d.percentage !== '0%');
                     const totalRows = entitledData.length;
 
                     const addCells = (row, dataItem, serial, isRightSide) => {
-                        const cellSerial = row.insertCell(); 
-                        cellSerial.textContent = serial; 
-                        cellSerial.className = 'center';
+                        const cellSerial = row.insertCell(); cellSerial.textContent = serial; cellSerial.className = 'center';
                         if (isRightSide) cellSerial.style.borderLeft = "2px solid #000";
 
-                        const cellYear = row.insertCell(); 
-                        cellYear.textContent = dataItem.year; 
-                        cellYear.className = 'center';
-
-                        const cellPerc = row.insertCell(); 
-                        cellPerc.textContent = dataItem.percentage; 
-                        cellPerc.className = 'center';
-
+                        const cellYear = row.insertCell(); cellYear.textContent = dataItem.year; cellYear.className = 'center';
+                        const cellPerc = row.insertCell(); cellPerc.textContent = dataItem.percentage; cellPerc.className = 'center';
                         const dataSrc = isRestored ? dataItem.restored : dataItem.current;
 
                         const cellBase = row.insertCell();
-                        if (dataItem.year >= 2025 && dataSrc.increase > 0) { 
-                             cellBase.textContent = formatCurrency(dataSrc.base, false, true); 
-                        } else { 
-                             cellBase.textContent = '-'; 
-                        }
+                        if (dataItem.year >= 2025 && dataSrc.increase > 0) { cellBase.textContent = formatCurrency(dataSrc.base, false, true); } else { cellBase.textContent = '-'; }
                         cellBase.className = 'amount';
 
-                        const cellInc = row.insertCell(); 
-                        cellInc.textContent = dataSrc.increase > 0 ? formatCurrency(dataSrc.increase, false, true) : '-'; 
-                        cellInc.className = 'amount';
-
-                        const cellNet = row.insertCell(); 
-                        cellNet.textContent = dataSrc.net > 0 ? formatCurrency(dataSrc.net, false, true) : '-'; 
-                        cellNet.className = 'amount';
-                        if (dataSrc.isMin) {
-                            cellNet.style.fontWeight = 'bold';
-                        }
+                        const cellInc = row.insertCell(); cellInc.textContent = dataSrc.increase > 0 ? formatCurrency(dataSrc.increase, false, true) : '-'; cellInc.className = 'amount';
+                        const cellNet = row.insertCell(); cellNet.textContent = dataSrc.net > 0 ? formatCurrency(dataSrc.net, false, true) : '-'; cellNet.className = 'amount';
+                        if (dataSrc.isMin) { cellNet.style.fontWeight = 'bold'; }
                     };
 
                     const dualColumnThreshold = isFamilyPension ? 13 : 17;
@@ -1671,55 +2071,27 @@
                     if (totalRows > dualColumnThreshold) {
                         detailsTable.style.fontSize = '8pt';
                         detailsHeadRow.innerHTML = `
-                            <th style="width: 4%; white-space: nowrap;">S No</th>
-                            <th style="width: 6%; white-space: nowrap;">Year</th>
-                            <th style="width: 6%; white-space: nowrap;">%age</th>
-                            <th style="width: 11%; text-align: right; white-space: nowrap;">Base Line</th>
-                            <th style="width: 11%; text-align: right; white-space: nowrap;">Increase</th>
-                            <th style="width: 12%; text-align: right; white-space: nowrap;">Net</th>
-                            <th style="width: 4%; border-left: 2px solid #000; white-space: nowrap;">S No</th>
-                            <th style="width: 6%; white-space: nowrap;">Year</th>
-                            <th style="width: 6%; white-space: nowrap;">%age</th>
-                            <th style="width: 11%; text-align: right; white-space: nowrap;">Base Line</th>
-                            <th style="width: 11%; text-align: right; white-space: nowrap;">Increase</th>
-                            <th style="width: 12%; text-align: right; white-space: nowrap;">Net</th>
+                            <th style="width: 4%; white-space: nowrap;">S No</th><th style="width: 6%; white-space: nowrap;">Year</th><th style="width: 6%; white-space: nowrap;">%age</th><th style="width: 11%; text-align: right; white-space: nowrap;">Base Line</th><th style="width: 11%; text-align: right; white-space: nowrap;">Increase</th><th style="width: 12%; text-align: right; white-space: nowrap;">Net</th>
+                            <th style="width: 4%; border-left: 2px solid #000; white-space: nowrap;">S No</th><th style="width: 6%; white-space: nowrap;">Year</th><th style="width: 6%; white-space: nowrap;">%age</th><th style="width: 11%; text-align: right; white-space: nowrap;">Base Line</th><th style="width: 11%; text-align: right; white-space: nowrap;">Increase</th><th style="width: 12%; text-align: right; white-space: nowrap;">Net</th>
                         `;
 
                         const midPoint = Math.ceil(totalRows / 2);
                         for (let i = 0; i < midPoint; i++) {
                             const row = detailsTableBody.insertRow();
-                            
                             addCells(row, entitledData[i], i + 1, false);
-
-                            if (i + midPoint < totalRows) {
-                                addCells(row, entitledData[i + midPoint], i + midPoint + 1, true);
-                            } else {
-                                for (let j = 0; j < 6; j++) {
-                                    const cell = row.insertCell();
-                                    cell.innerHTML = '&nbsp;';
-                                    if (j === 0) cell.style.borderLeft = "2px solid #000";
-                                }
+                            if (i + midPoint < totalRows) { addCells(row, entitledData[i + midPoint], i + midPoint + 1, true); } else {
+                                for (let j = 0; j < 6; j++) { const cell = row.insertCell(); cell.innerHTML = '&nbsp;'; if (j === 0) cell.style.borderLeft = "2px solid #000"; }
                             }
                         }
                     } else {
                         detailsTable.style.fontSize = '';
                         detailsHeadRow.innerHTML = `
-                            <th style="width: 10%;">S No</th>
-                            <th style="width: 15%;">Year</th>
-                            <th style="width: 15%;">%age</th>
-                            <th style="width: 20%; text-align: center;">Base Line</th>
-                            <th style="width: 20%; text-align: center;">Increase</th>
-                            <th style="width: 20%; text-align: center;">Net</th>
+                            <th style="width: 10%;">S No</th><th style="width: 15%;">Year</th><th style="width: 15%;">%age</th><th style="width: 20%; text-align: center;">Base Line</th><th style="width: 20%; text-align: center;">Increase</th><th style="width: 20%; text-align: center;">Net</th>
                         `;
-                        
-                        entitledData.forEach((dataItem, index) => {
-                            const row = detailsTableBody.insertRow();
-                            addCells(row, dataItem, index + 1, false);
-                        });
+                        entitledData.forEach((dataItem, index) => { const row = detailsTableBody.insertRow(); addCells(row, dataItem, index + 1, false); });
                     }
-                } else if (detailsTableBody) {
-                     detailsTableBody.innerHTML = ''; 
-                }
+                } else if (detailsTableBody) { detailsTableBody.innerHTML = ''; }
+                if (currentLang === 'ur') walkAndTranslate(detailsHeadRow);
 
                 const restorationOutputSpan = document.getElementById('restoration-date-output'); const restorationDateFormatted = restorationDate ? formatDateDisplay(restorationDate) : 'N/A'; restorationOutputSpan.textContent = restorationDateFormatted;
                 if (restorationDate) { const today2 = parseDate(getTodayDateString()); restorationOutputSpan.className = 'value'; if (restorationDate > today2) { restorationOutputSpan.classList.add('text-red-600', 'font-bold'); } else { restorationOutputSpan.classList.add('text-green-600', 'font-bold', 'flashing'); } } else { restorationOutputSpan.className = 'value text-gray-800'; }
@@ -1731,7 +2103,7 @@
                 if (restorationDate) { const today3 = parseDate(getTodayDateString()); if (restorationDate <= today3) { periodRemainingDisplay = 'Restored'; periodRemainingOutputSpan.classList.remove('text-gray-800'); periodRemainingOutputSpan.classList.add('text-green-600', 'font-bold'); } else { periodRemainingDisplay = formatYearsMonthsDisplay(today3, restorationDate); } }
                 periodRemainingOutputSpan.textContent = periodRemainingDisplay;
                 currentCalculatedValues.pensionCurrent = finalPensionCurrent; currentCalculatedValues.pensionRestored = finalPensionRestored; currentCalculatedValues.restorationDate = restorationDateFormatted; currentCalculatedValues.tkAllowance = tkAllowance;
-            } catch (error) {  }
+            } catch (error) { }
         }
 
         function renderLog(logArray) {
@@ -1780,29 +2152,7 @@
                     })()}
                     <strong class="text-blue-600">Current: Rs. ${Math.round(entry.pension_current || 0).toLocaleString('en-IN')}, Restored: Rs. ${Math.round(entry.pension_restored || 0).toLocaleString('en-IN')}${entry.tk_allowance ? `, TK: Rs. ${Math.round(entry.tk_allowance).toLocaleString('en-IN')}` : ''}, Date: ${entry.restoration_date || 'N/A'}</strong><br>
                     <button class="load-log-btn text-xs bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2" 
-                        data-rank="${entry.rank || ''}" 
-                        data-arms="${entry.arms || 'PAF'}"
-                        data-name="${entry.name || ''}" 
-                        data-pak-no="${entry.pak_no || ''}" 
-                        data-cnic="${entry.cnic || ''}" 
-                        data-account-no="${entry.account_no || ''}" 
-                        data-bank-branch="${entry.bank_branch || ''}" 
-                        data-dob="${entry.dob_raw || ''}" 
-                        data-doe="${entry.doe_raw || ''}" 
-                        data-sos="${entry.sos_raw || ''}" 
-                        data-pension="${entry.pension_raw || '0'}" 
-                        data-tk="${entry.tk}" 
-                        data-family="${entry.family}"
-                        data-family-name="${entry.family_pensioner_name || ''}"
-                        data-family-cnic="${entry.family_pensioner_cnic || ''}"
-                        data-family-relation="${entry.relation_with_pensioner || 'Widow'}"
-                        data-family-dob="${entry.family_dob_raw || ''}" 
-                        data-basic-pay="${entry.basic_pay ?? ''}"
-                        data-disturbance-pay="${entry.disturbance_pay ?? ''}"
-                        data-gcb-pay="${entry.gcb_pay ?? ''}"
-                        data-usual-increment="${entry.usual_increment ?? ''}"
-                        data-jco-addl-pension="${entry.jco_addl_pension ?? ''}"
-                        data-medical-board="${entry.medical_board || 'No'}"
+                        data-rank="${entry.rank || ''}" data-arms="${entry.arms || 'PAF'}" data-name="${entry.name || ''}" data-pak-no="${entry.pak_no || ''}" data-cnic="${entry.cnic || ''}" data-account-no="${entry.account_no || ''}" data-bank-branch="${entry.bank_branch || ''}" data-dob="${entry.dob_raw || ''}" data-doe="${entry.doe_raw || ''}" data-sos="${entry.sos_raw || ''}" data-pension="${entry.pension_raw || '0'}" data-tk="${entry.tk}" data-family="${entry.family}" data-family-name="${entry.family_pensioner_name || ''}" data-family-cnic="${entry.family_pensioner_cnic || ''}" data-family-relation="${entry.relation_with_pensioner || 'Widow'}" data-family-dob="${entry.family_dob_raw || ''}" data-basic-pay="${entry.basic_pay ?? ''}" data-disturbance-pay="${entry.disturbance_pay ?? ''}" data-gcb-pay="${entry.gcb_pay ?? ''}" data-usual-increment="${entry.usual_increment ?? ''}" data-jco-addl-pension="${entry.jco_addl_pension ?? ''}" data-medical-board="${entry.medical_board || 'No'}"
                     >Load this Data</button>
                     <button class="delete-log-btn text-xs bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2 ml-2" data-id="${entry.id}">Delete this Log</button>
                 </div>`;
@@ -1821,76 +2171,28 @@
                 if (logSaveQueued !== null) { const next = logSaveQueued; logSaveQueued = null; logCalculation(next); }
             }
         }
-        
         async function logCalculationNow(triggerSource) {
             if (!isSupabaseEnabled) return;
-            const rankInput = document.getElementById('rank');
-            const log_rank = rankInput.value; 
-            const armsInput = document.getElementById('arms'); 
-            const log_arms = armsInput.value;
-
+            const rankInput = document.getElementById('rank'); const log_rank = rankInput.value; 
+            const armsInput = document.getElementById('arms'); const log_arms = armsInput.value;
             const nameInput = document.getElementById('name'); const pakNoInput = document.getElementById('pak-no'); const cnicInput = document.getElementById('cnic'); const accountNoInput = document.getElementById('account-no'); const bankBranchInput = document.getElementById('bank-branch'); const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const tkAwardInput = document.getElementById('tk-award'); const familyPensionInput = document.getElementById('family-pension');
-            
-            const familyNameInput = document.getElementById('family-pensioner-name');
-            const familyCnicInput = document.getElementById('family-pensioner-cnic');
-            const familyRelationInput = document.getElementById('family-relation');
-            const familyDobInput = document.getElementById('family-dob');
-
+            const familyNameInput = document.getElementById('family-pensioner-name'); const familyCnicInput = document.getElementById('family-pensioner-cnic'); const familyRelationInput = document.getElementById('family-relation'); const familyDobInput = document.getElementById('family-dob');
             const log_name = nameInput.value; const log_pak_no = pakNoInput.value; const log_cnic = cnicInput.value; const log_account_no = accountNoInput.value; const log_bank_branch = bankBranchInput.value; const log_dob_raw = dobInput.value; const log_doe_raw = doeInput.value; const log_sos_raw = sosInput.value; const log_pension_raw = grossPensionInput.value.replace(/,/g, '') || '0'; const log_tk = tkAwardInput.value; const log_family = familyPensionInput.value;
-            
-            const log_family_name = familyNameInput.value;
-            const log_family_cnic = familyCnicInput.value;
-            const log_family_relation = familyRelationInput.value;
-            const log_family_dob_raw = familyDobInput.value; 
+            const log_family_name = familyNameInput.value; const log_family_cnic = familyCnicInput.value; const log_family_relation = familyRelationInput.value; const log_family_dob_raw = familyDobInput.value; 
 
             const now = new Date(); const day = String(now.getDate()).padStart(2, '0'); const month = String(now.getMonth() + 1).padStart(2, '0'); const year = now.getFullYear(); const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
             
             const manualGrossPension = !!document.getElementById('gross-pension-confirmed') && !document.getElementById('gross-pension-confirmed').checked; 
             const payVal = (id) => { if (manualGrossPension) return null; const v = parseAmount(document.getElementById(id)?.value); return isNaN(v) ? null : v; }; 
             const logEntry = { 
-                displaytimestamp: `${day}-${month}-${year} ${time}`, 
-                triggersource: triggerSource, 
-                rank: log_rank, 
-                arms: log_arms, 
-                name: log_name, 
-                pak_no: log_pak_no, 
-                cnic: log_cnic, 
-                account_no: log_account_no, 
-                bank_branch: log_bank_branch, 
-                dob_raw: log_dob_raw, 
-                doe_raw: log_doe_raw, 
-                sos_raw: log_sos_raw, 
-                pension_raw: log_pension_raw, 
-                tk: log_tk, 
-                family: log_family, 
-                family_pensioner_name: log_family_name, 
-                family_pensioner_cnic: log_family_cnic, 
-                relation_with_pensioner: log_family_relation, 
-                family_dob_raw: log_family_dob_raw, 
-                basic_pay: payVal('basic-pay'),
-                disturbance_pay: payVal('disturbance-pay'),
-                gcb_pay: payVal('gcb-pay'),
-                usual_increment: payVal('usual-increment'),
-                jco_addl_pension: payVal('jco-addl-pension'),
-                medical_board: manualGrossPension ? 'No' : (document.getElementById('medical-board')?.value || 'No'),
-                pension_current: currentCalculatedValues.pensionCurrent, 
-                pension_restored: currentCalculatedValues.pensionRestored, 
-                restoration_date: currentCalculatedValues.restorationDate, 
-                tk_allowance: currentCalculatedValues.tkAllowance 
+                displaytimestamp: `${day}-${month}-${year} ${time}`, triggersource: triggerSource, rank: log_rank, arms: log_arms, name: log_name, pak_no: log_pak_no, cnic: log_cnic, account_no: log_account_no, bank_branch: log_bank_branch, dob_raw: log_dob_raw, doe_raw: log_doe_raw, sos_raw: log_sos_raw, pension_raw: log_pension_raw, tk: log_tk, family: log_family, family_pensioner_name: log_family_name, family_pensioner_cnic: log_family_cnic, relation_with_pensioner: log_family_relation, family_dob_raw: log_family_dob_raw, basic_pay: payVal('basic-pay'), disturbance_pay: payVal('disturbance-pay'), gcb_pay: payVal('gcb-pay'), usual_increment: payVal('usual-increment'), jco_addl_pension: payVal('jco-addl-pension'), medical_board: manualGrossPension ? 'No' : (document.getElementById('medical-board')?.value || 'No'), pension_current: currentCalculatedValues.pensionCurrent, pension_restored: currentCalculatedValues.pensionRestored, restoration_date: currentCalculatedValues.restorationDate, tk_allowance: currentCalculatedValues.tkAllowance 
             };
 
             try {
                 if (log_pak_no && log_pak_no.trim() !== "") {
                     const { error: deletePakNoError } = await supabaseClient.from('logs').delete().eq('pak_no', log_pak_no);
                 } else {
-                    const { error: deleteError } = await supabaseClient.from('logs').delete().match({ 
-                        rank: log_rank, 
-                        name: log_name, 
-                        pak_no: log_pak_no, 
-                        cnic: log_cnic, 
-                        pension_raw: log_pension_raw, 
-                        pension_current: currentCalculatedValues.pensionCurrent 
-                    });
+                    const { error: deleteError } = await supabaseClient.from('logs').delete().match({ rank: log_rank, name: log_name, pak_no: log_pak_no, cnic: log_cnic, pension_raw: log_pension_raw, pension_current: currentCalculatedValues.pensionCurrent });
                 }
 
                 let { error: insertError } = await supabaseClient.from('logs').insert(logEntry);
@@ -1898,8 +2200,7 @@
                     const { basic_pay, disturbance_pay, gcb_pay, usual_increment, jco_addl_pension, medical_board, ...legacyEntry } = logEntry;
                     ({ error: insertError } = await supabaseClient.from('logs').insert(legacyEntry));
                 }
-                if (insertError) { throw insertError; }
-            } catch (e) {  }
+            } catch (e) { }
         }
         
         async function deleteLogEntry(id) {
@@ -1908,11 +2209,7 @@
                 const { error } = await supabaseClient.from('logs').delete().eq('id', id);
                 if (error) throw error;
                 fetchLogs(); 
-            } catch (e) {
-                if (window.openMessageModal) {
-                    window.openMessageModal("Error", "Failed to delete log entry.");
-                }
-            }
+            } catch (e) { alert("Failed to delete log entry."); }
         }
 
         function openPasswordModal() { const passwordModal = document.getElementById('password-modal'); const passwordInput = document.getElementById('password-input'); const passwordError = document.getElementById('password-error'); passwordInput.value = ''; passwordError.style.display = 'none'; passwordModal.classList.add('visible'); passwordInput.focus(); }
@@ -1930,78 +2227,38 @@
 
                 if (data === true) {
                     passwordError.style.display = 'none';
-                    if (passwordAction === 'show') {
-                        document.getElementById('log-container').style.display = 'block';
-                        closePasswordModal();
-                    } else if (passwordAction === 'clear') {
-                        const { error: clearError } = await supabaseClient.from('logs').delete().neq('id', 0);
-                        if (clearError) throw clearError;
-                        closePasswordModal();
-                    }
+                    if (passwordAction === 'show') { document.getElementById('log-container').style.display = 'block'; closePasswordModal(); } else if (passwordAction === 'clear') { const { error: clearError } = await supabaseClient.from('logs').delete().neq('id', 0); if (clearError) throw clearError; closePasswordModal(); }
                 } else {
-                    passwordError.textContent = "Incorrect password. Please try again."; 
-                    passwordError.style.display = 'block'; 
+                    passwordError.textContent = "Incorrect password. Please try again."; passwordError.style.display = 'block'; 
                 }
             } catch (e) {
-                 passwordError.textContent = "System error. Please try again later.";
-                 passwordError.style.display = 'block';
+                 passwordError.textContent = "System error. Please try again later."; passwordError.style.display = 'block';
             }
         }
 
         function loadLogData(button) {
             const data = button.dataset;
-            const rankInput = document.getElementById('rank'); 
-            const savedRank = data.rank || '';
-            const armsInput = document.getElementById('arms'); 
+            const rankInput = document.getElementById('rank'); const savedRank = data.rank || ''; const armsInput = document.getElementById('arms'); 
             
-            if (data.arms) {
-                armsInput.value = data.arms;
-                updateArmsUI(); 
-            } else {
-                armsInput.value = 'PAF';
-                updateArmsUI();
-            }
+            if (data.arms) { armsInput.value = data.arms; updateArmsUI(); } else { armsInput.value = 'PAF'; updateArmsUI(); }
 
             let optionFound = false; 
-            for (let i = 0; i < rankInput.options.length; i++) { 
-                if (rankInput.options[i].value === savedRank) { 
-                    rankInput.selectedIndex = i; 
-                    optionFound = true; 
-                    break; 
-                } 
-            }
-            if (!optionFound) { 
-                rankInput.value = savedRank;
-                if (rankInput.selectedIndex === -1) rankInput.selectedIndex = 0; 
-            }
+            for (let i = 0; i < rankInput.options.length; i++) { if (rankInput.options[i].value === savedRank) { rankInput.selectedIndex = i; optionFound = true; break; } }
+            if (!optionFound) { rankInput.value = savedRank; if (rankInput.selectedIndex === -1) rankInput.selectedIndex = 0; }
 
             document.getElementById('name').value = data.name || ''; document.getElementById('pak-no').value = data.pakNo || ''; document.getElementById('cnic').value = data.cnic || ''; document.getElementById('account-no').value = data.accountNo || ''; document.getElementById('bank-branch').value = data.bankBranch || ''; document.getElementById('dob').value = data.dob || ''; document.getElementById('doe').value = data.doe || ''; document.getElementById('sos').value = data.sos || '';
             const pensionValue = data.pension || ''; const grossPensionInput = document.getElementById('gross-pension-ppo'); grossPensionInput.value = pensionValue;
             const parts = pensionValue.split('.'); let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); let decimalPart = parts[1] ? (parts[1] + '00').substring(0, 2) : ''; grossPensionInput.value = integerPart; if (decimalPart) { grossPensionInput.value += '.' + decimalPart; } if (parseFloat(pensionValue) === 0) { grossPensionInput.value = '0'; }
             document.getElementById('tk-award').value = data.tk || 'No'; document.getElementById('family-pension').value = data.family || 'No';
-            
-            document.getElementById('family-pensioner-name').value = data.familyName || '';
-            document.getElementById('family-pensioner-cnic').value = data.familyCnic || '';
-            document.getElementById('family-relation').value = data.familyRelation || 'Widow';
-            document.getElementById('family-dob').value = data.familyDob || ''; 
-            setAmountField('basic-pay', data.basicPay);
-            setAmountField('disturbance-pay', data.disturbancePay);
-            setAmountField('gcb-pay', data.gcbPay);
-            setAmountField('usual-increment', data.usualIncrement);
-            setAmountField('jco-addl-pension', data.jcoAddlPension);
+            document.getElementById('family-pensioner-name').value = data.familyName || ''; document.getElementById('family-pensioner-cnic').value = data.familyCnic || ''; document.getElementById('family-relation').value = data.familyRelation || 'Widow'; document.getElementById('family-dob').value = data.familyDob || ''; 
+            setAmountField('basic-pay', data.basicPay); setAmountField('disturbance-pay', data.disturbancePay); setAmountField('gcb-pay', data.gcbPay); setAmountField('usual-increment', data.usualIncrement); setAmountField('jco-addl-pension', data.jcoAddlPension);
             { const mb = document.getElementById('medical-board'); if (mb) mb.value = ['No', 'A', 'B', 'C'].includes(data.medicalBoard) ? data.medicalBoard : 'No'; }
-            calculateTotalPay();
-            document.getElementById('account-no').dispatchEvent(new Event('input'));
-            document.getElementById('cnic').dispatchEvent(new Event('input'));
-            document.getElementById('family-pensioner-cnic').dispatchEvent(new Event('input'));
-
+            calculateTotalPay(); document.getElementById('account-no').dispatchEvent(new Event('input')); document.getElementById('cnic').dispatchEvent(new Event('input')); document.getElementById('family-pensioner-cnic').dispatchEvent(new Event('input'));
             calculateTotalPay();
             { const chk = document.getElementById('gross-pension-confirmed'); const basicPayVal = parseAmount(document.getElementById('basic-pay')?.value); const basicPayPositive = !isNaN(basicPayVal) && basicPayVal > 0; if (chk) chk.checked = document.getElementById('total-pay').value !== '' && basicPayPositive; } 
             checkInputEnabling(); calculateAndDisplayAll();
             { const chk = document.getElementById('gross-pension-confirmed'); if (chk) chk.dispatchEvent(new Event('change')); }
-            
             document.getElementById('dob').disabled = false;
-
             if (isSupabaseEnabled) { clearTimeout(logDebounceTimer); if (document.getElementById('dob').value && document.getElementById('doe').value && document.getElementById('sos').value && grossPensionInput.value) { logDebounceTimer = setTimeout(() => { logCalculation('Load Log Data (Debounced)'); }, LOG_DEBOUNCE_DELAY); } }
         }
 
@@ -2051,12 +2308,8 @@
                      const todayDate = new Date();
                      let currentAge = todayDate.getFullYear() - targetDobForIncrease.getFullYear();
                      const m = todayDate.getMonth() - targetDobForIncrease.getMonth();
-                     if (m < 0 || (m === 0 && todayDate.getDate() < targetDobForIncrease.getDate())) {
-                         currentAge--;
-                     }
-                     if (currentAge >= 85) {
-                         percentageToDisplay = '25%';
-                     }
+                     if (m < 0 || (m === 0 && todayDate.getDate() < targetDobForIncrease.getDate())) { currentAge--; }
+                     if (currentAge >= 85) { percentageToDisplay = '25%'; }
                 }
                 
                 const percentageText = percentageToDisplay.replace('%', ''); const percentageValue = parseFloat(percentageText) / 100;
@@ -2065,7 +2318,6 @@
                 const getSelfNormalMinimumPension = (increaseYear, selfDobDate) => {
                     const baseSelfMin = minPensionData[increaseYear] ? minPensionData[increaseYear].self : 0;
                     if (!selfDobDate || ![2018, 2019, 2021, 2022, 2023, 2024, 2025, 2026].includes(increaseYear)) return baseSelfMin;
-
                     const seventyFifthBirthday = new Date(selfDobDate.getFullYear() + 75, selfDobDate.getMonth(), selfDobDate.getDate());
                     const isBeforeOrOnCutoff = (cutoffDate) => seventyFifthBirthday <= parseDate(cutoffDate);
 
@@ -2077,14 +2329,12 @@
                     if (increaseYear === 2024) return isBeforeOrOnCutoff('2025-06-30') ? 15000 : 0;
                     if (increaseYear === 2025) return isBeforeOrOnCutoff('2026-06-30') ? 15000 : 0;
                     if (increaseYear === 2026) return isBeforeOrOnCutoff('2027-06-30') ? 15000 : 0;
-
                     return baseSelfMin;
                 };
 
                 const getFamilyNormalMinimumPension = (increaseYear, familyPensionDobDate) => {
                     const baseFamilyMin = minPensionData[increaseYear] ? minPensionData[increaseYear].family : 0;
                     if (!familyPensionDobDate || ![2018, 2019, 2021, 2022, 2023, 2024, 2025, 2026].includes(increaseYear)) return baseFamilyMin;
-
                     const seventyFifthBirthday = new Date(familyPensionDobDate.getFullYear() + 75, familyPensionDobDate.getMonth(), familyPensionDobDate.getDate());
                     const isBeforeOrOnCutoff = (cutoffDate) => seventyFifthBirthday <= parseDate(cutoffDate);
 
@@ -2096,7 +2346,6 @@
                     if (increaseYear === 2024) return isBeforeOrOnCutoff('2025-06-30') ? 11200 : 0;
                     if (increaseYear === 2025) return isBeforeOrOnCutoff('2026-06-30') ? 11200 : 0;
                     if (increaseYear === 2026) return isBeforeOrOnCutoff('2027-06-30') ? 11200 : 0;
-
                     return baseFamilyMin;
                 };
 
@@ -2135,53 +2384,27 @@
                     if (isEntitled === 'Y' && !isNaN(percentageValue)) { restoredIncreaseValue = roundToTwoDecimals(restoredBaseLine * percentageValue); isIncreaseCalculatedRestored = true; } else { restoredIncreaseValue = 0; }
                     restoredNetValue = roundToTwoDecimals(restoredBaseLine + restoredIncreaseValue); isNetCalculatedRestored = true;
                 } else if (year >= 2025) {
-                    currentBaseLine = net2024_Current;
-                    baseLineDisplayCurrent = formatCurrency(currentBaseLine, false, true);
-                    
-                    if (isEntitled === 'Y' && percentageValue > 0) {
-                        currentIncreaseValue = roundToTwoDecimals(percentageValue * currentBaseLine);
-                        isIncreaseCalculatedCurrent = true;
-                    } else { 
-                        currentIncreaseValue = 0; 
-                    }
-                    
+                    currentBaseLine = net2024_Current; baseLineDisplayCurrent = formatCurrency(currentBaseLine, false, true);
+                    if (isEntitled === 'Y' && percentageValue > 0) { currentIncreaseValue = roundToTwoDecimals(percentageValue * currentBaseLine); isIncreaseCalculatedCurrent = true; } else { currentIncreaseValue = 0; }
                     currentNetValue = roundToTwoDecimals(previousNetValueCurrent + currentIncreaseValue); isNetCalculatedCurrent = true;
-                    
                     restoredBaseLine = net2024_Restored;
-                    if (isEntitled === 'Y' && !isNaN(percentageValue)) { 
-                        const restoredIncreaseRaw = restoredBaseLine * percentageValue; 
-                        restoredIncreaseValue = roundToTwoDecimals(restoredIncreaseRaw); 
-                        isIncreaseCalculatedRestored = true; 
-                    } else { 
-                        restoredIncreaseValue = 0; 
-                    }
-                    
+                    if (isEntitled === 'Y' && !isNaN(percentageValue)) { restoredIncreaseValue = roundToTwoDecimals(restoredBaseLine * percentageValue); isIncreaseCalculatedRestored = true; } else { restoredIncreaseValue = 0; }
                     restoredNetValue = roundToTwoDecimals(previousNetValueRestored + restoredIncreaseValue); isNetCalculatedRestored = true;
                     baseLineDisplayRestored = formatCurrency(restoredBaseLine, false, true);
                 }
 
-                if (year === 2024) {
-                    net2024_Current = currentNetValue;
-                    net2024_Restored = restoredNetValue;
-                }
+                if (year === 2024) { net2024_Current = currentNetValue; net2024_Restored = restoredNetValue; }
 
                 if (year > 1999) {
                     if (isEntitled === 'Y' && isNetCalculatedCurrent && applicableMinPension > 0 && currentNetValue < applicableMinPension) { 
                         const diff = applicableMinPension - previousNetValueCurrent;
-                        if (diff > 0) {
-                             currentIncreaseValue = diff;
-                        }
-                        currentNetValue = applicableMinPension; 
-                        minPensionAppliedCurrent = true; 
+                        if (diff > 0) { currentIncreaseValue = diff; }
+                        currentNetValue = applicableMinPension; minPensionAppliedCurrent = true; 
                     }
-                    
                     if (isEntitled === 'Y' && isNetCalculatedRestored && applicableMinPension > 0 && restoredNetValue < applicableMinPension) { 
                         const diffRestored = applicableMinPension - previousNetValueRestored;
-                        if (diffRestored > 0) {
-                             restoredIncreaseValue = diffRestored;
-                        }
-                        restoredNetValue = applicableMinPension; 
-                        minPensionAppliedRestored = true; 
+                        if (diffRestored > 0) { restoredIncreaseValue = diffRestored; }
+                        restoredNetValue = applicableMinPension; minPensionAppliedRestored = true; 
                     }
                 }
                 
@@ -2190,10 +2413,7 @@
                 if (isNetCalculatedCurrent) currentNetValues.push(currentNetValue);
                 if (isNetCalculatedRestored) restoredNetValues.push(restoredNetValue);
 
-                if (isEntitled === 'Y') {
-                    totalAccumulatedIncreaseCurrent += currentIncreaseValue;
-                    totalAccumulatedIncreaseRestored += restoredIncreaseValue;
-                }
+                if (isEntitled === 'Y') { totalAccumulatedIncreaseCurrent += currentIncreaseValue; totalAccumulatedIncreaseRestored += restoredIncreaseValue; }
                 
                 detailedData.push({ year: year, percentage: percentageToDisplay, entitled: isEntitled, current: { base: currentBaseLine, increase: currentIncreaseValue, net: currentNetValue, isMin: minPensionAppliedCurrent }, restored: { base: restoredBaseLine, increase: restoredIncreaseValue, net: restoredNetValue, isMin: minPensionAppliedRestored } });
 
@@ -2209,9 +2429,7 @@
                 const minSelfCell = row.insertCell(); minSelfCell.textContent = minPensionSelf > 0 ? formatCurrency(minPensionSelf, false, true) : '-'; minSelfCell.classList.add('hidden-column');
                 const minFamilyCell = row.insertCell(); minFamilyCell.textContent = minPensionFamily > 0 ? formatCurrency(minPensionFamily, false, true) : '-'; minFamilyCell.classList.add('hidden-column');
             
-                if (isEntitled === 'N' || percentageToDisplay === '0%') { 
-                    row.classList.add('hidden'); 
-                }
+                if (isEntitled === 'N' || percentageToDisplay === '0%') { row.classList.add('hidden'); }
             });
             
             return { current: currentNetValues, restored: restoredNetValues, sumIncreasesCurrent: totalAccumulatedIncreaseCurrent, sumIncreasesRestored: totalAccumulatedIncreaseRestored, tableData: detailedData };
@@ -2234,60 +2452,27 @@
             const grpFamilyDob = document.getElementById('grp-family-dob');
 
             if (familyPensionVal === 'Yes') {
-                grpFamilyName.style.display = 'block';
-                grpFamilyCnic.style.display = 'block';
-                grpFamilyRelation.style.display = 'block';
-                if (grpFamilyDob) grpFamilyDob.style.display = 'block'; 
-                const familyCnicInput = document.getElementById('family-pensioner-cnic');
-                const familyCnicError = document.getElementById('family-cnic-error');
+                grpFamilyName.style.display = 'block'; grpFamilyCnic.style.display = 'block'; grpFamilyRelation.style.display = 'block'; if (grpFamilyDob) grpFamilyDob.style.display = 'block'; 
+                const familyCnicInput = document.getElementById('family-pensioner-cnic'); const familyCnicError = document.getElementById('family-cnic-error');
                 const familyDigits = (familyCnicInput.value || '').replace(/\D/g, '').length;
                 if (familyCnicError) familyCnicError.style.display = familyDigits === 13 ? 'none' : 'block';
             } else {
-                grpFamilyName.style.display = 'none';
-                grpFamilyCnic.style.display = 'none';
-                grpFamilyRelation.style.display = 'none';
-                if (grpFamilyDob) grpFamilyDob.style.display = 'none'; 
-                
-                document.getElementById('family-pensioner-name').value = ''; 
-                document.getElementById('family-pensioner-cnic').value = '';
-                document.getElementById('family-relation').selectedIndex = 0;
-                
-                const famDob = document.getElementById('family-dob');
-                if (famDob) famDob.value = '';
-                const famDobDisp = document.getElementById('family-dob-display');
-                if (famDobDisp) famDobDisp.textContent = '';
-                const familyCnicError = document.getElementById('family-cnic-error');
-                if (familyCnicError) familyCnicError.style.display = 'none';
+                grpFamilyName.style.display = 'none'; grpFamilyCnic.style.display = 'none'; grpFamilyRelation.style.display = 'none'; if (grpFamilyDob) grpFamilyDob.style.display = 'none'; 
+                document.getElementById('family-pensioner-name').value = ''; document.getElementById('family-pensioner-cnic').value = ''; document.getElementById('family-relation').selectedIndex = 0;
+                const famDob = document.getElementById('family-dob'); if (famDob) famDob.value = '';
+                const famDobDisp = document.getElementById('family-dob-display'); if (famDobDisp) famDobDisp.textContent = '';
+                const familyCnicError = document.getElementById('family-cnic-error'); if (familyCnicError) familyCnicError.style.display = 'none';
             }
         }
 
         function updateRanks() {
-            const armsSelect = document.getElementById('arms');
-            const rankSelect = document.getElementById('rank');
-            const selectedArm = armsSelect.value;
-            const currentRank = rankSelect.value;
-
+            const armsSelect = document.getElementById('arms'); const rankSelect = document.getElementById('rank'); const selectedArm = armsSelect.value; const currentRank = rankSelect.value;
             rankSelect.innerHTML = '<option value="" disabled selected>Select</option>';
-
             let ranks = [];
-            if (selectedArm === 'Army') {
-                ranks = ['Sep', 'L/NK', 'NK', 'Hav', 'Nb Sub', 'Sub', 'Sub Maj', 'Lt (Hon)', 'Capt (Hon)'];
-            } else if (selectedArm === 'Navy') {
-                ranks = ['Seaman', 'Able Seaman', 'Ledg Seaman', 'PO', 'CPO', 'FCPO', 'MCPO', 'Sub Lt (Hon)', 'Lt (Hon)'];
-            } else {
-                ranks = ['SAC', 'Jnr Tech', 'Cpl Tech', 'Snr Tech', 'Chf Tech', 'Asstt Wrt Off', 'Wrt Off', 'Chf Wrt Off', 'Flg Off (Hon)', 'Flt Lt (Hon)'];
-            }
-
-            ranks.forEach(rank => {
-                const option = document.createElement('option');
-                option.value = rank;
-                option.textContent = rank;
-                rankSelect.appendChild(option);
-            });
-            
-            if (ranks.includes(currentRank)) {
-                rankSelect.value = currentRank;
-            }
+            if (selectedArm === 'Army') { ranks = ['Sep', 'L/NK', 'NK', 'Hav', 'Nb Sub', 'Sub', 'Sub Maj', 'Lt (Hon)', 'Capt (Hon)']; } else if (selectedArm === 'Navy') { ranks = ['Seaman', 'Able Seaman', 'Ledg Seaman', 'PO', 'CPO', 'FCPO', 'MCPO', 'Sub Lt (Hon)', 'Lt (Hon)']; } else { ranks = ['SAC', 'Jnr Tech', 'Cpl Tech', 'Snr Tech', 'Chf Tech', 'Asstt Wrt Off', 'Wrt Off', 'Chf Wrt Off', 'Flg Off (Hon)', 'Flt Lt (Hon)']; }
+            ranks.forEach(rank => { const option = document.createElement('option'); option.value = rank; option.textContent = rank; rankSelect.appendChild(option); });
+            if (ranks.includes(currentRank)) { rankSelect.value = currentRank; }
+            relabelRankOptions();
             applyPayFieldEnabling();
         }
 
@@ -2299,610 +2484,195 @@
                 const { data: rpcData, error: rpcError } = await supabaseClient.rpc('increment_visits'); 
                 if (rpcError) throw rpcError; 
                 if (rpcData) { visitCountSpan.textContent = formatVisitCount(rpcData); } 
-                try {
-                    supabaseClient.channel('visits-channel').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'visits', filter: 'id=eq.1' }, (payload) => { visitCountSpan.textContent = formatVisitCount(payload.new.count); }).subscribe((status, err) => {
-                        if (err) console.warn('Supabase realtime:', err);
-                    }); 
-                } catch(e) {}
             } catch (e) { 
-                try { 
-                    const { data, error } = await supabaseClient.from('visits').select('count').eq('id', 1).single(); 
-                    if (error) throw error; 
-                    visitCountSpan.textContent = formatVisitCount(data.count); 
-                } catch (fetchError) { 
-                    visitCountSpan.textContent = 'Error'; 
-                } 
+                try { const { data, error } = await supabaseClient.from('visits').select('count').eq('id', 1).single(); if (error) throw error; visitCountSpan.textContent = formatVisitCount(data.count); } catch (fetchError) { visitCountSpan.textContent = 'Error'; } 
             } 
         }
 
-        async function fetchLogs() { if (!isSupabaseEnabled) return; try { const { data, error } = await supabaseClient.from('logs').select('*').order('created_at', { ascending: false }).limit(100); if (error) throw error; renderLog(data || []); } catch (error) { const logContainer = document.getElementById('log-container'); if(logContainer) logContainer.innerHTML = `<span class="text-red-500">Error loading log: ${error.message}</span>`; } }
-        
-        function initLogListener() { 
+        async function fetchLogs() { 
             if (!isSupabaseEnabled) return; 
-            fetchLogs(); 
-            try {
-                supabaseClient.channel('logs-channel').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'logs' }, (payload) => { fetchLogs(); }).on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'logs' }, (payload) => { fetchLogs(); }).subscribe((status, err) => {
-                    if (err) console.warn('Supabase realtime:', err);
-                }); 
-            } catch (e) {}
+            try { const { data, error } = await supabaseClient.from('logs').select('*').order('created_at', { ascending: false }).limit(100); if (error) throw error; renderLog(data || []); } catch (error) { const logContainer = document.getElementById('log-container'); if(logContainer) logContainer.innerHTML = `<span class="text-red-500">Error loading log: ${error.message}</span>`; } 
         }
-
+        
         function updateArmsUI() {
-            const armsSelect = document.getElementById('arms');
-            const selectedArm = armsSelect.value;
-            const logoMain = document.querySelector('.logo-left');
-            const logoPrintLeft = document.querySelector('.print-logo-left');
-            const watermark = document.querySelector('.print-watermark');
-            const serviceNamePrint = document.getElementById('print-service-name');
-            const pakNoLabel = document.getElementById('lbl-pak-no');
-            const printPakNoLabel = document.getElementById('print-lbl-pak-no');
-
+            const armsSelect = document.getElementById('arms'); const selectedArm = armsSelect.value; const logoMain = document.querySelector('.logo-left'); const logoPrintLeft = document.querySelector('.print-logo-left'); const watermark = document.querySelector('.print-watermark'); const serviceNamePrint = document.getElementById('print-service-name'); const pakNoLabel = document.getElementById('lbl-pak-no'); const printPakNoLabel = document.getElementById('print-lbl-pak-no');
             let logoFile = 'logo.gif'; 
-            if (selectedArm === 'Army') logoFile = 'logo1.gif';
-            else if (selectedArm === 'Navy') logoFile = 'logo2.gif';
-
-            const updateSrc = (el) => {
-                if (el) {
-                    el.src = logoFile;
-                    el.onerror = function() { 
-                        if (selectedArm === 'PAF') this.src='https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png';
-                        this.onerror = null; 
-                    };
-                }
-            };
-
-            updateSrc(logoMain);
-            updateSrc(logoPrintLeft);
-            updateSrc(watermark);
-
-            if (serviceNamePrint) {
-                if (selectedArm === 'PAF') serviceNamePrint.textContent = 'Pakistan Air Force';
-                else if (selectedArm === 'Army') serviceNamePrint.textContent = 'Pakistan Army';
-                else if (selectedArm === 'Navy') serviceNamePrint.textContent = 'Pakistan Navy';
-            }
-
+            if (selectedArm === 'Army') logoFile = 'logo1.gif'; else if (selectedArm === 'Navy') logoFile = 'logo2.gif';
+            const updateSrc = (el) => { if (el) { el.src = logoFile; el.onerror = function() { if (selectedArm === 'PAF') this.src='https://upload.wikimedia.org/wikipedia/commons/9/97/Pakistan_Air_Force_emblem.png'; this.onerror = null; }; } };
+            updateSrc(logoMain); updateSrc(logoPrintLeft); updateSrc(watermark);
+            if (serviceNamePrint) { if (selectedArm === 'PAF') serviceNamePrint.textContent = 'Pakistan Air Force'; else if (selectedArm === 'Army') serviceNamePrint.textContent = 'Pakistan Army'; else if (selectedArm === 'Navy') serviceNamePrint.textContent = 'Pakistan Navy'; }
             const labelText = (selectedArm === 'PAF') ? 'Pak No' : 'Service No';
-            if (pakNoLabel) pakNoLabel.textContent = labelText;
-            if (printPakNoLabel) printPakNoLabel.textContent = labelText + ':';
-            
+            if (pakNoLabel) pakNoLabel.textContent = trU(labelText);
+            if (printPakNoLabel) printPakNoLabel.textContent = trU(labelText + ':');
             updateRanks();
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
             const appWarning = document.getElementById('app-warning');
             function showWarning(message) { if (appWarning) { appWarning.textContent = message; appWarning.style.display = 'block'; } console.warn(message); }
-            if (!SUPABASE_URL || SUPABASE_URL.includes("PASTE_YOUR")) { showWarning("Supabase is not configured. Online features are disabled."); isSupabaseEnabled = false; document.getElementById('visit-counter-wrapper').style.display = 'none'; document.getElementById('log-wrapper').style.display = 'none'; } else if (!createClient) { showWarning("Supabase library failed to load. Online features are disabled."); isSupabaseEnabled = false; document.getElementById('visit-counter-wrapper').style.display = 'none'; document.getElementById('log-wrapper').style.display = 'none'; } else { try { supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY); if (!supabaseClient) { throw new Error("Supabase client failed to initialize."); } isSupabaseEnabled = true; } catch (e) { showWarning(`Error initializing online features: ${e.message}. App is in offline mode.`); isSupabaseEnabled = false; document.getElementById('visit-counter-wrapper').style.display = 'none'; document.getElementById('log-wrapper').style.display = 'none'; } }
+            if (!SUPABASE_URL || SUPABASE_URL.includes("PASTE_YOUR")) { showWarning("Supabase is not configured. Online features are disabled. Please paste your URL and Key into index.html."); isSupabaseEnabled = false; document.getElementById('visit-counter-wrapper').style.display = 'none'; document.getElementById('log-wrapper').style.display = 'none'; } else if (!createClient) { showWarning("Supabase library failed to load. Online features are disabled. Please refresh and check internet connection."); isSupabaseEnabled = false; document.getElementById('visit-counter-wrapper').style.display = 'none'; document.getElementById('log-wrapper').style.display = 'none'; } else { try { supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY); if (!supabaseClient) { throw new Error("Supabase client failed to initialize."); } isSupabaseEnabled = true; } catch (e) { showWarning(`Error initializing online features: ${e.message}. App is in offline mode.`); isSupabaseEnabled = false; document.getElementById('visit-counter-wrapper').style.display = 'none'; document.getElementById('log-wrapper').style.display = 'none'; } }
             
-            const allInputs = document.querySelectorAll('.calc-input'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const cancelClearBtn = document.getElementById('cancel-clear-btn'); const confirmClearBtn = document.getElementById('confirm-clear-btn'); const passwordInput = document.getElementById('password-input'); const logContainer = document.getElementById('log-container'); const printBtn = document.getElementById('print-btn'); const printRestorationBtn = document.getElementById('print-restoration-btn'); const print85YearsBtn = document.getElementById('print-85-years-btn'); const cnicInput = document.getElementById('cnic');
-            const showLogBtn = document.getElementById('show-log-btn');
-            const sosInput = document.getElementById('sos');
-            const armsSelect = document.getElementById('arms');
-            const dobInput = document.getElementById('dob');
+            const allInputs = document.querySelectorAll('.calc-input'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const cancelClearBtn = document.getElementById('cancel-clear-btn'); const confirmClearBtn = document.getElementById('confirm-clear-btn'); const passwordInput = document.getElementById('password-input'); const logContainer = document.getElementById('log-container'); const printBtn = document.getElementById('print-btn'); const printRestorationBtn = document.getElementById('print-restoration-btn'); const print85YearsBtn = document.getElementById('print-85-years-btn'); const cnicInput = document.getElementById('cnic'); const showLogBtn = document.getElementById('show-log-btn'); const sosInput = document.getElementById('sos'); const armsSelect = document.getElementById('arms'); const dobInput = document.getElementById('dob');
 
             if (dobInput) dobInput.disabled = true;
 
             const pakNoInput = document.getElementById('pak-no');
             if (pakNoInput && dobInput) {
-                const sanitizePakNoInput = () => {
-                    const sanitizedValue = pakNoInput.value.replace(/\D/g, '').slice(0, 8);
-                    if (pakNoInput.value !== sanitizedValue) {
-                        pakNoInput.value = sanitizedValue;
-                    }
-                };
-
-                pakNoInput.addEventListener('input', sanitizePakNoInput);
-                pakNoInput.addEventListener('paste', () => {
-                    requestAnimationFrame(sanitizePakNoInput);
-                });
+                const sanitizePakNoInput = () => { const sanitizedValue = pakNoInput.value.replace(/\D/g, '').slice(0, 8); if (pakNoInput.value !== sanitizedValue) { pakNoInput.value = sanitizedValue; } };
+                pakNoInput.addEventListener('input', sanitizePakNoInput); pakNoInput.addEventListener('paste', () => { requestAnimationFrame(sanitizePakNoInput); });
                 pakNoInput.addEventListener('blur', async () => {
-                    sanitizePakNoInput();
-                    const pakNo = pakNoInput.value.trim();
-                    
-                    if (!pakNo) {
-                        dobInput.disabled = true;
-                        return;
-                    }
-
+                    sanitizePakNoInput(); const pakNo = pakNoInput.value.trim();
+                    if (!pakNo) { dobInput.disabled = true; return; }
                     if (isSupabaseEnabled) {
                         try {
                             const data = await fetchLatestLogByPakNo(pakNo);
-
-                            if (data) {
-                                const selectedArm = document.getElementById('arms').value;
-                                const label = (selectedArm === 'Army' || selectedArm === 'Navy') ? 'Service No' : 'Pak No';
-                                if (window.openMessageModal) window.openMessageModal("Attention", `${label} ${pakNo} already exists. Use "Load Data" button or enter New.`);
-                                dobInput.disabled = true; 
-                            } else {
-                                dobInput.disabled = false;
-                            }
-                        } catch (err) {
-                            dobInput.disabled = false; 
-                        }
-                    } else {
-                        dobInput.disabled = false;
-                    }
+                            if (data) { const selectedArm = document.getElementById('arms').value; const label = (selectedArm === 'Army' || selectedArm === 'Navy') ? 'Service No' : 'Pak No'; openMessageModal("Attention", `${label} ${pakNo} already exists. Use "Load Data" button or enter New.`); dobInput.disabled = true; } else { dobInput.disabled = false; }
+                        } catch (err) { dobInput.disabled = false; }
+                    } else { dobInput.disabled = false; }
                 });
             }
 
             if (sosInput) {
                 sosInput.max = new Date().toISOString().split('T')[0];
-                sosInput.addEventListener('change', () => {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const selected = parseDate(sosInput.value);
-                    if (selected && selected > today) {
-                        if (window.openMessageModal) {
-                            window.openMessageModal("Invalid Date", "Date of Retirement (SOS) cannot be greater than today.");
-                        }
-                        sosInput.value = '';
-                        calculateAndDisplayAll();
-                    }
-                });
+                sosInput.addEventListener('change', () => { const today = new Date(); today.setHours(0, 0, 0, 0); const selected = parseDate(sosInput.value); if (selected && selected > today) { alert("Date of Retirement (SOS) cannot be greater than today."); sosInput.value = ''; calculateAndDisplayAll(); } });
             }
 
             if (grossPensionInput) {
-                const warnGrossPension = () => {
-                    if (grossPensionWarningShown) return; 
-                    if (grossPensionInput.readOnly) return; 
-
-                    grossPensionInput.blur(); 
-                    
-                    const msgTitle = document.getElementById('msg-modal-title');
-                    const msgBody = document.getElementById('msg-modal-body');
-                    const msgModal = document.getElementById('message-modal');
-                    
-                    msgTitle.textContent = "ATTENTION";
-                    msgTitle.className = "text-lg font-bold mb-2 text-red-600 flashing";
-                    msgBody.textContent = "Please enter Gross Pension from PPO or Pension Book. Don't enter your current Pension";
-                    
-                    msgModal.classList.add('visible');
-                    
-                    grossPensionWarningShown = true; 
-                };
-                
+                const warnGrossPension = () => { if (grossPensionWarningShown) return; if (grossPensionInput.readOnly) return; grossPensionInput.blur(); const msgTitle = document.getElementById('msg-modal-title'); const msgBody = document.getElementById('msg-modal-body'); const msgModal = document.getElementById('message-modal'); msgTitle.textContent = "ATTENTION"; msgTitle.className = "text-lg font-bold mb-2 text-red-600 flashing"; msgBody.textContent = "Please enter Gross Pension from PPO or Pension Book. Don't enter your current Pension"; msgModal.classList.add('visible'); grossPensionWarningShown = true; };
                 grossPensionInput.addEventListener('focus', warnGrossPension);
             }
 
             const grossPensionConfirmedCheckbox = document.getElementById('gross-pension-confirmed');
             const payComponentsCard = document.getElementById('pay-components-card');
-            const updatePayComponentsVisibility = () => {
-                if (grossPensionConfirmedCheckbox && payComponentsCard) {
-                    payComponentsCard.classList.toggle('hidden', !grossPensionConfirmedCheckbox.checked);
-                }
-                if (grossPensionConfirmedCheckbox) { const mbGrp = document.getElementById('grp-medical-board'); if (mbGrp) mbGrp.classList.toggle('hidden', !grossPensionConfirmedCheckbox.checked); if (!grossPensionConfirmedCheckbox.checked) { const mb = document.getElementById('medical-board'); if (mb) mb.value = 'No'; } } updateDisabilityPay();
-                syncGrossPensionLink();
-            };
-            if (grossPensionConfirmedCheckbox && payComponentsCard) {
-                grossPensionConfirmedCheckbox.addEventListener('change', () => { updatePayComponentsVisibility(); checkInputEnabling(); updateGrossPensionFromFormula(); calculateAndDisplayAll(); });
-                updatePayComponentsVisibility();
-            }
+            const updatePayComponentsVisibility = () => { if (grossPensionConfirmedCheckbox && payComponentsCard) { payComponentsCard.classList.toggle('hidden', !grossPensionConfirmedCheckbox.checked); } if (grossPensionConfirmedCheckbox) { const mbGrp = document.getElementById('grp-medical-board'); if (mbGrp) mbGrp.classList.toggle('hidden', !grossPensionConfirmedCheckbox.checked); if (!grossPensionConfirmedCheckbox.checked) { const mb = document.getElementById('medical-board'); if (mb) mb.value = 'No'; } } updateDisabilityPay(); syncGrossPensionLink(); };
+            if (grossPensionConfirmedCheckbox && payComponentsCard) { grossPensionConfirmedCheckbox.addEventListener('change', () => { updatePayComponentsVisibility(); checkInputEnabling(); updateGrossPensionFromFormula(); calculateAndDisplayAll(); }); updatePayComponentsVisibility(); }
 
-            if (armsSelect) {
-                armsSelect.addEventListener('change', updateArmsUI);
-                updateArmsUI(); 
-            }
+            if (!allInputs.length || !grossPensionInput || !increasePensionBtn || !decreasePensionBtn || !cancelClearBtn || !confirmClearBtn || !passwordInput || !logContainer || !showLogBtn) { return; }
+            
+            if (armsSelect) { armsSelect.addEventListener('change', updateArmsUI); updateArmsUI(); }
 
             const nameInput = document.getElementById('name');
-            if (nameInput) {
-                nameInput.addEventListener('input', (e) => {
-                    e.target.value = e.target.value.replace(/\d/g, '').toUpperCase();
-                });
-            }
+            if (nameInput) { nameInput.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\d/g, '').toUpperCase(); }); }
 
             const accountNoInput = document.getElementById('account-no');
-            const enforceAccountNoFormat = (e) => {
-                let value = (e.target.value || '').toUpperCase().replace(/\s+/g, '');
-                value = value.replace(/[^A-Z0-9]/g, '');
-                if (value.startsWith('PK')) {
-                    value = `PK${value.substring(2)}`;
-                } else {
-                    value = `PK${value.replace(/^P?K?/g, '')}`;
-                }
-                e.target.value = value.substring(0, 24);
-            };
-            if (accountNoInput) {
-                accountNoInput.value = 'PK';
-                accountNoInput.addEventListener('focus', enforceAccountNoFormat);
-                accountNoInput.addEventListener('input', enforceAccountNoFormat);
-                accountNoInput.addEventListener('blur', enforceAccountNoFormat);
-            }
+            const enforceAccountNoFormat = (e) => { let value = (e.target.value || '').toUpperCase().replace(/\s+/g, ''); value = value.replace(/[^A-Z0-9]/g, ''); if (value.startsWith('PK')) { value = `PK${value.substring(2)}`; } else { value = `PK${value.replace(/^P?K?/g, '')}`; } e.target.value = value.substring(0, 24); };
+            if (accountNoInput) { accountNoInput.value = 'PK'; accountNoInput.addEventListener('focus', enforceAccountNoFormat); accountNoInput.addEventListener('input', enforceAccountNoFormat); accountNoInput.addEventListener('blur', enforceAccountNoFormat); }
 
             const familyPensionerNameInput = document.getElementById('family-pensioner-name');
-            if (familyPensionerNameInput) {
-                familyPensionerNameInput.addEventListener('input', (e) => {
-                    e.target.value = e.target.value.toUpperCase();
-                    calculateAndDisplayAll(); 
-                });
-            }
+            if (familyPensionerNameInput) { familyPensionerNameInput.addEventListener('input', (e) => { e.target.value = e.target.value.toUpperCase(); calculateAndDisplayAll(); }); }
 
-            const formatCNIC = (e) => {
-                let value = e.target.value.replace(/\D/g, ''); 
-                if (value.length > 13) value = value.substring(0, 13); 
-                let formatted = ''; 
-                if (value.length > 0) { formatted += value.substring(0, 5); } 
-                if (value.length >= 6) { formatted += '-' + value.substring(5, 12); } 
-                if (value.length >= 13) { formatted += '-' + value.substring(12, 13); } 
-                e.target.value = formatted;
-            };
+            const formatCNIC = (e) => { let value = e.target.value.replace(/\D/g, ''); if (value.length > 13) value = value.substring(0, 13); let formatted = ''; if (value.length > 0) { formatted += value.substring(0, 5); } if (value.length >= 6) { formatted += '-' + value.substring(5, 12); } if (value.length >= 13) { formatted += '-' + value.substring(12, 13); } e.target.value = formatted; };
             const getCNICDigitsCount = (value) => (value || '').replace(/\D/g, '').length;
-            const validateCNICField = (inputEl, errorEl, isRequired = true) => {
-                if (!inputEl || !errorEl) return true;
-                const digitCount = getCNICDigitsCount(inputEl.value);
-                const isValid = isRequired ? digitCount === 13 : digitCount === 0 || digitCount === 13;
-                errorEl.style.display = isValid ? 'none' : 'block';
-                return isValid;
-            };
+            const validateCNICField = (inputEl, errorEl, isRequired = true) => { if (!inputEl || !errorEl) return true; const digitCount = getCNICDigitsCount(inputEl.value); const isValid = isRequired ? digitCount === 13 : digitCount === 0 || digitCount === 13; errorEl.style.display = isValid ? 'none' : 'block'; return isValid; };
 
             const cnicError = document.getElementById('cnic-error');
-            if (cnicInput) {
-                cnicInput.addEventListener('input', (e) => {
-                    formatCNIC(e);
-                    validateCNICField(cnicInput, cnicError, true);
-                });
-                cnicInput.addEventListener('blur', () => validateCNICField(cnicInput, cnicError, true));
-            }
+            if (cnicInput) { cnicInput.addEventListener('input', (e) => { formatCNIC(e); validateCNICField(cnicInput, cnicError, true); }); cnicInput.addEventListener('blur', () => validateCNICField(cnicInput, cnicError, true)); }
 
             const familyCnicError = document.getElementById('family-cnic-error');
             const familyCnicInput = document.getElementById('family-pensioner-cnic');
-            if (familyCnicInput) { 
-                familyCnicInput.addEventListener('input', (e) => {
-                    formatCNIC(e);
-                    const isFamilyRequired = document.getElementById('family-pension')?.value === 'Yes';
-                    validateCNICField(familyCnicInput, familyCnicError, isFamilyRequired);
-                    calculateAndDisplayAll(); 
-                }); 
-                familyCnicInput.addEventListener('blur', () => {
-                    const isFamilyRequired = document.getElementById('family-pension')?.value === 'Yes';
-                    validateCNICField(familyCnicInput, familyCnicError, isFamilyRequired);
-                });
-            }
+            if (familyCnicInput) { familyCnicInput.addEventListener('input', (e) => { formatCNIC(e); const isFamilyRequired = document.getElementById('family-pension')?.value === 'Yes'; validateCNICField(familyCnicInput, familyCnicError, isFamilyRequired); calculateAndDisplayAll(); }); familyCnicInput.addEventListener('blur', () => { const isFamilyRequired = document.getElementById('family-pension')?.value === 'Yes'; validateCNICField(familyCnicInput, familyCnicError, isFamilyRequired); }); }
 
-            const payComponentInputs = ['basic-pay', 'disturbance-pay', 'gcb-pay', 'usual-increment']
-                .map(id => document.getElementById(id))
-                .filter(Boolean);
+            const payComponentInputs = ['basic-pay', 'disturbance-pay', 'gcb-pay', 'usual-increment'].map(id => document.getElementById(id)).filter(Boolean);
             [...payComponentInputs, document.getElementById('jco-addl-pension')].filter(Boolean).forEach(input => input.addEventListener('input', () => formatAmountTyping(input)));
             payComponentInputs.forEach(input => input.addEventListener('input', calculateTotalPay));
             const grossPensionComponentInput = document.getElementById('gross-pension-component');
             if (grossPensionComponentInput) grossPensionComponentInput.addEventListener('input', () => syncGrossPensionLink('component'));
             const medicalBoardSelect = document.getElementById('medical-board');
             if (medicalBoardSelect) medicalBoardSelect.addEventListener('input', calculateAndDisplayAll);
-            const jcoModal = document.getElementById('jco-modal');
-            const jcoField = document.getElementById('jco-addl-pension');
-            const jcoInsertBtn = document.getElementById('jco-insert-btn');
-            const jcoManualBtn = document.getElementById('jco-manual-btn');
-            const jcoSavedDates = {}; 
-            let jcoManualFocus = false; 
+            const jcoModal = document.getElementById('jco-modal'); const jcoField = document.getElementById('jco-addl-pension'); const jcoInsertBtn = document.getElementById('jco-insert-btn'); const jcoManualBtn = document.getElementById('jco-manual-btn'); const jcoSavedDates = {}; let jcoManualFocus = false; 
             const jcoArm = () => { const a = document.getElementById('arms')?.value; return JCO_RANKS_BY_ARM[a] ? a : 'Army'; };
-            const jcoVisibleCount = () => {
-                const ranks = JCO_RANKS_BY_ARM[jcoArm()];
-                const idx = ranks.indexOf(document.getElementById('rank')?.value);
-                return idx >= 0 ? idx + 1 : ranks.length;
-            };
+            const jcoVisibleCount = () => { const ranks = JCO_RANKS_BY_ARM[jcoArm()]; const idx = ranks.indexOf(document.getElementById('rank')?.value); return idx >= 0 ? idx + 1 : ranks.length; };
             const jcoSet = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
             const readJcoPeriods = () => [0, 1, 2].map(i => ({ start: parseDate(document.getElementById('jco-start-' + i)?.value), end: parseDate(document.getElementById('jco-end-' + i)?.value) }));
             const updateJcoResults = () => {
-                const arm = jcoArm();
-                const ranks = JCO_RANKS_BY_ARM[arm];
-                const visible = jcoVisibleCount();
-                for (let i = 1; i < 3; i++) {
-                    const prevEnd = parseDate(document.getElementById('jco-end-' + (i - 1))?.value);
-                    const startEl = document.getElementById('jco-start-' + i);
-                    if (!startEl) continue;
-                    startEl.value = prevEnd ? new Date(prevEnd.getTime() + 86400000).toISOString().slice(0, 10) : '';
-                    startEl.readOnly = true; 
-                }
+                const arm = jcoArm(); const ranks = JCO_RANKS_BY_ARM[arm]; const visible = jcoVisibleCount();
+                for (let i = 1; i < 3; i++) { const prevEnd = parseDate(document.getElementById('jco-end-' + (i - 1))?.value); const startEl = document.getElementById('jco-start-' + i); if (!startEl) continue; startEl.value = prevEnd ? new Date(prevEnd.getTime() + 86400000).toISOString().slice(0, 10) : ''; startEl.readOnly = true; }
                 jcoSavedDates[arm] = [0, 1, 2].map(i => ({ start: document.getElementById('jco-start-' + i)?.value || '', end: document.getElementById('jco-end-' + i)?.value || '' }));
                 const r = computeJcoAddlPension(readJcoPeriods(), visible);
-                r.rows.forEach((row, i) => {
-                    const rowEl = document.getElementById('jco-row-' + i);
-                    if (rowEl) rowEl.style.display = i < visible ? '' : 'none';
-                    if (i >= visible) return;
-                    const el = document.getElementById('jco-result-' + i);
-                    if (!el) return;
-                    el.className = 'text-xs mt-2 ' + (row.invalid ? 'text-red-500' : 'text-gray-600');
-                    el.textContent = row.invalid ? 'End date is before the start date.'
-                        : (row.totalDays > 0 ? `Days ${row.days}${row.carryIn ? ' + ' + row.carryIn + ' rolled down' : ''} = ${row.totalDays}  |  Years ${row.years}  |  Rs. ${row.amount}` : 'No service entered.');
-                });
-                jcoSet('jco-sum-text', `Total of all ranks: Rs. ${r.sum}`);
-                jcoSet('jco-cap-text', r.highest >= 0 ? `Maximum for the highest rank held (${ranks[r.highest]}): Rs. ${r.cap}` : 'Enter the dates served in at least one rank.');
-                jcoSet('jco-final-text', `JCO Additional Pension: Rs. ${r.final}`);
+                r.rows.forEach((row, i) => { const rowEl = document.getElementById('jco-row-' + i); if (rowEl) rowEl.style.display = i < visible ? '' : 'none'; if (i >= visible) return; const el = document.getElementById('jco-result-' + i); if (!el) return; el.className = 'text-xs mt-2 ' + (row.invalid ? 'text-red-500' : 'text-gray-600'); el.textContent = row.invalid ? 'End date is before the start date.' : (row.totalDays > 0 ? `Days ${row.days}${row.carryIn ? ' + ' + row.carryIn + ' rolled down' : ''} = ${row.totalDays}  |  Years ${row.years}  |  Rs. ${row.amount}` : 'No service entered.'); });
+                jcoSet('jco-sum-text', `Total of all ranks: Rs. ${r.sum}`); jcoSet('jco-cap-text', r.highest >= 0 ? `Maximum for the highest rank held (${ranks[r.highest]}): Rs. ${r.cap}` : 'Enter the dates served in at least one rank.'); jcoSet('jco-final-text', `JCO Additional Pension: Rs. ${r.final}`);
                 if (jcoInsertBtn) jcoInsertBtn.disabled = r.highest < 0;
             };
             const openJcoModal = () => {
-                if (!jcoModal) return;
-                const arm = jcoArm();
-                const saved = jcoSavedDates[arm] || [];
-                jcoSet('jco-modal-arm', arm);
-                document.getElementById('jco-rows').innerHTML = JCO_RANKS_BY_ARM[arm].map((rank, i) => `
-                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50" id="jco-row-${i}">
-                        <div class="flex justify-between items-baseline mb-2">
-                            <span class="font-semibold text-sm">${rank}</span>
-                            <span class="text-xs text-gray-500">Rs. ${JCO_TIERS[i].perYear} per year (max Rs. ${JCO_TIERS[i].max})</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="input-group" style="margin-bottom: 0;"><label for="jco-start-${i}">Start Date</label><input type="date" id="jco-start-${i}" value="${saved[i]?.start || ''}"${i > 0 ? ' readonly title="End Date of the rank below + 1 day"' : ''}></div>
-                            <div class="input-group" style="margin-bottom: 0;"><label for="jco-end-${i}">End Date</label><input type="date" id="jco-end-${i}" value="${saved[i]?.end || ''}"></div>
-                        </div>
-                        <div id="jco-result-${i}" class="text-xs text-gray-600 mt-2"></div>
-                    </div>`).join('');
-                [0, 1, 2].forEach(i => {
-                    document.getElementById('jco-start-' + i)?.addEventListener('input', updateJcoResults);
-                    document.getElementById('jco-end-' + i)?.addEventListener('input', updateJcoResults);
-                });
-                updateJcoResults();
-                jcoModal.classList.add('visible');
-                if (jcoField) jcoField.blur();
+                if (!jcoModal) return; const arm = jcoArm(); const saved = jcoSavedDates[arm] || []; jcoSet('jco-modal-arm', arm);
+                document.getElementById('jco-rows').innerHTML = JCO_RANKS_BY_ARM[arm].map((rank, i) => ` <div class="border border-gray-200 rounded-lg p-3 bg-gray-50" id="jco-row-${i}"> <div class="flex justify-between items-baseline mb-2"> <span class="font-semibold text-sm">${rank}</span> <span class="text-xs text-gray-500">Rs. ${JCO_TIERS[i].perYear} per year (max Rs. ${JCO_TIERS[i].max})</span> </div> <div class="grid grid-cols-2 gap-3"> <div class="input-group" style="margin-bottom: 0;"><label for="jco-start-${i}">Start Date</label><input type="date" id="jco-start-${i}" value="${saved[i]?.start || ''}"${i > 0 ? ' readonly title="End Date of the rank below + 1 day"' : ''}></div> <div class="input-group" style="margin-bottom: 0;"><label for="jco-end-${i}">End Date</label><input type="date" id="jco-end-${i}" value="${saved[i]?.end || ''}"></div> </div> <div id="jco-result-${i}" class="text-xs text-gray-600 mt-2"></div> </div>`).join('');
+                [0, 1, 2].forEach(i => { document.getElementById('jco-start-' + i)?.addEventListener('input', updateJcoResults); document.getElementById('jco-end-' + i)?.addEventListener('input', updateJcoResults); });
+                updateJcoResults(); jcoModal.classList.add('visible'); if (jcoField) jcoField.blur();
             };
             const closeJcoModalForManual = () => { if (jcoModal) jcoModal.classList.remove('visible'); jcoManualFocus = true; if (jcoField) jcoField.focus(); };
-            if (jcoField) {
-                jcoField.addEventListener('click', () => { if (!jcoManualFocus && !jcoField.disabled) openJcoModal(); });
-                jcoField.addEventListener('focus', () => { if (!jcoManualFocus && !jcoField.disabled) openJcoModal(); }); 
-                jcoField.addEventListener('blur', () => { jcoManualFocus = false; });
-            }
-            if (jcoInsertBtn) jcoInsertBtn.addEventListener('click', () => {
-                const r = computeJcoAddlPension(readJcoPeriods());
-                if (r.highest < 0) return;
-                jcoModal.classList.remove('visible');
-                jcoManualFocus = false;
-                jcoField.value = formatAmountLoose(r.final);
-                jcoField.dispatchEvent(new Event('input', { bubbles: true })); 
-            });
+            if (jcoField) { jcoField.addEventListener('click', () => { if (!jcoManualFocus && !jcoField.disabled) openJcoModal(); }); jcoField.addEventListener('focus', () => { if (!jcoManualFocus && !jcoField.disabled) openJcoModal(); }); jcoField.addEventListener('blur', () => { jcoManualFocus = false; }); }
+            if (jcoInsertBtn) jcoInsertBtn.addEventListener('click', () => { const r = computeJcoAddlPension(readJcoPeriods()); if (r.highest < 0) return; jcoModal.classList.remove('visible'); jcoManualFocus = false; jcoField.value = formatAmountLoose(r.final); jcoField.dispatchEvent(new Event('input', { bubbles: true })); });
             if (jcoManualBtn) jcoManualBtn.addEventListener('click', closeJcoModalForManual);
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && jcoModal && jcoModal.classList.contains('visible')) closeJcoModalForManual(); });
             [...payComponentInputs, document.getElementById('jco-addl-pension')].filter(Boolean).forEach(input => input.addEventListener('input', () => { updateGrossPensionFromFormula(); calculateAndDisplayAll(); }));
-            [...payComponentInputs, document.getElementById('jco-addl-pension'), document.getElementById('medical-board')].filter(Boolean).forEach(input => input.addEventListener('input', () => {
-                if (!isSupabaseEnabled) return;
-                clearTimeout(logDebounceTimer);
-                const g = document.getElementById('gross-pension-ppo');
-                if (document.getElementById('dob').value && document.getElementById('doe').value && document.getElementById('sos').value && g.value && parseFloat(g.value.replace(/,/g, '')) > 0) {
-                    logDebounceTimer = setTimeout(() => { logCalculation('Input Change (Debounced)'); }, LOG_DEBOUNCE_DELAY);
-                }
-            }));
+            [...payComponentInputs, document.getElementById('jco-addl-pension'), document.getElementById('medical-board')].filter(Boolean).forEach(input => input.addEventListener('input', () => { if (!isSupabaseEnabled) return; clearTimeout(logDebounceTimer); const g = document.getElementById('gross-pension-ppo'); if (document.getElementById('dob').value && document.getElementById('doe').value && document.getElementById('sos').value && g.value && parseFloat(g.value.replace(/,/g, '')) > 0) { logDebounceTimer = setTimeout(() => { logCalculation('Input Change (Debounced)'); }, LOG_DEBOUNCE_DELAY); } }));
             calculateTotalPay();
 
-            allInputs.forEach(input => { if(input.id !== 'gross-pension-ppo') { input.addEventListener('input', () => { try { calculateAndDisplayAll(); } catch (e) {  } if (isSupabaseEnabled) { clearTimeout(logDebounceTimer); const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); if (dobInput.value && doeInput.value && sosInput.value && grossPensionInput.value && parseFloat(grossPensionInput.value.replace(/,/g, '')) > 0) { logDebounceTimer = setTimeout(() => { logCalculation('Input Change (Debounced)'); }, LOG_DEBOUNCE_DELAY); } } checkInputEnabling(); }); } });
+            allInputs.forEach(input => { if(input.id !== 'gross-pension-ppo') { input.addEventListener('input', () => { try { calculateAndDisplayAll(); } catch (e) { } if (isSupabaseEnabled) { clearTimeout(logDebounceTimer); const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); if (dobInput.value && doeInput.value && sosInput.value && grossPensionInput.value && parseFloat(grossPensionInput.value.replace(/,/g, '')) > 0) { logDebounceTimer = setTimeout(() => { logCalculation('Input Change (Debounced)'); }, LOG_DEBOUNCE_DELAY); } } checkInputEnabling(); }); } });
             grossPensionInput.addEventListener('input', formatGrossPensionInput);
             increasePensionBtn.addEventListener('mousedown', () => startPress(1)); decreasePensionBtn.addEventListener('mousedown', () => startPress(-1)); document.addEventListener('mouseup', stopPress); document.addEventListener('mouseleave', stopPress); increasePensionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(1); }); decreasePensionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(-1); }); document.addEventListener('touchend', stopPress); document.addEventListener('touchcancel', stopPress);
             if (printBtn) { printBtn.addEventListener('click', () => { window.print(); }); }
             if (printRestorationBtn) { printRestorationBtn.addEventListener('click', generateRestorationApplicationPdf); }
             if (print85YearsBtn) { print85YearsBtn.addEventListener('click', generate85YearsApplicationPdf); }
             
-            // Reusable modal setup
-            const msgModal = document.getElementById('message-modal');
-            const msgTitle = document.getElementById('msg-modal-title');
-            const msgBody = document.getElementById('msg-modal-body');
-            const msgBtn = document.getElementById('msg-modal-btn');
-
-            window.openMessageModal = (title, body) => {
-                msgTitle.textContent = title;
-                msgBody.textContent = body;
-                msgModal.classList.add('visible');
-                msgBtn.focus();
-            };
-
-            msgBtn.addEventListener('click', () => {
-                msgModal.classList.remove('visible');
-                msgTitle.className = "text-lg font-bold mb-2";
-            });
-
-            window.openConfirmModal = (title, body, onConfirm) => {
-                const modal = document.getElementById('confirm-modal');
-                document.getElementById('confirm-modal-title').textContent = title;
-                document.getElementById('confirm-modal-body').textContent = body;
-                
-                const btnOk = document.getElementById('confirm-modal-ok');
-                const btnCancel = document.getElementById('confirm-modal-cancel');
-                
-                const newBtnOk = btnOk.cloneNode(true);
-                btnOk.parentNode.replaceChild(newBtnOk, btnOk);
-                const newBtnCancel = btnCancel.cloneNode(true);
-                btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
-                
-                newBtnOk.addEventListener('click', () => {
-                    modal.classList.remove('visible');
-                    if(onConfirm) onConfirm();
-                });
-                
-                newBtnCancel.addEventListener('click', () => {
-                    modal.classList.remove('visible');
-                });
-                
-                modal.classList.add('visible');
-            };
-
             if (isSupabaseEnabled) { 
-                showLogBtn.addEventListener('click', () => {
-                    passwordAction = 'show';
-                    openPasswordModal();
-                });
-                cancelClearBtn.addEventListener('click', closePasswordModal); 
-                confirmClearBtn.addEventListener('click', handlePasswordSubmit); 
-                
-                logContainer.addEventListener('click', async (e) => { 
-                    if (e.target.classList.contains('load-log-btn')) { 
-                        loadLogData(e.target); 
-                    } else if (e.target.classList.contains('delete-log-btn')) {
-                        const logId = e.target.dataset.id;
-                        window.openConfirmModal("Delete Log", "Are you sure you want to delete this log entry?", async () => {
-                            await deleteLogEntry(logId);
-                        });
-                    }
-                }); 
-                
+                showLogBtn.addEventListener('click', () => { passwordAction = 'show'; openPasswordModal(); });
+                cancelClearBtn.addEventListener('click', closePasswordModal); confirmClearBtn.addEventListener('click', handlePasswordSubmit); 
+                logContainer.addEventListener('click', async (e) => { if (e.target.classList.contains('load-log-btn')) { loadLogData(e.target); } else if (e.target.classList.contains('delete-log-btn')) { const logId = e.target.dataset.id; if (confirm('Are you sure you want to delete this log entry?')) { await deleteLogEntry(logId); } } }); 
                 passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { handlePasswordSubmit(); } }); 
                 
                 const btnLoadData = document.getElementById('btn-load-data');
                 if (btnLoadData) {
                     btnLoadData.addEventListener('click', async () => {
-                        const pakNoInput = document.getElementById('pak-no');
-                        const pakNo = pakNoInput.value.trim();
-                        
-                        if (!pakNo) {
-                             if (window.openMessageModal) window.openMessageModal("Input Required", "Please enter a Pak No to search.");
-                             return;
-                        }
-
-                        btnLoadData.disabled = true;
-                        btnLoadData.textContent = "Loading...";
-
-                        try {
-                            const data = await fetchLatestLogByPakNo(pakNo);
-
-                            if (!data) {
-                                if (window.openMessageModal) window.openMessageModal("No Data Found", "No Data Found. Enter Now.");
-                            } else {
-                                pendingLoadData = data;
-                                openDobVerifyModal();
-                            }
-                        } catch (err) {
-                            if (window.openMessageModal) window.openMessageModal("Error", "Failed to load data. Please check your connection.");
-                        } finally {
-                            btnLoadData.disabled = false;
-                            btnLoadData.textContent = "Load Data";
-                        }
+                        const pakNoInput = document.getElementById('pak-no'); const pakNo = pakNoInput.value.trim();
+                        if (!pakNo) { openMessageModal("Input Required", "Please enter a Pak No to search."); return; }
+                        btnLoadData.disabled = true; btnLoadData.textContent = "Loading...";
+                        try { const data = await fetchLatestLogByPakNo(pakNo); if (!data) { openMessageModal("No Data Found", "No Data Found. Enter Now."); } else { pendingLoadData = data; openDobVerifyModal(); } } catch (err) { openMessageModal("Error", "Failed to load data. Please check your connection."); } finally { btnLoadData.disabled = false; btnLoadData.textContent = "Load Data"; }
                     });
                 }
                 
-                const dobVerifyModal = document.getElementById('dob-verify-modal');
-                const cancelVerifyBtn = document.getElementById('cancel-verify-btn');
-                const confirmVerifyBtn = document.getElementById('confirm-verify-btn');
-                const verifyDobInput = document.getElementById('verify-dob-input');
-                const verifyDobError = document.getElementById('verify-dob-error');
-
-                window.openDobVerifyModal = () => {
-                    verifyDobInput.value = '';
-                    verifyDobError.style.display = 'none';
-                    dobVerifyModal.classList.add('visible');
-                    verifyDobInput.focus();
-                };
-
-                const closeDobVerifyModal = () => {
-                    dobVerifyModal.classList.remove('visible');
-                    pendingLoadData = null;
-                };
-
+                const dobVerifyModal = document.getElementById('dob-verify-modal'); const cancelVerifyBtn = document.getElementById('cancel-verify-btn'); const confirmVerifyBtn = document.getElementById('confirm-verify-btn'); const verifyDobInput = document.getElementById('verify-dob-input'); const verifyDobError = document.getElementById('verify-dob-error');
+                window.openDobVerifyModal = () => { verifyDobInput.value = ''; verifyDobError.style.display = 'none'; dobVerifyModal.classList.add('visible'); verifyDobInput.focus(); };
+                const closeDobVerifyModal = () => { dobVerifyModal.classList.remove('visible'); pendingLoadData = null; };
                 cancelVerifyBtn.addEventListener('click', closeDobVerifyModal);
-
                 confirmVerifyBtn.addEventListener('click', () => {
                     const enteredDob = verifyDobInput.value;
-                    if (!enteredDob) {
-                        verifyDobError.textContent = "Please select a date.";
-                        verifyDobError.style.display = 'block';
-                        return;
-                    }
-
+                    if (!enteredDob) { verifyDobError.textContent = "Please select a date."; verifyDobError.style.display = 'block'; return; }
                     if (pendingLoadData && pendingLoadData.dob_raw === enteredDob) {
-                        const mockButton = {
-                            dataset: {
-                                rank: pendingLoadData.rank,
-                                arms: pendingLoadData.arms,
-                                name: pendingLoadData.name,
-                                pakNo: pendingLoadData.pak_no,
-                                cnic: pendingLoadData.cnic,
-                                accountNo: pendingLoadData.account_no,
-                                bankBranch: pendingLoadData.bank_branch,
-                                dob: pendingLoadData.dob_raw,
-                                doe: pendingLoadData.doe_raw,
-                                sos: pendingLoadData.sos_raw,
-                                pension: pendingLoadData.pension_raw,
-                                tk: pendingLoadData.tk,
-                                family: pendingLoadData.family,
-                                familyName: pendingLoadData.family_pensioner_name,
-                                familyCnic: pendingLoadData.family_pensioner_cnic,
-                                familyRelation: pendingLoadData.relation_with_pensioner,
-                                familyDob: pendingLoadData.family_dob_raw || '',
-                                basicPay: pendingLoadData.basic_pay ?? '',
-                                disturbancePay: pendingLoadData.disturbance_pay ?? '',
-                                gcbPay: pendingLoadData.gcb_pay ?? '',
-                                usualIncrement: pendingLoadData.usual_increment ?? '',
-                                jcoAddlPension: pendingLoadData.jco_addl_pension ?? '',
-                                medicalBoard: pendingLoadData.medical_board || 'No'
-                            }
-                        };
-                        
-                        loadLogData(mockButton);
-                        closeDobVerifyModal();
-                        if (window.openMessageModal) window.openMessageModal("Success", "Data loaded successfully.");
-                    } else {
-                        verifyDobError.textContent = "Date of Birth does not match records.";
-                        verifyDobError.style.display = 'block';
-                    }
+                        const mockButton = { dataset: { rank: pendingLoadData.rank, arms: pendingLoadData.arms, name: pendingLoadData.name, pakNo: pendingLoadData.pak_no, cnic: pendingLoadData.cnic, accountNo: pendingLoadData.account_no, bankBranch: pendingLoadData.bank_branch, dob: pendingLoadData.dob_raw, doe: pendingLoadData.doe_raw, sos: pendingLoadData.sos_raw, pension: pendingLoadData.pension_raw, tk: pendingLoadData.tk, family: pendingLoadData.family, familyName: pendingLoadData.family_pensioner_name, familyCnic: pendingLoadData.family_pensioner_cnic, familyRelation: pendingLoadData.relation_with_pensioner, familyDob: pendingLoadData.family_dob_raw || '', basicPay: pendingLoadData.basic_pay ?? '', disturbancePay: pendingLoadData.disturbance_pay ?? '', gcbPay: pendingLoadData.gcb_pay ?? '', usualIncrement: pendingLoadData.usual_increment ?? '', jcoAddlPension: pendingLoadData.jco_addl_pension ?? '', medicalBoard: pendingLoadData.medical_board || 'No' } };
+                        loadLogData(mockButton); closeDobVerifyModal(); openMessageModal("Success", "Data loaded successfully.");
+                    } else { verifyDobError.textContent = "Date of Birth does not match records."; verifyDobError.style.display = 'block'; }
                 });
 
-            } else { 
-                showLogBtn.style.display = 'none';
-            }
+                const msgModal = document.getElementById('message-modal'); const msgTitle = document.getElementById('msg-modal-title'); const msgBody = document.getElementById('msg-modal-body'); const msgBtn = document.getElementById('msg-modal-btn');
+                window.openMessageModal = (title, body) => { msgTitle.textContent = title; msgBody.textContent = body; msgModal.classList.add('visible'); msgBtn.focus(); };
+                msgBtn.addEventListener('click', () => { msgModal.classList.remove('visible'); msgTitle.className = "text-lg font-bold mb-2"; });
+
+            } else { showLogBtn.style.display = 'none'; }
             
-            await initVisitCounter(); 
-            initLogListener();
-            try { calculateAndDisplayAll(); } catch (e) { } checkInputEnabling();
+            await initVisitCounter(); fetchLogs(); try { calculateAndDisplayAll(); } catch (e) { } checkInputEnabling();
         });
     </script>
 
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                if (window.location.protocol === 'blob:' || window.location.protocol === 'data:') {
-                    return;
-                }
-                navigator.serviceWorker.register('./service-worker.js').catch((error) => {
-                });
+                if (window.location.protocol === 'blob:' || window.location.protocol === 'data:') { return; }
+                navigator.serviceWorker.register('./service-worker.js').catch((error) => { });
             });
         }
-
         let deferredInstallPrompt = null;
-
-        const isTargetInstallPlatform = () => {
-            const userAgent = navigator.userAgent || '';
-            return /android|windows/i.test(userAgent);
-        };
-
-        const isAppInstalled = () => {
-            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-        };
-
-        const updateInstallButtonVisibility = () => {
-            const installBtn = document.getElementById('install-app-btn');
-            if (!installBtn) return;
-
-            const canShowInstallButton = isTargetInstallPlatform() && !isAppInstalled() && !!deferredInstallPrompt;
-            installBtn.classList.toggle('hidden', !canShowInstallButton);
-        };
-
-        window.addEventListener('beforeinstallprompt', (event) => {
-            event.preventDefault();
-            deferredInstallPrompt = event;
-            updateInstallButtonVisibility();
-        });
-
-        window.addEventListener('appinstalled', () => {
-            deferredInstallPrompt = null;
-            updateInstallButtonVisibility();
-        });
-
+        const isTargetInstallPlatform = () => { const userAgent = navigator.userAgent || ''; return /android|windows/i.test(userAgent); };
+        const isAppInstalled = () => { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; };
+        const updateInstallButtonVisibility = () => { const installBtn = document.getElementById('install-app-btn'); if (!installBtn) return; const canShowInstallButton = isTargetInstallPlatform() && !isAppInstalled() && !!deferredInstallPrompt; installBtn.classList.toggle('hidden', !canShowInstallButton); };
+        window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); deferredInstallPrompt = event; updateInstallButtonVisibility(); });
+        window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; updateInstallButtonVisibility(); });
         window.addEventListener('DOMContentLoaded', () => {
-            const installBtn = document.getElementById('install-app-btn');
-            if (!installBtn) return;
-
-            updateInstallButtonVisibility();
-
+            const installBtn = document.getElementById('install-app-btn'); if (!installBtn) return; updateInstallButtonVisibility();
             installBtn.addEventListener('click', async () => {
-                if (isAppInstalled()) {
-                    installBtn.classList.add('hidden');
-                    return;
-                }
-
-                if (!deferredInstallPrompt) {
-                    if (window.openMessageModal) {
-                        window.openMessageModal('Install App', 'Install prompt is not available right now. Please open this app in Chrome/Edge and use the browser menu to install it.');
-                    }
-                    return;
-                }
-
-                deferredInstallPrompt.prompt();
-                await deferredInstallPrompt.userChoice;
-                deferredInstallPrompt = null;
-                updateInstallButtonVisibility();
+                if (isAppInstalled()) { installBtn.classList.add('hidden'); return; }
+                if (!deferredInstallPrompt) { alert('Install prompt is not available right now. Please open this app in Chrome/Edge and use the browser menu to install it.'); return; }
+                deferredInstallPrompt.prompt(); await deferredInstallPrompt.userChoice; deferredInstallPrompt = null; updateInstallButtonVisibility();
             });
         });
     </script>
