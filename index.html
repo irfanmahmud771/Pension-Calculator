@@ -1022,6 +1022,7 @@
         };
         const rankLabel = (r) => (currentLang === 'ur' && rankUrdu[r]) ? rankUrdu[r] : r;
         const trU = (s) => (currentLang === 'ur' && urduDict[s]) ? urduDict[s] : s;
+        const yearsText = (n) => currentLang === 'ur' ? `${n} سال` : `${n} Years`;
         const relabelRankOptions = () => {
             const sel = document.getElementById('rank');
             if (!sel) return;
@@ -1928,7 +1929,7 @@
                     
                     if (ageD < 0) { ageM--; }
                     if (ageM < 0) { ageY--; ageM += 12; }
-                    return `(Age ${ageY} Y ${ageM} M)`;
+                    return currentLang === 'ur' ? `(عمر ${ageY} سال ${ageM} ماہ)` : `(Age ${ageY} Y ${ageM} M)`;
                 };
 
                 let ageString = getAgeDisplayString(dobInput.value);
@@ -1989,7 +1990,7 @@
                     if (tbody) tbody.innerHTML = '';
                 }
 
-                document.getElementById('qs-output').textContent = `${roundedQS} Years`; document.getElementById('age-at-sos-output').textContent = `${ageNextBirthday} Years`; document.getElementById('commutation-factor-output').textContent = commutationFactor.toFixed(4); document.getElementById('gross-pension-normal-output').textContent = formatCurrency(grossPension); currentNormalGrossPension = Number(grossPension) || 0; document.getElementById('net-pension-pre-increase-output').textContent = formatCurrency(basePension); document.getElementById('commuted-pension-output').textContent = formatCurrency(commutedPension); currentNormalCommutedPension = Number(commutedPension) || 0; document.getElementById('commutation-amount-output').textContent = formatCurrency(commutationAmount); currentNormalCommutationAmount = Number(commutationAmount) || 0;
+                document.getElementById('qs-output').textContent = yearsText(roundedQS); document.getElementById('age-at-sos-output').textContent = yearsText(ageNextBirthday); document.getElementById('commutation-factor-output').textContent = commutationFactor.toFixed(4); document.getElementById('gross-pension-normal-output').textContent = formatCurrency(grossPension); currentNormalGrossPension = Number(grossPension) || 0; document.getElementById('net-pension-pre-increase-output').textContent = formatCurrency(basePension); document.getElementById('commuted-pension-output').textContent = formatCurrency(commutedPension); currentNormalCommutedPension = Number(commutedPension) || 0; document.getElementById('commutation-amount-output').textContent = formatCurrency(commutationAmount); currentNormalCommutationAmount = Number(commutationAmount) || 0;
                 document.getElementById('pension-pm-current-output').textContent = formatCurrency(finalPensionCurrent, true); document.getElementById('pension-pm-restored-output').textContent = formatCurrency(finalPensionRestored, true); document.getElementById('tk-allowance-current-output').textContent = formatCurrency(tkAllowance);
                 document.getElementById('total-payable-current-output').textContent = formatCurrency(totalPayableCurrent, true); document.getElementById('total-payable-restored-output').textContent = formatCurrency(totalPayableRestored, true);
                 
@@ -2095,12 +2096,12 @@
 
                 const restorationOutputSpan = document.getElementById('restoration-date-output'); const restorationDateFormatted = restorationDate ? formatDateDisplay(restorationDate) : 'N/A'; restorationOutputSpan.textContent = restorationDateFormatted;
                 if (restorationDate) { const today2 = parseDate(getTodayDateString()); restorationOutputSpan.className = 'value'; if (restorationDate > today2) { restorationOutputSpan.classList.add('text-red-600', 'font-bold'); } else { restorationOutputSpan.classList.add('text-green-600', 'font-bold', 'flashing'); } } else { restorationOutputSpan.className = 'value text-gray-800'; }
-                const formatYearsMonthsDisplay = (fromDate, toDate) => { let totalMonths = (toDate.getUTCFullYear() - fromDate.getUTCFullYear()) * 12; totalMonths -= fromDate.getUTCMonth(); totalMonths += toDate.getUTCMonth(); if (toDate.getUTCDate() < fromDate.getUTCDate()) { totalMonths--; } if (totalMonths < 0) { return 'N/A'; } const years = Math.floor(totalMonths / 12); const months = totalMonths % 12; let yearsString = `${years} Years`; let monthsString = (months === 1) ? `, 1 Month` : (months > 1) ? `, ${months} Months` : ''; return yearsString + monthsString; };
+                const formatYearsMonthsDisplay = (fromDate, toDate) => { let totalMonths = (toDate.getUTCFullYear() - fromDate.getUTCFullYear()) * 12; totalMonths -= fromDate.getUTCMonth(); totalMonths += toDate.getUTCMonth(); if (toDate.getUTCDate() < fromDate.getUTCDate()) { totalMonths--; } if (totalMonths < 0) { return 'N/A'; } const years = Math.floor(totalMonths / 12); const months = totalMonths % 12; let yearsString = yearsText(years); let monthsString = (months < 1) ? '' : (currentLang === 'ur') ? `، ${months} ماہ` : (months === 1) ? `, 1 Month` : `, ${months} Months`; return yearsString + monthsString; };
                 let restorationAgeDisplay = 'N/A'; if (dobDate && restorationDate && restorationDate > dobDate) { restorationAgeDisplay = formatYearsMonthsDisplay(dobDate, restorationDate); } document.getElementById('age-at-restoration-output').textContent = restorationAgeDisplay;
                 const periodRemainingOutputSpan = document.getElementById('period-remaining-restoration-output');
                 let periodRemainingDisplay = 'N/A';
                 periodRemainingOutputSpan.className = 'value w-full md:w-1/3 text-left md:text-right whitespace-nowrap text-gray-800';
-                if (restorationDate) { const today3 = parseDate(getTodayDateString()); if (restorationDate <= today3) { periodRemainingDisplay = 'Restored'; periodRemainingOutputSpan.classList.remove('text-gray-800'); periodRemainingOutputSpan.classList.add('text-green-600', 'font-bold'); } else { periodRemainingDisplay = formatYearsMonthsDisplay(today3, restorationDate); } }
+                if (restorationDate) { const today3 = parseDate(getTodayDateString()); if (restorationDate <= today3) { periodRemainingDisplay = (currentLang === 'ur') ? 'بحال شدہ' : 'Restored'; periodRemainingOutputSpan.classList.remove('text-gray-800'); periodRemainingOutputSpan.classList.add('text-green-600', 'font-bold'); } else { periodRemainingDisplay = formatYearsMonthsDisplay(today3, restorationDate); } }
                 periodRemainingOutputSpan.textContent = periodRemainingDisplay;
                 currentCalculatedValues.pensionCurrent = finalPensionCurrent; currentCalculatedValues.pensionRestored = finalPensionRestored; currentCalculatedValues.restorationDate = restorationDateFormatted; currentCalculatedValues.tkAllowance = tkAllowance;
             } catch (error) { }
