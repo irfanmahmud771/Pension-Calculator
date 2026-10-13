@@ -59,8 +59,14 @@
         @font-face { font-family: 'Noori Nastaleeq'; src: local('Noori Nastaleeq'), local('Jameel Noori Nastaleeq'), local('JameelNooriNastaleeq'), local('Noori Nastaliq'), url('NooriNastaleeq.ttf') format('truetype'); }
         body.lang-ur .print-info-label { white-space: nowrap; vertical-align: bottom; }
         body.lang-ur .print-info-value { vertical-align: bottom; }
+        body.lang-ur #print-name { text-align: right; }
+        body.lang-ur #print-family-pensioner-name { text-align: right !important; padding-left: 0 !important; padding-right: 10px; }
         body.lang-ur .print-info-table td:nth-child(2) { padding-left: 0 !important; padding-right: 16px !important; }
         body.lang-ur header h1 { line-height: 2 !important; margin-bottom: 0.5rem; }
+        @media (max-width: 767px) {
+            #lang-toggle-btn { position: static !important; display: block; margin: 0 0 8px auto; }
+            body.lang-ur header p.text-blue-600 { white-space: nowrap; font-size: 2.8vw; line-height: 2.2 !important; }
+        }
         body.lang-ur #log-container { direction: ltr; text-align: left; }
         body.lang-ur header p { line-height: 2.3 !important; margin-top: 0.5rem !important; }
         body.lang-ur .print-info-table td:first-child .print-info-label { width: 112px !important; }
@@ -185,19 +191,7 @@
                                     <option value="Navy">Navy</option>
                                 </select>
                             </div>
-                            <div class="input-group md:col-span-1">
-                                <label for="rank">Rank</label>
-                                <select id="rank" class="calc-input">
-                                    <option value="" disabled selected>Select</option>
-                                </select>
-                            </div>
-                             <div class="input-group md:col-span-2">
-                                <label for="name">Name</label>
-                                <input type="text" id="name" class="calc-input" placeholder="Full Name" maxlength="22" inputmode="text" title="Numbers are not allowed" style="text-transform: uppercase;">
-                            </div>
-                         </div>
-                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div class="input-group">
+                             <div class="input-group md:col-span-3">
                                 <label for="pak-no" id="lbl-pak-no">Pak No</label>
                                 <div class="flex gap-2">
                                     <input type="text" id="pak-no" class="calc-input flex-grow" placeholder="e.g. 123456" inputmode="numeric" maxlength="8" pattern="\d{1,8}" title="Enter up to 8 digits">
@@ -206,6 +200,20 @@
                                     </button>
                                 </div>
                             </div>
+                         </div>
+                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="input-group md:col-span-1">
+                                <label for="rank">Rank</label>
+                                <select id="rank" class="calc-input">
+                                    <option value="" disabled selected>Select</option>
+                                </select>
+                            </div>
+                             <div class="input-group md:col-span-3">
+                                <label for="name">Name</label>
+                                <input type="text" id="name" class="calc-input" placeholder="Full Name" maxlength="22" inputmode="text" title="Numbers are not allowed" style="text-transform: uppercase;">
+                            </div>
+                         </div>
+                         <div class="grid grid-cols-1 gap-4">
                             <div class="input-group">
                                 <label for="cnic">CNIC</label>
                                 <input type="text" id="cnic" class="calc-input" placeholder="00000-0000000-0" maxlength="15">
@@ -1036,7 +1044,7 @@
             'HAMID': 'حمید', 'HAMEED': 'حمید', 'MAHMOOD': 'محمود', 'MEHMOOD': 'محمود', 'MAHMUD': 'محمود', 'IRFAN': 'عرفان', 'IMRAN': 'عمران', 'ASLAM': 'اسلم', 'AKRAM': 'اکرم', 'NAWAZ': 'نواز',
             'SHAHID': 'شاہد', 'JAVED': 'جاوید', 'JAVAID': 'جاوید', 'IQBAL': 'اقبال', 'TARIQ': 'طارق', 'RASHID': 'راشد', 'RAFIQ': 'رفیق', 'SADIQ': 'صادق', 'SALEEM': 'سلیم', 'NASEER': 'نصیر', 'MUNIR': 'منیر',
             'BASHIR': 'بشیر', 'ZAFAR': 'ظفر', 'AKHTAR': 'اختر', 'ANWAR': 'انور', 'ASHRAF': 'اشرف', 'AFZAL': 'افضل', 'AZIZ': 'عزیز', 'FAROOQ': 'فاروق', 'GUL': 'گل', 'JAN': 'جان', 'DIN': 'دین', 'UDDIN': 'الدین',
-            'MIR': 'میر', 'MALIK': 'ملک', 'CHAUDHRY': 'چوہدری', 'CHAUDHARY': 'چوہدری', 'CHOUDHRY': 'چوہدری', 'RAJA': 'راجہ', 'SYED': 'سید', 'SAYED': 'سید', 'SAYYED': 'سید', 'HAJI': 'حاجی', 'QURESHI': 'قریشی',
+            'MIR': 'میر', 'MALIK': 'ملک', 'CHAUDHRY': 'چوہدری', 'CHAUDHARY': 'چوہدری', 'CHOUDHRY': 'چوہدری', 'RAJA': 'راجہ', 'SYED': 'سید', 'SAYED': 'سید', 'SAYYED': 'سید', 'HAJI': 'حاجی', 'HAFIZ': 'حافظ', 'QURESHI': 'قریشی',
             'BUTT': 'بٹ', 'AWAN': 'اعوان', 'ABBASI': 'عباسی', 'MUGHAL': 'مغل', 'MIRZA': 'مرزا', 'BEGUM': 'بیگم', 'BIBI': 'بی بی', 'BANO': 'بانو',
             'ZAHID': 'زاہد', 'ZAHEER': 'ظہیر', 'NADEEM': 'ندیم', 'NAEEM': 'نعیم', 'KAMRAN': 'کامران', 'FAISAL': 'فیصل', 'SHABBIR': 'شبیر', 'SHAFIQ': 'شفیق', 'SHAKEEL': 'شکیل', 'SAJID': 'ساجد', 'SAEED': 'سعید',
             'SARFRAZ': 'سرفراز', 'SHAUKAT': 'شوکت', 'LIAQAT': 'لیاقت', 'MUSHTAQ': 'مشتاق', 'MUMTAZ': 'ممتاز', 'MANZOOR': 'منظور', 'MASOOD': 'مسعود', 'NAZIR': 'نذیر', 'NISAR': 'نثار', 'RIAZ': 'ریاض',
@@ -2038,7 +2046,7 @@
                     let displayText = nameForPrint(familyName);
                     if (familyCnic) { displayText += ` (CNIC: ${familyCnic})`; }
                     document.getElementById('print-family-pensioner-name').textContent = displayText;
-                    document.getElementById('print-family-relation-label').textContent = `${familyRelation} of below`;
+                    document.getElementById('print-family-relation-label').textContent = (currentLang === 'ur' && urduRelation[familyRelation]) ? `${familyRelation === 'Son' ? 'مندرجہ ذیل کا' : familyRelation === 'Father' ? 'مندرجہ ذیل کے' : 'مندرجہ ذیل کی'} ${urduRelation[familyRelation]}` : `${familyRelation} of below`;
                 } else { printRowFamily.style.display = 'none'; }
 
                 const detailsTableBody = document.getElementById('print-details-table-body');
@@ -2259,7 +2267,7 @@
             { const chk = document.getElementById('gross-pension-confirmed'); const basicPayVal = parseAmount(document.getElementById('basic-pay')?.value); const basicPayPositive = !isNaN(basicPayVal) && basicPayVal > 0; if (chk) chk.checked = document.getElementById('total-pay').value !== '' && basicPayPositive; } 
             checkInputEnabling(); calculateAndDisplayAll();
             { const chk = document.getElementById('gross-pension-confirmed'); if (chk) chk.dispatchEvent(new Event('change')); }
-            document.getElementById('dob').disabled = false;
+            pakDobLocked = false; applyPersonalFlow();
             if (isSupabaseEnabled) { clearTimeout(logDebounceTimer); if (document.getElementById('dob').value && document.getElementById('doe').value && document.getElementById('sos').value && grossPensionInput.value) { logDebounceTimer = setTimeout(() => { logCalculation('Load Log Data (Debounced)'); }, LOG_DEBOUNCE_DELAY); } }
         }
 
@@ -2436,7 +2444,19 @@
             return { current: currentNetValues, restored: restoredNetValues, sumIncreasesCurrent: totalAccumulatedIncreaseCurrent, sumIncreasesRestored: totalAccumulatedIncreaseRestored, tableData: detailedData };
         }
 
+        let pakDobLocked = true;
+        function applyPersonalFlow() {
+            const g = (id) => document.getElementById(id);
+            const pak = (g('pak-no')?.value || '').trim() !== '';
+            const rankOk = pak && (g('rank')?.value || '') !== '';
+            const nameOk = rankOk && (g('name')?.value || '').trim().length >= 5;
+            const set = (id, en) => { const el = g(id); if (el) el.disabled = !en; };
+            set('rank', pak); set('name', rankOk); set('cnic', nameOk); set('account-no', nameOk); set('bank-branch', nameOk);
+            set('dob', nameOk && !pakDobLocked);
+        }
+
         function checkInputEnabling() {
+            applyPersonalFlow();
             const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const tkAwardInput = document.getElementById('tk-award'); const familyPensionInput = document.getElementById('family-pension'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const printBtn = document.getElementById('print-btn'); const printRestorationBtn = document.getElementById('print-restoration-btn'); const print85YearsBtn = document.getElementById('print-85-years-btn');
             const dobFilled = dobInput.value !== ''; const doeFilled = doeInput.value !== ''; const sosFilled = sosInput.value !== ''; const grossPensionFilled = grossPensionInput.value !== '' && parseFloat(grossPensionInput.value.replace(/,/g, '')) > 0;
             doeInput.disabled = !dobFilled; sosInput.disabled = !(dobFilled && doeFilled); grossPensionInput.disabled = !(dobFilled && doeFilled && sosFilled); increasePensionBtn.disabled = !(dobFilled && doeFilled && sosFilled); decreasePensionBtn.disabled = !(dobFilled && doeFilled && sosFilled); tkAwardInput.disabled = !sosFilled; familyPensionInput.disabled = !sosFilled;
@@ -2515,7 +2535,8 @@
             
             const allInputs = document.querySelectorAll('.calc-input'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const increasePensionBtn = document.getElementById('increase-pension'); const decreasePensionBtn = document.getElementById('decrease-pension'); const cancelClearBtn = document.getElementById('cancel-clear-btn'); const confirmClearBtn = document.getElementById('confirm-clear-btn'); const passwordInput = document.getElementById('password-input'); const logContainer = document.getElementById('log-container'); const printBtn = document.getElementById('print-btn'); const printRestorationBtn = document.getElementById('print-restoration-btn'); const print85YearsBtn = document.getElementById('print-85-years-btn'); const cnicInput = document.getElementById('cnic'); const showLogBtn = document.getElementById('show-log-btn'); const sosInput = document.getElementById('sos'); const armsSelect = document.getElementById('arms'); const dobInput = document.getElementById('dob');
 
-            if (dobInput) dobInput.disabled = true;
+            applyPersonalFlow();
+            ['arms','rank','name','pak-no','cnic','account-no','bank-branch'].forEach(id => { const el = document.getElementById(id); if (el) { el.addEventListener('change', applyPersonalFlow); el.addEventListener('input', applyPersonalFlow); } });
 
             const pakNoInput = document.getElementById('pak-no');
             if (pakNoInput && dobInput) {
@@ -2523,13 +2544,14 @@
                 pakNoInput.addEventListener('input', sanitizePakNoInput); pakNoInput.addEventListener('paste', () => { requestAnimationFrame(sanitizePakNoInput); });
                 pakNoInput.addEventListener('blur', async () => {
                     sanitizePakNoInput(); const pakNo = pakNoInput.value.trim();
-                    if (!pakNo) { dobInput.disabled = true; return; }
+                    if (!pakNo) { pakDobLocked = true; applyPersonalFlow(); return; }
                     if (isSupabaseEnabled) {
                         try {
                             const data = await fetchLatestLogByPakNo(pakNo);
-                            if (data) { const selectedArm = document.getElementById('arms').value; const label = (selectedArm === 'Army' || selectedArm === 'Navy') ? 'Service No' : 'Pak No'; openMessageModal("Attention", `${label} ${pakNo} already exists. Use "Load Data" button or enter New.`); dobInput.disabled = true; } else { dobInput.disabled = false; }
-                        } catch (err) { dobInput.disabled = false; }
-                    } else { dobInput.disabled = false; }
+                            if (data) { const selectedArm = document.getElementById('arms').value; const label = (selectedArm === 'Army' || selectedArm === 'Navy') ? 'Service No' : 'Pak No'; openMessageModal("Attention", `${label} ${pakNo} already exists. Use "Load Data" button or enter New.`); pakDobLocked = true; } else { pakDobLocked = false; }
+                        } catch (err) { pakDobLocked = false; }
+                    } else { pakDobLocked = false; }
+                    applyPersonalFlow();
                 });
             }
 
