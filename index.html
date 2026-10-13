@@ -57,15 +57,19 @@
 
         body.lang-ur { font-family: 'Noto Nastaliq Urdu', serif; }
         @font-face { font-family: 'Noori Nastaleeq'; src: local('Noori Nastaleeq'), local('Jameel Noori Nastaleeq'), local('JameelNooriNastaleeq'), local('Noori Nastaliq'), url('NooriNastaleeq.ttf') format('truetype'); }
+        @media (min-width: 768px) { #rank-name-row { grid-template-columns: max-content 1fr; } }
+        #rank-name-row #rank { width: auto; max-width: 100%; }
         body.lang-ur .print-info-label { white-space: nowrap; vertical-align: bottom; }
         body.lang-ur .print-info-value { vertical-align: bottom; }
         body.lang-ur #print-name { text-align: right; }
         body.lang-ur #print-family-pensioner-name { text-align: right !important; padding-left: 0 !important; padding-right: 10px; }
         body.lang-ur .print-info-table td:nth-child(2) { padding-left: 0 !important; padding-right: 16px !important; }
         body.lang-ur header h1 { line-height: 2 !important; margin-bottom: 0.5rem; }
+        @media (max-width: 1023px), (display-mode: standalone) {
+            #lang-toggle-btn { position: static !important; display: block; margin: 0 0 12px auto; }
+        }
         @media (max-width: 767px) {
-            #lang-toggle-btn { position: static !important; display: block; margin: 0 0 8px auto; }
-            body.lang-ur header p.text-blue-600 { white-space: nowrap; font-size: 2.8vw; line-height: 2.2 !important; }
+            body.lang-ur header p.text-blue-600 { white-space: nowrap; font-size: 3.2vw; line-height: 2.2 !important; overflow: visible; }
         }
         body.lang-ur #log-container { direction: ltr; text-align: left; }
         body.lang-ur header p { line-height: 2.3 !important; margin-top: 0.5rem !important; }
@@ -201,14 +205,14 @@
                                 </div>
                             </div>
                          </div>
-                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="input-group md:col-span-1">
+                         <div class="grid grid-cols-1 gap-4" id="rank-name-row">
+                            <div class="input-group">
                                 <label for="rank">Rank</label>
                                 <select id="rank" class="calc-input">
                                     <option value="" disabled selected>Select</option>
                                 </select>
                             </div>
-                             <div class="input-group md:col-span-3">
+                             <div class="input-group">
                                 <label for="name">Name</label>
                                 <input type="text" id="name" class="calc-input" placeholder="Full Name" maxlength="22" inputmode="text" title="Numbers are not allowed" style="text-transform: uppercase;">
                             </div>
@@ -287,7 +291,7 @@
                         </div>
                         <div class="input-group" id="grp-family-name" style="display: none;">
                             <label for="family-pensioner-name">Family Pensioner Name</label>
-                            <input type="text" id="family-pensioner-name" class="calc-input" placeholder="W/D/S Name" maxlength="21" style="text-transform: uppercase;">
+                            <input type="text" id="family-pensioner-name" class="calc-input" placeholder="Name" maxlength="21" style="text-transform: uppercase;">
                         </div>
                         <div class="input-group" id="grp-family-cnic" style="display: none;">
                             <label for="family-pensioner-cnic">Family Pensioner CNIC</label>
@@ -930,7 +934,19 @@
             calculateAndDisplayAll();
         };
 
-        function applyTranslation() { relabelRankOptions();
+        window.fitUrduDesignerLine = function () {
+            const el = document.querySelector('header p.text-blue-600');
+            if (!el) return;
+            el.style.fontSize = '';
+            if (!document.body.classList.contains('lang-ur') || window.innerWidth > 767) return;
+            let size = parseFloat(getComputedStyle(el).fontSize);
+            let guard = 0;
+            while (el.scrollWidth > el.clientWidth + 1 && size > 6 && guard++ < 40) { size -= 0.5; el.style.fontSize = size + 'px'; }
+        };
+        window.addEventListener('resize', () => window.fitUrduDesignerLine());
+        window.addEventListener('load', () => { window.fitUrduDesignerLine(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => window.fitUrduDesignerLine()); });
+
+        function applyTranslation() { relabelRankOptions(); setTimeout(() => { if (window.fitUrduDesignerLine) window.fitUrduDesignerLine(); }, 150);
             if (currentLang === 'ur') {
                 document.documentElement.setAttribute('dir', 'rtl');
                 document.body.classList.add('lang-ur');
