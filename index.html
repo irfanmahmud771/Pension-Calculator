@@ -72,7 +72,11 @@
             body.lang-ur header p.text-blue-600 { white-space: nowrap; font-size: 3.2vw; line-height: 2.2 !important; overflow: visible; }
         }
         body.lang-ur .output-group .value { text-align: left; }
-        @media (max-width: 768px) { body.lang-ur .output-group .value { width: 100%; text-align: left; padding-left: 0; } }
+        @media (max-width: 768px) {
+            body.lang-ur .output-group { flex-direction: row; align-items: center; justify-content: space-between; gap: 0.75rem; }
+            body.lang-ur .output-group .label { margin-bottom: 0; flex: 1 1 auto; text-align: right; }
+            body.lang-ur .output-group .value { flex: 0 1 auto; max-width: 50%; width: auto; text-align: left; padding-left: 0; }
+        }
         body.lang-ur #log-container { direction: ltr; text-align: left; }
         body.lang-ur header p { line-height: 2.3 !important; margin-top: 0.5rem !important; }
         body.lang-ur .print-info-table td:first-child .print-info-label { width: 112px !important; }
