@@ -291,6 +291,13 @@
                                 <option value="Yes">Yes</option>
                             </select>
                         </div>
+                        <div class="input-group" id="grp-nature-of-death" style="display: none;">
+                            <label for="nature-of-death">Nature of Death</label>
+                            <select id="nature-of-death" class="calc-input">
+                                <option value="After Retirement" selected>After Retirement</option>
+                                <option value="During Service">During Service</option>
+                            </select>
+                        </div>
                         <div class="input-group" id="grp-family-name" style="display: none;">
                             <label for="family-pensioner-name">Family Pensioner Name</label>
                             <input type="text" id="family-pensioner-name" class="calc-input" placeholder="Name" maxlength="21" style="text-transform: uppercase;">
@@ -928,6 +935,7 @@
         };
         const extraUrdu = {
             "ATTENTION": "توجہ فرمائیں", "Attention": "توجہ فرمائیں",
+            "Nature of Death": "وفات کی نوعیت", "After Retirement": "ریٹائرمنٹ کے بعد", "During Service": "دورانِ سروس",
             "Please enter Gross Pension from PPO or Pension Book. Don't enter your current Pension": "براہ کرم مجموعی پینشن پی پی او یا پینشن بک سے درج کریں۔ اپنی موجودہ پینشن درج نہ کریں۔",
             "Error": "خرابی", "Success": "کامیابی", "Input Required": "ان پٹ درکار ہے",
             "No Data Found": "کوئی ڈیٹا نہیں ملا", "No Data Found. Enter Now.": "کوئی ڈیٹا نہیں ملا۔ اب درج کریں۔",
@@ -2056,7 +2064,8 @@
                      if (isFamilyPension) { grossPension = roundToTwoDecimals(grossPensionPPO * 0.75); }
                      
                      let commutedPensionPercentage = 0;
-                     if (sosDate) { const date2005 = parseDate('2005-06-30'); const date2001 = parseDate('2001-11-30'); if (sosDate > date2005) commutedPensionPercentage = 0.35; else if (sosDate > date2001) commutedPensionPercentage = 0.40; else commutedPensionPercentage = 0.50; }
+                     const isDuringServiceDeath = isFamilyPension && document.getElementById('nature-of-death')?.value === 'During Service';
+                     if (isDuringServiceDeath) { commutedPensionPercentage = 0.25; } else if (sosDate) { const date2005 = parseDate('2005-06-30'); const date2001 = parseDate('2001-11-30'); if (sosDate > date2005) commutedPensionPercentage = 0.35; else if (sosDate > date2001) commutedPensionPercentage = 0.40; else commutedPensionPercentage = 0.50; }
                      
                      commutedPension = roundToTwoDecimals(grossPension * commutedPensionPercentage);
                      basePension = roundToTwoDecimals(grossPension - commutedPension);
@@ -2225,7 +2234,7 @@
                 const pakNoLabelDisplay = (entry.arms === 'Army' || entry.arms === 'Navy') ? 'Service No' : 'Pak No';
 
                 let familyLogLine = `<strong>Family:</strong> ${entry.family}`;
-                if (entry.family === 'Yes') {
+                if (String(entry.family || '').startsWith('Yes')) {
                      if (entry.relation_with_pensioner) familyLogLine += `, <strong>Relation:</strong> ${entry.relation_with_pensioner}`;
                      if (entry.family_pensioner_name) familyLogLine += `, <strong>Name:</strong> ${entry.family_pensioner_name}`;
                      if (entry.family_pensioner_cnic) familyLogLine += ` (${entry.family_pensioner_cnic})`;
@@ -2271,7 +2280,7 @@
             const armsInput = document.getElementById('arms'); const log_arms = armsInput.value;
             const nameInput = document.getElementById('name'); const pakNoInput = document.getElementById('pak-no'); const cnicInput = document.getElementById('cnic'); const accountNoInput = document.getElementById('account-no'); const bankBranchInput = document.getElementById('bank-branch'); const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); const tkAwardInput = document.getElementById('tk-award'); const familyPensionInput = document.getElementById('family-pension');
             const familyNameInput = document.getElementById('family-pensioner-name'); const familyCnicInput = document.getElementById('family-pensioner-cnic'); const familyRelationInput = document.getElementById('family-relation'); const familyDobInput = document.getElementById('family-dob');
-            const log_name = nameInput.value; const log_pak_no = pakNoInput.value; const log_cnic = cnicInput.value; const log_account_no = accountNoInput.value; const log_bank_branch = bankBranchInput.value; const log_dob_raw = dobInput.value; const log_doe_raw = doeInput.value; const log_sos_raw = sosInput.value; const log_pension_raw = grossPensionInput.value.replace(/,/g, '') || '0'; const log_tk = tkAwardInput.value; const log_family = familyPensionInput.value;
+            const log_name = nameInput.value; const log_pak_no = pakNoInput.value; const log_cnic = cnicInput.value; const log_account_no = accountNoInput.value; const log_bank_branch = bankBranchInput.value; const log_dob_raw = dobInput.value; const log_doe_raw = doeInput.value; const log_sos_raw = sosInput.value; const log_pension_raw = grossPensionInput.value.replace(/,/g, '') || '0'; const log_tk = tkAwardInput.value; const log_family = (familyPensionInput.value === 'Yes' && document.getElementById('nature-of-death')?.value === 'During Service') ? 'Yes (In-Service Death)' : familyPensionInput.value;
             const log_family_name = familyNameInput.value; const log_family_cnic = familyCnicInput.value; const log_family_relation = familyRelationInput.value; const log_family_dob_raw = familyDobInput.value; 
 
             const now = new Date(); const day = String(now.getDate()).padStart(2, '0'); const month = String(now.getMonth() + 1).padStart(2, '0'); const year = now.getFullYear(); const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -2344,14 +2353,14 @@
             document.getElementById('name').value = data.name || ''; document.getElementById('pak-no').value = data.pakNo || ''; document.getElementById('cnic').value = data.cnic || ''; document.getElementById('account-no').value = data.accountNo || ''; document.getElementById('bank-branch').value = data.bankBranch || ''; document.getElementById('dob').value = data.dob || ''; document.getElementById('doe').value = data.doe || ''; document.getElementById('sos').value = data.sos || '';
             const pensionValue = data.pension || ''; const grossPensionInput = document.getElementById('gross-pension-ppo'); grossPensionInput.value = pensionValue;
             const parts = pensionValue.split('.'); let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); let decimalPart = parts[1] ? (parts[1] + '00').substring(0, 2) : ''; grossPensionInput.value = integerPart; if (decimalPart) { grossPensionInput.value += '.' + decimalPart; } if (parseFloat(pensionValue) === 0) { grossPensionInput.value = '0'; }
-            document.getElementById('tk-award').value = data.tk || 'No'; document.getElementById('family-pension').value = data.family || 'No';
+            document.getElementById('tk-award').value = data.tk || 'No'; { let fam = data.family || 'No'; const inSvc = String(fam).includes('In-Service Death'); if (inSvc) fam = 'Yes'; document.getElementById('family-pension').value = fam; window.__pendingNatureOfDeath = inSvc ? 'During Service' : 'After Retirement'; }
             document.getElementById('family-pensioner-name').value = data.familyName || ''; document.getElementById('family-pensioner-cnic').value = data.familyCnic || ''; document.getElementById('family-relation').value = data.familyRelation || 'Widow'; document.getElementById('family-dob').value = data.familyDob || ''; 
             setAmountField('basic-pay', data.basicPay); setAmountField('disturbance-pay', data.disturbancePay); setAmountField('gcb-pay', data.gcbPay); setAmountField('usual-increment', data.usualIncrement); setAmountField('jco-addl-pension', data.jcoAddlPension);
             { const mb = document.getElementById('medical-board'); if (mb) mb.value = ['No', 'A', 'B', 'C'].includes(data.medicalBoard) ? data.medicalBoard : 'No'; }
             calculateTotalPay(); document.getElementById('account-no').dispatchEvent(new Event('input')); document.getElementById('cnic').dispatchEvent(new Event('input')); document.getElementById('family-pensioner-cnic').dispatchEvent(new Event('input'));
             calculateTotalPay();
             { const chk = document.getElementById('gross-pension-confirmed'); const basicPayVal = parseAmount(document.getElementById('basic-pay')?.value); const basicPayPositive = !isNaN(basicPayVal) && basicPayVal > 0; if (chk) chk.checked = document.getElementById('total-pay').value !== '' && basicPayPositive; } 
-            checkInputEnabling(); calculateAndDisplayAll();
+            checkInputEnabling(); { const nod = document.getElementById('nature-of-death'); if (nod) nod.value = (document.getElementById('family-pension').value === 'Yes' && window.__pendingNatureOfDeath === 'During Service') ? 'During Service' : 'After Retirement'; } calculateAndDisplayAll();
             { const chk = document.getElementById('gross-pension-confirmed'); if (chk) chk.dispatchEvent(new Event('change')); }
             pakDobLocked = false; applyPersonalFlow();
             if (isSupabaseEnabled) { clearTimeout(logDebounceTimer); if (document.getElementById('dob').value && document.getElementById('doe').value && document.getElementById('sos').value && grossPensionInput.value) { logDebounceTimer = setTimeout(() => { logCalculation('Load Log Data (Debounced)'); }, LOG_DEBOUNCE_DELAY); } }
@@ -2559,12 +2568,12 @@
             const grpFamilyDob = document.getElementById('grp-family-dob');
 
             if (familyPensionVal === 'Yes') {
-                grpFamilyName.style.display = 'block'; grpFamilyCnic.style.display = 'block'; grpFamilyRelation.style.display = 'block'; if (grpFamilyDob) grpFamilyDob.style.display = 'block'; 
+                { const gnd = document.getElementById('grp-nature-of-death'); if (gnd) gnd.style.display = 'block'; } grpFamilyName.style.display = 'block'; grpFamilyCnic.style.display = 'block'; grpFamilyRelation.style.display = 'block'; if (grpFamilyDob) grpFamilyDob.style.display = 'block'; 
                 const familyCnicInput = document.getElementById('family-pensioner-cnic'); const familyCnicError = document.getElementById('family-cnic-error');
                 const familyDigits = (familyCnicInput.value || '').replace(/\D/g, '').length;
                 if (familyCnicError) familyCnicError.style.display = familyDigits === 13 ? 'none' : 'block';
             } else {
-                grpFamilyName.style.display = 'none'; grpFamilyCnic.style.display = 'none'; grpFamilyRelation.style.display = 'none'; if (grpFamilyDob) grpFamilyDob.style.display = 'none'; 
+                { const gnd = document.getElementById('grp-nature-of-death'); if (gnd) gnd.style.display = 'none'; const nod = document.getElementById('nature-of-death'); if (nod) nod.value = 'After Retirement'; } grpFamilyName.style.display = 'none'; grpFamilyCnic.style.display = 'none'; grpFamilyRelation.style.display = 'none'; if (grpFamilyDob) grpFamilyDob.style.display = 'none'; 
                 document.getElementById('family-pensioner-name').value = ''; document.getElementById('family-pensioner-cnic').value = ''; document.getElementById('family-relation').selectedIndex = 0;
                 const famDob = document.getElementById('family-dob'); if (famDob) famDob.value = '';
                 const famDobDisp = document.getElementById('family-dob-display'); if (famDobDisp) famDobDisp.textContent = '';
