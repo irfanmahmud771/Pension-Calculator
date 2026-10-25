@@ -2103,7 +2103,7 @@
                 document.getElementById('print-rank').textContent = rankLabel(document.getElementById('rank').value); document.getElementById('print-name').textContent = nameForPrint(document.getElementById('name').value); document.getElementById('print-pak-no').textContent = document.getElementById('pak-no').value; document.getElementById('print-cnic').textContent = document.getElementById('cnic').value; document.getElementById('print-account').textContent = document.getElementById('account-no').value; document.getElementById('print-bank').textContent = document.getElementById('bank-branch').value; 
                 
                 let printDobText = formatDateDisplay(dobDate);
-                if (isFamilyPension && familyDobDate) { printDobText += ` (${formatDateDisplay(familyDobDate)} F)`; }
+                if (isFamilyPension && familyDobDate) { printDobText += ` (${formatDateDisplay(familyDobDate)} ${currentLang === 'ur' ? 'فیملی' : 'Family'})`; }
                 document.getElementById('print-dob').textContent = printDobText;
 
                 document.getElementById('print-sos').textContent = formatDateDisplay(sosDate);
@@ -2142,7 +2142,7 @@
                 if (isFamilyPension) {
                     printRowFamily.style.display = 'table-row';
                     let displayText = nameForPrint(familyName);
-                    if (familyCnic) { displayText += ` (CNIC: ${familyCnic})`; }
+                    if (familyCnic) { displayText += (currentLang === 'ur') ? ` (${trU('CNIC')}: \u2066${familyCnic}\u2069)` : ` (CNIC: ${familyCnic})`; }
                     document.getElementById('print-family-pensioner-name').textContent = displayText;
                     document.getElementById('print-family-relation-label').textContent = (currentLang === 'ur' && urduRelation[familyRelation]) ? `${familyRelation === 'Son' ? 'مندرجہ ذیل کا' : familyRelation === 'Father' ? 'مندرجہ ذیل کے' : 'مندرجہ ذیل کی'} ${urduRelation[familyRelation]}` : `${familyRelation} of below`;
                 } else { printRowFamily.style.display = 'none'; }
@@ -2733,6 +2733,7 @@
 
             allInputs.forEach(input => { if(input.id !== 'gross-pension-ppo') { input.addEventListener('input', () => { try { calculateAndDisplayAll(); } catch (e) { } if (isSupabaseEnabled) { clearTimeout(logDebounceTimer); const dobInput = document.getElementById('dob'); const doeInput = document.getElementById('doe'); const sosInput = document.getElementById('sos'); const grossPensionInput = document.getElementById('gross-pension-ppo'); if (dobInput.value && doeInput.value && sosInput.value && grossPensionInput.value && parseFloat(grossPensionInput.value.replace(/,/g, '')) > 0) { logDebounceTimer = setTimeout(() => { logCalculation('Input Change (Debounced)'); }, LOG_DEBOUNCE_DELAY); } } checkInputEnabling(); }); } });
             grossPensionInput.addEventListener('input', formatGrossPensionInput);
+            document.addEventListener('urdu-names-updated', () => { try { calculateAndDisplayAll(); } catch (e) { } });
             increasePensionBtn.addEventListener('mousedown', () => startPress(1)); decreasePensionBtn.addEventListener('mousedown', () => startPress(-1)); document.addEventListener('mouseup', stopPress); document.addEventListener('mouseleave', stopPress); increasePensionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(1); }); decreasePensionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(-1); }); document.addEventListener('touchend', stopPress); document.addEventListener('touchcancel', stopPress);
             if (printBtn) { printBtn.addEventListener('click', () => { window.print(); }); }
             if (printRestorationBtn) { printRestorationBtn.addEventListener('click', generateRestorationApplicationPdf); }
@@ -3405,7 +3406,10 @@ ullah,allah=اللہ
         }
 
         const cache = Object.create(null); // Google Input Tools results for names not in the dictionary
+        const letterNamesLower = { a:'اے', b:'بی', c:'سی', d:'ڈی', e:'ای', f:'ایف', g:'جی', h:'ایچ', i:'آئی', j:'جے', k:'کے', l:'ایل', m:'ایم', n:'این', o:'او', p:'پی', q:'کیو', r:'آر', s:'ایس', t:'ٹی', u:'یو', v:'وی', w:'ڈبلیو', x:'ایکس', y:'وائی', z:'زیڈ' };
+        const relAbbrev = { 'W/O': 'زوجہ', 'D/O': 'دختر', 'S/O': 'ولد', 'WD/O': 'بیوہ', 'WID/O': 'بیوہ', 'C/O': 'معرفت' };
         function wordU(w) {
+            if (w.length === 1 && letterNamesLower[w]) return letterNamesLower[w];
             const k = lookup(w);
             if (k) return k;
             let m = /^(.{3,}?)(uddin|ud-din|uldin|uddeen|ulddin)$/.exec(w);
@@ -3422,6 +3426,9 @@ ullah,allah=اللہ
             const out = [];
             for (let i = 0; i < parts.length; i++) {
                 const raw = parts[i];
+                const relKey = raw.toUpperCase().replace(/[.\s]/g, '');
+                if (relAbbrev[relKey]) { out.push(relAbbrev[relKey]); continue; }
+                if (/^([A-Za-z]\.)+$/.test(raw)) { out.push(raw.replace(/\./g, '').toLowerCase().split('').map(c => letterNamesLower[c] || c).join(' ')); continue; }
                 const w = cleanW(raw);
                 if (!w || !/[A-Za-z]/.test(raw)) { out.push(raw); continue; }
                 const nx = i + 1 < parts.length ? cleanW(parts[i + 1]) : '';
@@ -3510,6 +3517,7 @@ ullah,allah=اللہ
             unknown.forEach((w, idx) => { cache[w] = results[idx] || localTranslit(w); });
             if (mine !== f.seq) return;
             f.box.textContent = localPhrase(parts).join(' ');
+            document.dispatchEvent(new CustomEvent('urdu-names-updated'));
         }
         const updateAll = () => fields.forEach(updateField);
         setInterval(updateAll, 400);
