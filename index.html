@@ -488,8 +488,17 @@
                             <span class="value w-full md:w-1/3 text-left md:text-right text-gray-800 whitespace-nowrap" id="age-at-restoration-output">0 Years</span>
                         </div>
                         <div class="output-group">
-                            <span class="label w-full md:w-1/3 whitespace-nowrap">Period Remaing in Restoration</span>
+                            <span class="label w-full md:w-1/3 whitespace-nowrap">Period Remaining in Restoration</span>
                             <span class="value w-full md:w-1/3 text-left md:text-right text-gray-800 whitespace-nowrap" id="period-remaining-restoration-output">0 Years</span>
+                        </div>
+                        <div id="restoration-progress-wrap" style="display: none; padding: 0.5rem 0 0.75rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 1.05rem; font-weight: 500; color: #2D3748; margin-bottom: 8px;">
+                                <span id="restoration-progress-label">Remaining Period (%)</span>
+                                <span id="restoration-progress-pct" style="font-weight: 700; font-size: 1.3rem; color: #1D4ED8; direction: ltr;">0%</span>
+                            </div>
+                            <div style="direction: ltr; width: 100%; height: 28px; background: #E2E8F0; border-radius: 14px; overflow: hidden;" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="restoration-progress-track">
+                                <div id="restoration-progress-bar" style="height: 100%; width: 0%; background: #2563EB; border-radius: 14px; transition: width 0.4s ease;"></div>
+                            </div>
                         </div>
                      </div>
                 </div>
@@ -939,6 +948,7 @@
         };
         const extraUrdu = {
             "ATTENTION": "توجہ فرمائیں", "Attention": "توجہ فرمائیں",
+            "Remaining Period (%)": "باقی ماندہ مدت (فیصد)",
             "Nature of Death": "وفات کی نوعیت", "After Retirement": "ریٹائرمنٹ کے بعد", "During Service": "دورانِ سروس",
             "Please enter Gross Pension from PPO or Pension Book. Don't enter your current Pension": "براہ کرم مجموعی پینشن پی پی او یا پینشن بک سے درج کریں۔ اپنی موجودہ پینشن درج نہ کریں۔",
             "Error": "خرابی", "Success": "کامیابی", "Input Required": "ان پٹ درکار ہے",
@@ -2209,6 +2219,7 @@
                 periodRemainingOutputSpan.className = 'value w-full md:w-1/3 text-left md:text-right whitespace-nowrap text-gray-800';
                 if (restorationDate) { const today3 = parseDate(getTodayDateString()); if (restorationDate <= today3) { periodRemainingDisplay = (currentLang === 'ur') ? 'بحال شدہ' : 'Restored'; periodRemainingOutputSpan.classList.remove('text-gray-800'); periodRemainingOutputSpan.classList.add('text-green-600', 'font-bold'); } else { periodRemainingDisplay = formatYearsMonthsDisplay(today3, restorationDate); } }
                 periodRemainingOutputSpan.textContent = periodRemainingDisplay;
+                { const wrap = document.getElementById('restoration-progress-wrap'); if (wrap) { let pct = null; if (restorationDate && sosDate) { const todayP = parseDate(getTodayDateString()); const total = restorationDate - sosDate; if (total > 0) { pct = Math.max(0, Math.min(100, ((restorationDate - todayP) / total) * 100)); } } if (pct === null) { wrap.style.display = 'none'; } else { wrap.style.display = ''; const shown = Math.round(pct * 10) / 10; document.getElementById('restoration-progress-bar').style.width = pct + '%'; document.getElementById('restoration-progress-pct').textContent = shown + '%'; document.getElementById('restoration-progress-track').setAttribute('aria-valuenow', String(Math.round(pct))); } } }
                 currentCalculatedValues.pensionCurrent = finalPensionCurrent; currentCalculatedValues.pensionRestored = finalPensionRestored; currentCalculatedValues.restorationDate = restorationDateFormatted; currentCalculatedValues.tkAllowance = tkAllowance;
             } catch (error) { }
         }
