@@ -83,6 +83,16 @@
         body.lang-ur .print-info-table td:first-child .print-info-value { width: calc(100% - 122px) !important; }
         body.lang-ur .print-info-table td:nth-child(2) .print-info-label { width: 140px !important; }
         body.lang-ur .print-info-table td:nth-child(2) .print-info-value { width: calc(100% - 150px) !important; }
+        body.lang-ur .print-info-table, body.lang-ur .print-table, body.lang-ur .print-bank-section { font-size: 12.5pt; }
+        body.lang-ur .print-table.compact { font-size: 10.5pt; }
+        body.lang-ur .print-section-header { font-size: 13pt; }
+        body.lang-ur .print-footer { font-size: 11.5pt; }
+        body.lang-ur .print-info-table td:first-child .print-info-label { width: 128px !important; }
+        body.lang-ur .print-info-table td:first-child .print-info-value { width: calc(100% - 138px) !important; }
+        body.lang-ur .print-info-table td:nth-child(2) .print-info-label { width: 160px !important; }
+        body.lang-ur .print-info-table td:nth-child(2) .print-info-value { width: calc(100% - 170px) !important; }
+        body.lang-ur .print-bank-label { width: 175px; }
+        body.lang-ur #print-dob { white-space: nowrap; font-size: 9.5pt; }
         body.lang-ur #print-area, body.lang-ur #print-area * { font-family: 'Noori Nastaleeq', 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; }
         body[dir="rtl"] .text-left { text-align: right !important; }
         body[dir="rtl"] .text-right { text-align: left !important; }
@@ -280,7 +290,7 @@
                                 </select>
                             </div>
                          <div class="input-group">
-                            <label for="tk-award">TK Award</label>
+                            <label for="tk-award">Tamgha-e-Khidmat Award</label>
                             <select id="tk-award" class="calc-input" disabled>
                                 <option value="No" selected>No</option>
                                 <option value="1">1</option>
@@ -465,7 +475,7 @@
                             <span class="value w-full md:w-1/3 text-left md:text-right text-gray-800 whitespace-nowrap" id="pension-pm-restored-output">0</span>
                         </div>
                         <div class="output-group">
-                            <span class="label w-full md:w-1/3 whitespace-nowrap">TK Allowance</span>
+                            <span class="label w-full md:w-1/3 whitespace-nowrap">Tamgha-e-Khidmat Allowance</span>
                             <span class="value w-full md:w-1/3 text-left md:text-right text-gray-800 whitespace-nowrap" id="tk-allowance-current-output">0</span>
                         </div>
 
@@ -713,7 +723,7 @@
                         </tr>
                          <tr id="print-row-tk">
                             <td class="center serial-cell">3</td>
-                            <td>TK Allowance</td>
+                            <td>Tamgha-e-Khidmat Allowance</td>
                             <td class="amount" id="print-tk"></td>
                             <td></td>
                         </tr>
@@ -797,7 +807,7 @@
 
         let currentLang = 'en';
         const urduDict = {
-            "Pension Calculator Armed Forces": "پینشن کیلکولیٹر مسلح افواج",
+            "Pension Calculator Armed Forces": "پنشن کیلکولیٹر مسلح افواج",
             "(For Retirement date 01 July, 1986 to till now)": "(یکم جولائی 1986 سے اب تک کی ریٹائرمنٹ کے لیے)",
             "Designed by Flt Lt (Hon) Irfan Mahmud Sect Asstt": "ڈیزائن کردہ: فلائٹ لیفٹیننٹ (آنریری) عرفان محمود، سیکریٹریٹ اسسٹنٹ",
             "Install App (Windows/Android)": "ایپ انسٹال کریں",
@@ -824,26 +834,26 @@
             "Date of Enrollment (DOE)": "تاریخ بھرتی (DOE)",
             "Date of Retirment (SOS)": "تاریخ ریٹائرمنٹ (SOS)",
             "Date of Retirement (SOS)": "تاریخ ریٹائرمنٹ (SOS)",
-            "Gross Pension": "گراس پینشن",
+            "Gross Pension": "گراس پنشن",
             "(Mark check to calculate from Pay)": "(تنخواہ سے حساب کرنے کے لیے چیک لگائیں)",
             "Medical Board": "میڈیکل بورڈ",
-            "TK Award": "تمغہ خدمت",
-            "Family Pension": "فیملی پینشن",
-            "Family Pensioner Name": "فیملی پینشنر کا نام",
-            "Family Pensioner CNIC": "فیملی پینشنر کا شناختی کارڈ",
-            "Relation with Pensioner": "پینشنر سے رشتہ",
+            "Tamgha-e-Khidmat Award": "تمغہ خدمت",
+            "Family Pension": "فیملی پنشن",
+            "Family Pensioner Name": "فیملی پنشنر کا نام",
+            "Family Pensioner CNIC": "فیملی پنشنر کا شناختی کارڈ",
+            "Relation with Pensioner": "پنشنر سے رشتہ",
             "Date of Birth (DOB) Family": "فیملی کی تاریخ پیدائش",
-            "Pay Components (for Gross Pension)": "تنخواہ کے اجزاء (گراس پینشن کے لیے)",
+            "Pay Components (for Gross Pension)": "تنخواہ کے اجزاء (گراس پنشن کے لیے)",
             "Basic Pay": "بنیادی تنخواہ",
             "24 Months Avg Pay Emoluments": "24 ماہ کی اوسط تنخواہ",
             "Disturbance Pay": "ڈسٹربنس تنخواہ",
             "GCB Pay/Other Pay": "جی سی بی / دیگر تنخواہ",
             "Usual Annual Increment": "معمول کا سالانہ اضافہ",
             "Total Pay": "کل تنخواہ",
-            "JCO Additional Pension": "جے سی او اضافی پینشن",
+            "JCO Additional Pension": "جے سی او اضافی پنشن",
             "(calculated)": "(حساب شدہ)",
             "Printing Jobs": "پرنٹنگ",
-            "Pension Slip": "پینشن سلپ",
+            "Pension Slip": "پنشن سلپ",
             "Restoration Application": "بحالی کی درخواست",
             "85 Years Application": "85 سالہ درخواست",
             "Calculated Results": "حساب کے نتائج",
@@ -851,30 +861,30 @@
             "Qualifying Service (QS)": "کوالیفائنگ سروس (QS)",
             "Age on next Birthday after SOS": "ریٹائرمنٹ کے بعد اگلی سالگرہ پر عمر",
             "Commutation Purchase Value": "کمیوٹیشن پرچیز ویلیو",
-            "Disability Pension Details": "معذوری پینشن کی تفصیلات",
-            "Pay for Disability Pension": "معذوری پینشن کی تنخواہ",
-            "Gross Disability Pension": "گراس معذوری پینشن",
-            "Commuted Disability Pension": "کمیوٹڈ معذوری پینشن",
+            "Disability Pension Details": "معذوری پنشن کی تفصیلات",
+            "Pay for Disability Pension": "معذوری پنشن کی تنخواہ",
+            "Gross Disability Pension": "گراس معذوری پنشن",
+            "Commuted Disability Pension": "کمیوٹڈ معذوری پنشن",
             "Disability Purchase Value": "معذوری پرچیز ویلیو",
             "Disability Commute": "معذوری کمیوٹ",
-            "Pension Details": "پینشن کی تفصیلات",
-            "Commuted Pension": "کمیوٹڈ پینشن",
+            "Pension Details": "پنشن کی تفصیلات",
+            "Commuted Pension": "کمیوٹڈ پنشن",
             "Commutation Amount": "کمیوٹیشن کی رقم",
             "Commutation Amount (Normal+Disability)": "کمیوٹیشن کی رقم (نارمل+معذوری)",
-            "Total Gross Pension (Normal+Disability)": "کل گراس پینشن (نارمل+معذوری)",
-            "Total Gross Pension": "کل گراس پینشن",
-            "Net Pension (Before Increases)": "نیٹ پینشن (اضافے سے پہلے)",
-            "Final Pension After Increases": "اضافے کے بعد حتمی پینشن",
-            "Pension (Current)": "پینشن (موجودہ)",
-            "Pension (After Restoration)": "پینشن (بحالی کے بعد)",
-            "TK Allowance": "ٹی کے الاؤنس",
+            "Total Gross Pension (Normal+Disability)": "کل گراس پنشن (نارمل+معذوری)",
+            "Total Gross Pension": "کل گراس پنشن",
+            "Net Pension (Before Increases)": "نیٹ پنشن (اضافے سے پہلے)",
+            "Final Pension After Increases": "اضافے کے بعد حتمی پنشن",
+            "Pension (Current)": "پنشن (موجودہ)",
+            "Pension (After Restoration)": "پنشن (بحالی کے بعد)",
+            "Tamgha-e-Khidmat Allowance": "تمغہ خدمت الاؤنس",
             "Total Payable (Current)": "کل قابل ادائیگی (موجودہ)",
             "Total Payable (Restored)": "کل قابل ادائیگی (بحال شدہ)",
-            "Pension Restoration Date": "پینشن کی بحالی کی تاریخ",
-            "Age on Pension Restoration": "پینشن کی بحالی پر عمر",
+            "Pension Restoration Date": "پنشن کی بحالی کی تاریخ",
+            "Age on Pension Restoration": "پنشن کی بحالی پر عمر",
             "Period Remaing in Restoration": "بحالی میں باقی ماندہ مدت",
             "Period Remaining in Restoration": "بحالی میں باقی ماندہ مدت",
-            "Pension Increase Calculations": "پینشن میں اضافے کا حساب",
+            "Pension Increase Calculations": "پنشن میں اضافے کا حساب",
             "Increase Year": "اضافے کا سال",
             "%age": "فیصد",
             "Year": "سال",
@@ -886,7 +896,7 @@
             "Entitled": "حقدار",
             "From": "سے",
             "To": "تک",
-            "Minimum Pension": "کم از کم پینشن",
+            "Minimum Pension": "کم از کم پنشن",
             "Self": "ذاتی",
             "Family": "فیملی",
             "Total Calculation Log:": "کل کیلکولیشن لاگ:",
@@ -910,13 +920,13 @@
             "Father": "والد",
             "Mother": "والدہ",
             "Sister": "بہن",
-            "Pension Slip Preview": "پینشن سلپ کا پیش نظارہ",
+            "Pension Slip Preview": "پنشن سلپ کا پیش نظارہ",
             "Government of Pakistan": "حکومت پاکستان",
             "Pakistan Air Force": "پاکستان ایئر فورس",
             "Pakistan Army": "پاکستان آرمی",
             "Pakistan Navy": "پاکستان نیوی",
             "Monthly Pension Statement": "ماہانہ پنشن گوشوارہ",
-            "Family Pensioner Name:": "فیملی پینشنر کا نام:",
+            "Family Pensioner Name:": "فیملی پنشنر کا نام:",
             "Served as:": "عہدہ:",
             "Name:": "نام:",
             "Pak No:": "پاک نمبر:",
@@ -925,15 +935,15 @@
             "Date of Birth:": "تاریخ پیدائش:",
             "Retirement Date:": "تاریخ ریٹائرمنٹ:",
             "S No": "نمبر",
-            "Pension Payment Details": "پینشن کی ادائیگی کی تفصیلات",
+            "Pension Payment Details": "پنشن کی ادائیگی کی تفصیلات",
             "Amount (Rs.)": "رقم (روپے)",
             "Remarks": "ریمارکس",
-            "Monthly Pension - Self": "ماہانہ پینشن - ذاتی",
-            "Monthly Pension - Family": "ماہانہ پینشن - فیملی",
-            "Pension Increase - Self": "پینشن میں اضافہ - ذاتی",
-            "Pension Increase - Family": "پینشن میں اضافہ - فیملی",
-            "Total Pension Transferred": "کل منتقل شدہ پینشن",
-            "Details of Pension Increases": "پینشن میں اضافے کی تفصیلات",
+            "Monthly Pension - Self": "ماہانہ پنشن - ذاتی",
+            "Monthly Pension - Family": "ماہانہ پنشن - فیملی",
+            "Pension Increase - Self": "پنشن میں اضافہ - ذاتی",
+            "Pension Increase - Family": "پنشن میں اضافہ - فیملی",
+            "Total Pension Transferred": "کل منتقل شدہ پنشن",
+            "Details of Pension Increases": "پنشن میں اضافے کی تفصیلات",
             "Bank Details :": "بینک کی تفصیلات:",
             "Account No:": "اکاؤنٹ نمبر:",
             "Bank & Branch:": "بینک اور برانچ:",
@@ -941,7 +951,7 @@
             "Loading...": "لوڈ ہو رہا ہے...",
             "Total of all ranks: Rs. ": "تمام رینکس کا کل: روپے ",
             "Maximum for the highest rank held": "اعلیٰ ترین رینک کی زیادہ سے زیادہ حد",
-            "JCO Additional Pension:": "جے سی او اضافی پینشن:",
+            "JCO Additional Pension:": "جے سی او اضافی پنشن:",
             "January": "جنوری", "February": "فروری", "March": "مارچ", "April": "اپریل",
             "May": "مئی", "June": "جون", "July": "جولائی", "August": "اگست",
             "September": "ستمبر", "October": "اکتوبر", "November": "نومبر", "December": "دسمبر"
@@ -950,7 +960,7 @@
             "ATTENTION": "توجہ فرمائیں", "Attention": "توجہ فرمائیں",
             "Remaining Period (%)": "باقی ماندہ مدت (فیصد)",
             "Nature of Death": "وفات کی نوعیت", "After Retirement": "ریٹائرمنٹ کے بعد", "During Service": "دورانِ سروس",
-            "Please enter Gross Pension from PPO or Pension Book. Don't enter your current Pension": "براہ کرم مجموعی پینشن پی پی او یا پینشن بک سے درج کریں۔ اپنی موجودہ پینشن درج نہ کریں۔",
+            "Please enter Gross Pension from PPO or Pension Book. Don't enter your current Pension": "براہ کرم مجموعی پنشن پی پی او یا پنشن بک سے درج کریں۔ اپنی موجودہ پنشن درج نہ کریں۔",
             "Error": "خرابی", "Success": "کامیابی", "Input Required": "ان پٹ درکار ہے",
             "No Data Found": "کوئی ڈیٹا نہیں ملا", "No Data Found. Enter Now.": "کوئی ڈیٹا نہیں ملا۔ اب درج کریں۔",
             "Please enter a Pak No to search.": "براہ کرم تلاش کے لیے پاک نمبر درج کریں۔",
@@ -1001,7 +1011,7 @@
             else if ((m = t.match(/^(Pak No|Service No) (\d+) already exists\. Use "Load Data" button or enter New\.$/))) out = (urduDict[m[1]] || m[1]) + ' ' + m[2] + ' پہلے سے موجود ہے۔ "لوڈ ڈیٹا" بٹن استعمال کریں یا نیا درج کریں۔';
             else if ((m = t.match(/^Total of all ranks: Rs\. (.+)$/))) out = 'تمام رینکس کا کل: روپے ' + m[1];
             else if ((m = t.match(/^Maximum for the highest rank held \((.*?)\): Rs\. (.+)$/))) out = 'اعلیٰ ترین رینک (' + ((typeof rankUrdu !== 'undefined' && rankUrdu[m[1]]) || m[1]) + ') کی زیادہ سے زیادہ حد: روپے ' + m[2];
-            else if ((m = t.match(/^JCO Additional Pension: Rs\. (.+)$/))) out = 'جے سی او اضافی پینشن: روپے ' + m[1];
+            else if ((m = t.match(/^JCO Additional Pension: Rs\. (.+)$/))) out = 'جے سی او اضافی پنشن: روپے ' + m[1];
             else if (t === 'No service entered.') out = 'کوئی سروس درج نہیں کی گئی۔';
             else if ((m = t.match(/^Rs\. (\S+) per year \(max Rs\. (\S+)\)$/))) out = 'روپے ' + m[1] + ' فی سال (زیادہ سے زیادہ روپے ' + m[2] + ')';
             else if ((m = t.match(/^Days (\d+)(?: \+ (\d+) rolled down)? = (\d+)\s*\|\s*Years (\d+)\s*\|\s*Rs\. (\S+)$/))) out = 'دن ' + m[1] + (m[2] ? ' + ' + m[2] + ' رول ڈاؤن' : '') + ' = ' + m[3] + '  |  سال ' + m[4] + '  |  روپے ' + m[5];
@@ -1024,6 +1034,19 @@
         function observeModals() { ['jco-modal', 'message-modal', 'confirm-modal', 'dob-verify-modal'].forEach(id => { const el = document.getElementById(id); if (el) modalObserver.observe(el, { childList: true, subtree: true, characterData: true }); }); }
         document.addEventListener('DOMContentLoaded', observeModals);
         if (document.readyState !== 'loading') observeModals();
+
+
+        (function () {
+            const fitPayslip = () => {
+                const area = document.getElementById('print-area'); if (!area) return;
+                area.style.zoom = '';
+                if (!document.body.classList.contains('lang-ur')) return;
+                const available = 1084; const h = area.scrollHeight;
+                if (h > available) area.style.zoom = String(Math.max(0.6, (available / h) * 0.98));
+            };
+            window.addEventListener('beforeprint', fitPayslip);
+            window.addEventListener('afterprint', () => { const area = document.getElementById('print-area'); if (area) area.style.zoom = ''; });
+        })();
 
         function applyTranslation() { relabelRankOptions(); setTimeout(() => { if (window.fitUrduDesignerLine) window.fitUrduDesignerLine(); }, 150);
             if (currentLang === 'ur') {
@@ -1069,7 +1092,7 @@
                                        .replace(/Restored/g, 'بحال شدہ')
                                        .replace(/Total of all ranks: Rs\. /g, 'تمام رینکس کا کل: روپے ')
                                        .replace(/Maximum for the highest rank held \((.*?)\): Rs\. /g, 'اعلیٰ ترین رینک ($1) کی زیادہ سے زیادہ حد: روپے ')
-                                       .replace(/JCO Additional Pension: Rs\. /g, 'جے سی او اضافی پینشن: روپے ')
+                                       .replace(/JCO Additional Pension: Rs\. /g, 'جے سی او اضافی پنشن: روپے ')
                                        .replace(/Days /g, 'دن ')
                                        .replace(/ rolled down/g, ' رول ڈاؤن')
                                        .replace(/No service entered\./g, 'کوئی سروس درج نہیں کی گئی۔');
@@ -1095,7 +1118,7 @@
                                        .replace(/بحال شدہ/g, 'Restored')
                                        .replace(/تمام رینکس کا کل: روپے /g, 'Total of all ranks: Rs. ')
                                        .replace(/اعلیٰ ترین رینک \((.*?)\) کی زیادہ سے زیادہ حد: روپے /g, 'Maximum for the highest rank held ($1): Rs. ')
-                                       .replace(/جے سی او اضافی پینشن: روپے /g, 'JCO Additional Pension: Rs. ')
+                                       .replace(/جے سی او اضافی پنشن: روپے /g, 'JCO Additional Pension: Rs. ')
                                        .replace(/دن /g, 'Days ')
                                        .replace(/ رول ڈاؤن/g, ' rolled down')
                                        .replace(/کوئی سروس درج نہیں کی گئی۔/g, 'No service entered.');
@@ -1737,15 +1760,15 @@
                 const familyDobDate = parseDate(g('family-dob'));
                 const base = (isFamily && familyDobDate) ? familyDobDate : dobDate;
                 const bday = base ? urduDate(new Date(Date.UTC(base.getUTCFullYear() + 85, base.getUTCMonth(), base.getUTCDate())), true) : '____________';
-                heading = isFamily ? 'فیملی پینشن میں 85 سال کی عمر پر 25 فیصد اضافے کی منظوری' : 'پینشن میں 85 سال کی عمر پر 25 فیصد اضافے کی منظوری';
+                heading = isFamily ? 'فیملی پنشن میں 85 سال کی عمر پر 25 فیصد اضافے کی منظوری' : 'پنشن میں 85 سال کی عمر پر 25 فیصد اضافے کی منظوری';
                 paras = [
                     `مندرجہ بالا موضوع کے حوالے سے اور فنانس ڈویژن (ریگولیشن ونگ) کے جاری کردہ آفس میمورنڈم نمبر ${ltr('F.4 (1)-Reg-6/2016-870')} مورخہ 01 جولائی 2016 اور نمبر ${ltr('F.4 (1)-Reg-6/2016-1082')} مورخہ 26 ستمبر 2016 کی شقوں کے تحت۔`,
-                    `گزارش ہے کہ میری عمر ${bday} کو 85 سال ہو چکی ہے۔ مذکورہ آفس میمورنڈم کے مطابق اب میں جولائی 2016 میں دی گئی 10 فیصد کے بجائے پینشن میں 25 فیصد اضافے کا حقدار ہوں۔`,
-                    'لہٰذا استدعا ہے کہ مذکورہ اضافہ میری پینشن میں منظور کیا جائے اور اصلاحی پی پی او (Corrigendum PPO) کی نقل میرے گھر کے پتے پر ارسال کی جائے۔'
+                    `گزارش ہے کہ میری عمر ${bday} کو 85 سال ہو چکی ہے۔ مذکورہ آفس میمورنڈم کے مطابق اب میں جولائی 2016 میں دی گئی 10 فیصد کے بجائے پنشن میں 25 فیصد اضافے کا حقدار ہوں۔`,
+                    'لہٰذا استدعا ہے کہ مذکورہ اضافہ میری پنشن میں منظور کیا جائے اور اصلاحی پی پی او (Corrigendum PPO) کی نقل میرے گھر کے پتے پر ارسال کی جائے۔'
                 ];
             } else {
                 const dobDate = parseDate(g('dob')); const sosDate = parseDate(g('sos'));
-                heading = isFamily ? 'فیملی پینشن کے کمیوٹ شدہ حصے کی بحالی' : 'پینشن کے کمیوٹ شدہ حصے کی بحالی';
+                heading = isFamily ? 'فیملی پنشن کے کمیوٹ شدہ حصے کی بحالی' : 'پنشن کے کمیوٹ شدہ حصے کی بحالی';
                 const idLabel = isAN ? 'سروس نمبر' : 'پاک نمبر';
                 dataHtml = `<table class="data">
                     <tr><td>رینک: <b>${rankUr}</b></td><td>نام: <b>${nameUr}</b></td></tr>
@@ -1755,11 +1778,11 @@
                     <tr><td colspan="2"><span class="fill"></span></td></tr>
                 </table>`;
                 paras = [
-                    'ذیل میں پینشن کے کمیوٹ شدہ حصے کی بحالی کے لیے ڈیٹا درج ہے:-',
-                    'لہٰذا استدعا ہے کہ پینشن کا کمیوٹ شدہ حصہ بحال کیا جائے۔ برائے مہربانی اصلاحی پی پی او کی نقل مندرجہ بالا پتے پر ارسال فرمائیں۔'
+                    'ذیل میں پنشن کے کمیوٹ شدہ حصے کی بحالی کے لیے ڈیٹا درج ہے:-',
+                    'لہٰذا استدعا ہے کہ پنشن کا کمیوٹ شدہ حصہ بحال کیا جائے۔ برائے مہربانی اصلاحی پی پی او کی نقل مندرجہ بالا پتے پر ارسال فرمائیں۔'
                 ];
             }
-            const addressee = isAN ? '<div class="blank"></div><div class="blank"></div>' : '<div>ڈائریکٹوریٹ آف پینشن</div><div>ایئر ہیڈ کوارٹرز، پشاور</div>';
+            const addressee = isAN ? '<div class="blank"></div><div class="blank"></div>' : '<div>ڈائریکٹوریٹ آف پنشن</div><div>ایئر ہیڈ کوارٹرز، پشاور</div>';
             let n = 0;
             const paraHtml = (t) => `<div class="para"><span class="num">${++n}.</span><span class="txt">${t}</span></div>`;
             let body = '';
