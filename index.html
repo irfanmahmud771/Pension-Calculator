@@ -84,16 +84,16 @@
         body.lang-ur .print-info-table td:nth-child(2) .print-info-label { width: 140px !important; }
         body.lang-ur .print-info-table td:nth-child(2) .print-info-value { width: calc(100% - 150px) !important; }
         @media (min-width: 769px) {
-        body.lang-ur .print-info-table, body.lang-ur .print-table, body.lang-ur .print-bank-section { font-size: 12.5pt; }
-        body.lang-ur .print-table.compact { font-size: 10.5pt; }
-        body.lang-ur .print-section-header { font-size: 13pt; }
-        body.lang-ur .print-footer { font-size: 11.5pt; }
-        body.lang-ur .print-info-table td:first-child .print-info-label { width: 128px !important; }
-        body.lang-ur .print-info-table td:first-child .print-info-value { width: calc(100% - 138px) !important; }
-        body.lang-ur .print-info-table td:nth-child(2) .print-info-label { width: 160px !important; }
-        body.lang-ur .print-info-table td:nth-child(2) .print-info-value { width: calc(100% - 170px) !important; }
-        body.lang-ur .print-bank-label { width: 175px; }
-        body.lang-ur #print-dob { white-space: nowrap; font-size: 9.5pt; }
+        body.lang-ur:not(.mobile-device) .print-info-table, body.lang-ur:not(.mobile-device) .print-table, body.lang-ur:not(.mobile-device) .print-bank-section { font-size: 12.5pt; }
+        body.lang-ur:not(.mobile-device) .print-table.compact { font-size: 10.5pt; }
+        body.lang-ur:not(.mobile-device) .print-section-header { font-size: 13pt; }
+        body.lang-ur:not(.mobile-device) .print-footer { font-size: 11.5pt; }
+        body.lang-ur:not(.mobile-device) .print-info-table td:first-child .print-info-label { width: 128px !important; }
+        body.lang-ur:not(.mobile-device) .print-info-table td:first-child .print-info-value { width: calc(100% - 138px) !important; }
+        body.lang-ur:not(.mobile-device) .print-info-table td:nth-child(2) .print-info-label { width: 160px !important; }
+        body.lang-ur:not(.mobile-device) .print-info-table td:nth-child(2) .print-info-value { width: calc(100% - 170px) !important; }
+        body.lang-ur:not(.mobile-device) .print-bank-label { width: 175px; }
+        body.lang-ur:not(.mobile-device) #print-dob { white-space: nowrap; font-size: 9.5pt; }
         }
         body.lang-ur #print-area, body.lang-ur #print-area * { font-family: 'Noori Nastaleeq', 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; }
         body[dir="rtl"] .text-left { text-align: right !important; }
@@ -704,10 +704,10 @@
                 <table class="print-table">
                     <thead>
                         <tr>
-                            <th style="width: 10%;">S No</th>
-                            <th style="width: 30%;">Pension Payment Details</th>
+                            <th style="width: 8%;">S No</th>
+                            <th style="width: 40%;">Pension Payment Details</th>
                             <th style="width: 15%; text-align: center; white-space: nowrap;">Amount (Rs.)</th>
-                            <th style="width: 45%;">Remarks</th>
+                            <th style="width: 37%;">Remarks</th>
                         </tr>
                     </thead>
                     <tbody id="print-table-body">
@@ -725,7 +725,7 @@
                         </tr>
                          <tr id="print-row-tk">
                             <td class="center serial-cell">3</td>
-                            <td>Tamgha-e-Khidmat Allowance</td>
+                            <td style="white-space: nowrap;">Tamgha-e-Khidmat Allowance</td>
                             <td class="amount" id="print-tk"></td>
                             <td></td>
                         </tr>
@@ -3563,5 +3563,6 @@ ullah,allah=اللہ
         updateAll();
     })();
     </script>
+<script>try{if(Math.min(screen.width,screen.height)<=820||/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent))document.body.classList.add("mobile-device");}catch(e){}</script>
 </body>
 </html>
