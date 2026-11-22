@@ -242,7 +242,7 @@
                          </div>
                          <div class="grid grid-cols-1 gap-4">
                             <div class="input-group">
-                                <label for="cnic">CNIC</label>
+                                <label for="cnic">CNIC No</label>
                                 <input type="text" id="cnic" class="calc-input" placeholder="00000-0000000-0" maxlength="15">
                                 <div id="cnic-error" class="text-red-600 text-xs mt-1" style="display: none;">Incomplete CNIC</div>
                             </div>
@@ -690,7 +690,7 @@
                             <span class="print-info-value" id="print-pak-no" style="width: calc(100% - 105px);"></span>
                         </td>
                         <td style="width: 50%; vertical-align: top; padding-left: 4px;">
-                            <span class="print-info-label">CNIC:</span>
+                            <span class="print-info-label">CNIC No:</span>
                             <span class="print-info-value" id="print-cnic" style="white-space: nowrap;"></span>
                         </td>
                     </tr>
@@ -831,7 +831,7 @@
             "Pak No": "پاک نمبر",
             "Service No": "سروس نمبر",
             "Load Data": "ڈیٹا لوڈ کریں",
-            "CNIC": "شناختی کارڈ نمبر",
+            "CNIC No": "شناختی کارڈ نمبر",
             "Incomplete CNIC": "نامکمل شناختی کارڈ",
             "Account No (IBAN)": "اکاؤنٹ نمبر (آئی بی اے این)",
             "Bank & Branch": "بینک اور برانچ",
@@ -938,7 +938,7 @@
             "Name:": "نام:",
             "Pak No:": "پاک نمبر:",
             "Service No:": "سروس نمبر:",
-            "CNIC:": "شناختی کارڈ:",
+            "CNIC No:": "شناختی کارڈ نمبر:",
             "Date of Birth:": "تاریخ پیدائش:",
             "Retirement Date:": "تاریخ ریٹائرمنٹ:",
             "S No": "نمبر",
@@ -2182,7 +2182,7 @@
                 if (isFamilyPension) {
                     printRowFamily.style.display = 'table-row';
                     let displayText = nameForPrint(familyName);
-                    if (familyCnic) { displayText += (currentLang === 'ur') ? ` (${trU('CNIC')}: \u2066${familyCnic}\u2069)` : ` (CNIC: ${familyCnic})`; }
+                    if (familyCnic) { displayText += (currentLang === 'ur') ? ` (${trU('CNIC No')}: \u2066${familyCnic}\u2069)` : ` (CNIC No: ${familyCnic})`; }
                     document.getElementById('print-family-pensioner-name').textContent = displayText;
                     document.getElementById('print-family-relation-label').textContent = (currentLang === 'ur' && urduRelation[familyRelation]) ? `${familyRelation === 'Son' ? 'مندرجہ ذیل کا' : familyRelation === 'Father' ? 'مندرجہ ذیل کے' : 'مندرجہ ذیل کی'} ${urduRelation[familyRelation]}` : `${familyRelation} of below`;
                 } else { printRowFamily.style.display = 'none'; }
@@ -2436,7 +2436,7 @@
                 
                  if (sosDate) {
                     if (year === 1991) { if (sosDate > date1977_04_30) percentageToDisplay = '12%'; else if (sosDate < date1977_05_01) percentageToDisplay = '32%'; else percentageToDisplay = '0%'; } 
-                    else if (year === 1995) { if (sosDate > date1947_08_14 && sosDate < date1977_04_30) percentageToDisplay = '15%'; else if (sosDate > date1977_05_01 && sosDate < date1991_06_01) percentageToDisplay = '10%'; else if (sosDate < date1993_06_01) percentageToDisplay = '5%'; else percentageToDisplay = '0%'; }
+                    else if (year === 1995) { if (sosDate > date1947_08_14 && sosDate < date1977_04_30) percentageToDisplay = '15%'; else if (sosDate > date1977_05_01 && sosDate < date1991_06_01) percentageToDisplay = '10%'; else percentageToDisplay = '5%'; }
                     else if (year === 2001) { if (sosDate > date1993_06_30 && sosDate < date2001_12_01) percentageToDisplay = '5%'; else if (sosDate > date1991_05_31 && sosDate < date1993_07_01) percentageToDisplay = '10%'; else if (sosDate < date1991_06_01) percentageToDisplay = '15%'; else percentageToDisplay = '0%'; }
                     else if (year === 2004) { if (sosDate > date1994_06_30) percentageToDisplay = '8%'; else if (sosDate < date1994_07_01) percentageToDisplay = '16%'; else percentageToDisplay = '0%'; }
                     else if (year === 2006) { if (sosDate > date1977_04_30_2006) percentageToDisplay = '15%'; else if (sosDate < date1977_05_01_2006) percentageToDisplay = '20%'; else percentageToDisplay = '0%'; }
