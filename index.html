@@ -319,6 +319,10 @@
                                 <option value="During Service">During Service</option>
                             </select>
                         </div>
+                        <div class="input-group" id="grp-date-of-death" style="display: none;">
+                            <label for="date-of-death">Date of Death</label>
+                            <input type="date" id="date-of-death" class="calc-input">
+                        </div>
                         <div class="input-group" id="grp-family-name" style="display: none;">
                             <label for="family-pensioner-name">Family Pensioner Name</label>
                             <input type="text" id="family-pensioner-name" class="calc-input" placeholder="Name" maxlength="21" style="text-transform: uppercase;">
@@ -968,7 +972,7 @@
             "Remaining Period (%)": "باقی ماندہ مدت (فیصد)",
             "Nature of Death": "وفات کی نوعیت", "After Retirement": "ریٹائرمنٹ کے بعد", "During Service": "دورانِ سروس",
             "Please enter Gross Pension from PPO or Pension Book. Don't enter your current Pension": "براہ کرم مجموعی پنشن پی پی او یا پنشن بک سے درج کریں۔ اپنی موجودہ پنشن درج نہ کریں۔",
-            "Pak No cannot be blank. Enter digits only, minimum 4 digits.": "پاک نمبر خالی نہیں ہو سکتا۔ صرف ہندسے درج کریں، کم از کم 4 ہندسے۔", "Error": "خرابی", "Success": "کامیابی", "Input Required": "ان پٹ درکار ہے",
+            "Date of Death": "تاریخ وفات", "Pak No cannot be blank. Enter digits only, minimum 4 digits.": "پاک نمبر خالی نہیں ہو سکتا۔ صرف ہندسے درج کریں، کم از کم 4 ہندسے۔", "Error": "خرابی", "Success": "کامیابی", "Input Required": "ان پٹ درکار ہے",
             "No Data Found": "کوئی ڈیٹا نہیں ملا", "No Data Found. Enter Now.": "کوئی ڈیٹا نہیں ملا۔ اب درج کریں۔",
             "Please enter a Pak No to search.": "براہ کرم تلاش کے لیے پاک نمبر درج کریں۔",
             "Please select a date.": "براہ کرم تاریخ منتخب کریں۔",
@@ -2144,9 +2148,9 @@
                 
                 let printDobText = formatDateDisplay(dobDate);
                 if (isFamilyPension && familyDobDate) { printDobText += ` (${formatDateDisplay(familyDobDate)} ${currentLang === 'ur' ? 'فیملی' : 'Family'})`; }
-                document.getElementById('print-dob').textContent = printDobText;
+                { const pd = document.getElementById('print-dob'); if (currentLang === 'ur') { pd.innerHTML = printDobText.replace(' (', '<span style="display:inline-block;width:0.45em"></span>('); } else { pd.textContent = printDobText; } }
 
-                document.getElementById('print-sos').textContent = formatDateDisplay(sosDate);
+                { let sosText = formatDateDisplay(sosDate); const dodDate = isFamilyPension ? parseDate(document.getElementById('date-of-death')?.value) : null; if (dodDate) sosText += ` (${formatDateDisplay(dodDate)} ${currentLang === 'ur' ? 'وفات' : 'Death'})`; const ps = document.getElementById('print-sos'); if (currentLang === 'ur') { ps.innerHTML = sosText.replace(' (', '<span style="display:inline-block;width:0.45em"></span>('); } else { ps.textContent = sosText; } }
                 const todayForPrint = new Date(); todayForPrint.setMonth(todayForPrint.getMonth() - 1); 
                 let monthNameEn = todayForPrint.toLocaleString('en-US', { month: 'long' });
                 if (currentLang === 'ur') {
@@ -2300,7 +2304,7 @@
                     })()}
                     <strong class="text-blue-600">Current: Rs. ${Math.round(entry.pension_current || 0).toLocaleString('en-IN')}, Restored: Rs. ${Math.round(entry.pension_restored || 0).toLocaleString('en-IN')}${entry.tk_allowance ? `, TK: Rs. ${Math.round(entry.tk_allowance).toLocaleString('en-IN')}` : ''}, Date: ${entry.restoration_date || 'N/A'}</strong><br>
                     <button class="load-log-btn text-xs bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2" 
-                        data-rank="${entry.rank || ''}" data-arms="${entry.arms || 'PAF'}" data-name="${entry.name || ''}" data-pak-no="${entry.pak_no || ''}" data-cnic="${entry.cnic || ''}" data-account-no="${entry.account_no || ''}" data-bank-branch="${entry.bank_branch || ''}" data-dob="${entry.dob_raw || ''}" data-doe="${entry.doe_raw || ''}" data-sos="${entry.sos_raw || ''}" data-pension="${entry.pension_raw || '0'}" data-tk="${entry.tk}" data-family="${entry.family}" data-family-name="${entry.family_pensioner_name || ''}" data-family-cnic="${entry.family_pensioner_cnic || ''}" data-family-relation="${entry.relation_with_pensioner || 'Widow'}" data-family-dob="${entry.family_dob_raw || ''}" data-basic-pay="${entry.basic_pay ?? ''}" data-disturbance-pay="${entry.disturbance_pay ?? ''}" data-gcb-pay="${entry.gcb_pay ?? ''}" data-usual-increment="${entry.usual_increment ?? ''}" data-jco-addl-pension="${entry.jco_addl_pension ?? ''}" data-medical-board="${entry.medical_board || 'No'}"
+                        data-rank="${entry.rank || ''}" data-arms="${entry.arms || 'PAF'}" data-name="${entry.name || ''}" data-pak-no="${entry.pak_no || ''}" data-cnic="${entry.cnic || ''}" data-account-no="${entry.account_no || ''}" data-bank-branch="${entry.bank_branch || ''}" data-dob="${entry.dob_raw || ''}" data-doe="${entry.doe_raw || ''}" data-sos="${entry.sos_raw || ''}" data-pension="${entry.pension_raw || '0'}" data-tk="${entry.tk}" data-family="${entry.family}" data-family-name="${entry.family_pensioner_name || ''}" data-family-cnic="${entry.family_pensioner_cnic || ''}" data-family-relation="${entry.relation_with_pensioner || 'Widow'}" data-family-dob="${entry.family_dob_raw || ''}" data-date-of-death="${entry.date_of_death || ''}" data-basic-pay="${entry.basic_pay ?? ''}" data-disturbance-pay="${entry.disturbance_pay ?? ''}" data-gcb-pay="${entry.gcb_pay ?? ''}" data-usual-increment="${entry.usual_increment ?? ''}" data-jco-addl-pension="${entry.jco_addl_pension ?? ''}" data-medical-board="${entry.medical_board || 'No'}"
                     >Load this Data</button>
                     <button class="delete-log-btn text-xs bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-2 rounded-lg transition-colors mt-2 ml-2" data-id="${entry.id}">Delete this Log</button>
                 </div>`;
@@ -2334,7 +2338,7 @@
             const manualGrossPension = !!document.getElementById('gross-pension-confirmed') && !document.getElementById('gross-pension-confirmed').checked; 
             const payVal = (id) => { if (manualGrossPension) return null; const v = parseAmount(document.getElementById(id)?.value); return isNaN(v) ? null : v; }; 
             const logEntry = { 
-                displaytimestamp: `${day}-${month}-${year} ${time}`, triggersource: triggerSource, rank: log_rank, arms: log_arms, name: log_name, pak_no: log_pak_no, cnic: log_cnic, account_no: log_account_no, bank_branch: log_bank_branch, dob_raw: log_dob_raw, doe_raw: log_doe_raw, sos_raw: log_sos_raw, pension_raw: log_pension_raw, tk: log_tk, family: log_family, family_pensioner_name: log_family_name, family_pensioner_cnic: log_family_cnic, relation_with_pensioner: log_family_relation, family_dob_raw: log_family_dob_raw, basic_pay: payVal('basic-pay'), disturbance_pay: payVal('disturbance-pay'), gcb_pay: payVal('gcb-pay'), usual_increment: payVal('usual-increment'), jco_addl_pension: payVal('jco-addl-pension'), medical_board: manualGrossPension ? 'No' : (document.getElementById('medical-board')?.value || 'No'), pension_current: currentCalculatedValues.pensionCurrent, pension_restored: currentCalculatedValues.pensionRestored, restoration_date: currentCalculatedValues.restorationDate, tk_allowance: currentCalculatedValues.tkAllowance 
+                displaytimestamp: `${day}-${month}-${year} ${time}`, triggersource: triggerSource, rank: log_rank, arms: log_arms, name: log_name, pak_no: log_pak_no, cnic: log_cnic, account_no: log_account_no, bank_branch: log_bank_branch, dob_raw: log_dob_raw, doe_raw: log_doe_raw, sos_raw: log_sos_raw, pension_raw: log_pension_raw, tk: log_tk, family: log_family, family_pensioner_name: log_family_name, family_pensioner_cnic: log_family_cnic, relation_with_pensioner: log_family_relation, family_dob_raw: log_family_dob_raw, date_of_death: (familyPensionInput.value === 'Yes' ? (document.getElementById('date-of-death')?.value || null) : null), basic_pay: payVal('basic-pay'), disturbance_pay: payVal('disturbance-pay'), gcb_pay: payVal('gcb-pay'), usual_increment: payVal('usual-increment'), jco_addl_pension: payVal('jco-addl-pension'), medical_board: manualGrossPension ? 'No' : (document.getElementById('medical-board')?.value || 'No'), pension_current: currentCalculatedValues.pensionCurrent, pension_restored: currentCalculatedValues.pensionRestored, restoration_date: currentCalculatedValues.restorationDate, tk_allowance: currentCalculatedValues.tkAllowance 
             };
 
             try {
@@ -2348,6 +2352,10 @@
                 if (insertError && /basic_pay|disturbance_pay|gcb_pay|usual_increment|jco_addl_pension|medical_board/.test(insertError.message || '')) {
                     const { basic_pay, disturbance_pay, gcb_pay, usual_increment, jco_addl_pension, medical_board, ...legacyEntry } = logEntry;
                     ({ error: insertError } = await supabaseClient.from('logs').insert(legacyEntry));
+                }
+                if (insertError && /date_of_death/.test(insertError.message || '')) {
+                    const { date_of_death, ...noDodEntry } = logEntry;
+                    ({ error: insertError } = await supabaseClient.from('logs').insert(noDodEntry));
                 }
                 if (!insertError) fetchLogs();
             } catch (e) { }
@@ -2400,7 +2408,7 @@
             const pensionValue = data.pension || ''; const grossPensionInput = document.getElementById('gross-pension-ppo'); grossPensionInput.value = pensionValue;
             const parts = pensionValue.split('.'); let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ","); let decimalPart = parts[1] ? (parts[1] + '00').substring(0, 2) : ''; grossPensionInput.value = integerPart; if (decimalPart) { grossPensionInput.value += '.' + decimalPart; } if (parseFloat(pensionValue) === 0) { grossPensionInput.value = '0'; }
             document.getElementById('tk-award').value = data.tk || 'No'; { let fam = data.family || 'No'; const inSvc = String(fam).includes('In-Service Death'); if (inSvc) fam = 'Yes'; document.getElementById('family-pension').value = fam; window.__pendingNatureOfDeath = inSvc ? 'During Service' : 'After Retirement'; }
-            document.getElementById('family-pensioner-name').value = data.familyName || ''; document.getElementById('family-pensioner-cnic').value = data.familyCnic || ''; document.getElementById('family-relation').value = data.familyRelation || 'Widow'; document.getElementById('family-dob').value = data.familyDob || ''; 
+            document.getElementById('family-pensioner-name').value = data.familyName || ''; document.getElementById('family-pensioner-cnic').value = data.familyCnic || ''; document.getElementById('family-relation').value = data.familyRelation || 'Widow'; document.getElementById('family-dob').value = data.familyDob || ''; { const dodEl = document.getElementById('date-of-death'); if (dodEl) dodEl.value = data.dateOfDeath || ''; } 
             setAmountField('basic-pay', data.basicPay); setAmountField('disturbance-pay', data.disturbancePay); setAmountField('gcb-pay', data.gcbPay); setAmountField('usual-increment', data.usualIncrement); setAmountField('jco-addl-pension', data.jcoAddlPension);
             { const mb = document.getElementById('medical-board'); if (mb) mb.value = ['No', 'A', 'B', 'C'].includes(data.medicalBoard) ? data.medicalBoard : 'No'; }
             calculateTotalPay(); document.getElementById('account-no').dispatchEvent(new Event('input')); document.getElementById('cnic').dispatchEvent(new Event('input')); document.getElementById('family-pensioner-cnic').dispatchEvent(new Event('input'));
@@ -2614,12 +2622,12 @@
             const grpFamilyDob = document.getElementById('grp-family-dob');
 
             if (familyPensionVal === 'Yes') {
-                { const gnd = document.getElementById('grp-nature-of-death'); if (gnd) gnd.style.display = 'block'; } grpFamilyName.style.display = 'block'; grpFamilyCnic.style.display = 'block'; grpFamilyRelation.style.display = 'block'; if (grpFamilyDob) grpFamilyDob.style.display = 'block'; 
+                { const gnd = document.getElementById('grp-nature-of-death'); if (gnd) gnd.style.display = 'block'; const gdd = document.getElementById('grp-date-of-death'); if (gdd) gdd.style.display = 'block'; } grpFamilyName.style.display = 'block'; grpFamilyCnic.style.display = 'block'; grpFamilyRelation.style.display = 'block'; if (grpFamilyDob) grpFamilyDob.style.display = 'block'; 
                 const familyCnicInput = document.getElementById('family-pensioner-cnic'); const familyCnicError = document.getElementById('family-cnic-error');
                 const familyDigits = (familyCnicInput.value || '').replace(/\D/g, '').length;
                 if (familyCnicError) familyCnicError.style.display = familyDigits === 13 ? 'none' : 'block';
             } else {
-                { const gnd = document.getElementById('grp-nature-of-death'); if (gnd) gnd.style.display = 'none'; const nod = document.getElementById('nature-of-death'); if (nod) nod.value = 'After Retirement'; } grpFamilyName.style.display = 'none'; grpFamilyCnic.style.display = 'none'; grpFamilyRelation.style.display = 'none'; if (grpFamilyDob) grpFamilyDob.style.display = 'none'; 
+                { const gnd = document.getElementById('grp-nature-of-death'); if (gnd) gnd.style.display = 'none'; const gdd = document.getElementById('grp-date-of-death'); if (gdd) gdd.style.display = 'none'; const dod = document.getElementById('date-of-death'); if (dod) dod.value = ''; const nod = document.getElementById('nature-of-death'); if (nod) nod.value = 'After Retirement'; } grpFamilyName.style.display = 'none'; grpFamilyCnic.style.display = 'none'; grpFamilyRelation.style.display = 'none'; if (grpFamilyDob) grpFamilyDob.style.display = 'none'; 
                 document.getElementById('family-pensioner-name').value = ''; document.getElementById('family-pensioner-cnic').value = ''; document.getElementById('family-relation').selectedIndex = 0;
                 const famDob = document.getElementById('family-dob'); if (famDob) famDob.value = '';
                 const famDobDisp = document.getElementById('family-dob-display'); if (famDobDisp) famDobDisp.textContent = '';
@@ -2805,7 +2813,7 @@
                     const enteredDob = verifyDobInput.value;
                     if (!enteredDob) { verifyDobError.textContent = "Please select a date."; verifyDobError.style.display = 'block'; return; }
                     if (pendingLoadData && pendingLoadData.dob_raw === enteredDob) {
-                        const mockButton = { dataset: { rank: pendingLoadData.rank, arms: pendingLoadData.arms, name: pendingLoadData.name, pakNo: pendingLoadData.pak_no, cnic: pendingLoadData.cnic, accountNo: pendingLoadData.account_no, bankBranch: pendingLoadData.bank_branch, dob: pendingLoadData.dob_raw, doe: pendingLoadData.doe_raw, sos: pendingLoadData.sos_raw, pension: pendingLoadData.pension_raw, tk: pendingLoadData.tk, family: pendingLoadData.family, familyName: pendingLoadData.family_pensioner_name, familyCnic: pendingLoadData.family_pensioner_cnic, familyRelation: pendingLoadData.relation_with_pensioner, familyDob: pendingLoadData.family_dob_raw || '', basicPay: pendingLoadData.basic_pay ?? '', disturbancePay: pendingLoadData.disturbance_pay ?? '', gcbPay: pendingLoadData.gcb_pay ?? '', usualIncrement: pendingLoadData.usual_increment ?? '', jcoAddlPension: pendingLoadData.jco_addl_pension ?? '', medicalBoard: pendingLoadData.medical_board || 'No' } };
+                        const mockButton = { dataset: { rank: pendingLoadData.rank, arms: pendingLoadData.arms, name: pendingLoadData.name, pakNo: pendingLoadData.pak_no, cnic: pendingLoadData.cnic, accountNo: pendingLoadData.account_no, bankBranch: pendingLoadData.bank_branch, dob: pendingLoadData.dob_raw, doe: pendingLoadData.doe_raw, sos: pendingLoadData.sos_raw, pension: pendingLoadData.pension_raw, tk: pendingLoadData.tk, family: pendingLoadData.family, familyName: pendingLoadData.family_pensioner_name, familyCnic: pendingLoadData.family_pensioner_cnic, familyRelation: pendingLoadData.relation_with_pensioner, familyDob: pendingLoadData.family_dob_raw || '', dateOfDeath: pendingLoadData.date_of_death || '', basicPay: pendingLoadData.basic_pay ?? '', disturbancePay: pendingLoadData.disturbance_pay ?? '', gcbPay: pendingLoadData.gcb_pay ?? '', usualIncrement: pendingLoadData.usual_increment ?? '', jcoAddlPension: pendingLoadData.jco_addl_pension ?? '', medicalBoard: pendingLoadData.medical_board || 'No' } };
                         loadLogData(mockButton); closeDobVerifyModal(); openMessageModal("Success", "Data loaded successfully.");
                     } else { verifyDobError.textContent = "Date of Birth does not match records."; verifyDobError.style.display = 'block'; }
                 });
