@@ -2492,16 +2492,22 @@
                 };
 
                 const getFamilyNormalMinimumPension = (increaseYear, familyPensionDobDate) => {
-                    const baseFamilyMin = minPensionData[increaseYear] ? minPensionData[increaseYear].family : 0;
+                    let baseFamilyMin = minPensionData[increaseYear] ? minPensionData[increaseYear].family : 0;
+                    { const dodForMin = parseDate(document.getElementById('date-of-death')?.value);
+                      if (dodForMin) {
+                          const eligibleMinYears = Object.keys(minPensionData).map(Number).filter(y => { const it = pensionIncreases.find(i => i.year === y); return it && parseDate(it.from) <= dodForMin; });
+                          const onlyMinYear = eligibleMinYears.length ? Math.max(...eligibleMinYears) : null;
+                          if (increaseYear !== onlyMinYear) baseFamilyMin = 0;
+                      } }
                     if (!familyPensionDobDate || ![2018, 2019, 2021, 2022, 2023, 2024, 2025, 2026].includes(increaseYear)) return baseFamilyMin;
                     const seventyFifthBirthday = new Date(familyPensionDobDate.getFullYear() + 75, familyPensionDobDate.getMonth(), familyPensionDobDate.getDate());
                     const isBeforeOrOnCutoff = (cutoffDate) => seventyFifthBirthday <= parseDate(cutoffDate);
 
-                    if (increaseYear === 2018) return isBeforeOrOnCutoff('2019-06-30') ? 11200 : 7500;
+                    if (increaseYear === 2018) return isBeforeOrOnCutoff('2019-06-30') ? 11200 : baseFamilyMin;
                     if (increaseYear === 2019) return isBeforeOrOnCutoff('2021-06-30') ? 11200 : 0;
                     if (increaseYear === 2021) return isBeforeOrOnCutoff('2022-06-30') ? 11200 : 0;
                     if (increaseYear === 2022) return isBeforeOrOnCutoff('2023-06-30') ? 11200 : 0;
-                    if (increaseYear === 2023) return isBeforeOrOnCutoff('2024-06-30') ? 11200 : 9000;
+                    if (increaseYear === 2023) return isBeforeOrOnCutoff('2024-06-30') ? 11200 : baseFamilyMin;
                     if (increaseYear === 2024) return isBeforeOrOnCutoff('2025-06-30') ? 11200 : 0;
                     if (increaseYear === 2025) return isBeforeOrOnCutoff('2026-06-30') ? 11200 : 0;
                     if (increaseYear === 2026) return isBeforeOrOnCutoff('2027-06-30') ? 11200 : 0;
