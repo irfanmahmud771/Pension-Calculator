@@ -322,6 +322,7 @@
                         <div class="input-group" id="grp-date-of-death" style="display: none;">
                             <label for="date-of-death">Date of Death</label>
                             <input type="date" id="date-of-death" class="calc-input">
+                            <div id="date-of-death-display" class="text-xs text-gray-500 mt-1"></div>
                         </div>
                         <div class="input-group" id="grp-family-name" style="display: none;">
                             <label for="family-pensioner-name">Family Pensioner Name</label>
@@ -2084,14 +2085,14 @@
                 let ageString = getAgeDisplayString(dobInput.value);
                 const dobFormatted = formatDateDisplay(dobDate);
                 const dobDisplayElement = document.getElementById('dob-display');
-                if (dobInput.value) { dobDisplayElement.innerHTML = `${dobFormatted}<br>${ageString}`; } else { dobDisplayElement.textContent = dobFormatted; }
+                if (dobInput.value) { dobDisplayElement.innerHTML = `${dobFormatted} ${ageString}`; } else { dobDisplayElement.textContent = dobFormatted; }
 
                 let familyAgeString = getAgeDisplayString(familyDobInput.value);
                 const familyDobFormatted = formatDateDisplay(familyDobDate);
                 const familyDobDisplayElement = document.getElementById('family-dob-display');
-                if (familyDobInput.value) { familyDobDisplayElement.innerHTML = `${familyDobFormatted}<br>${familyAgeString}`; } else { familyDobDisplayElement.textContent = ''; }
+                if (familyDobInput.value) { familyDobDisplayElement.innerHTML = `${familyDobFormatted} ${familyAgeString}`; } else { familyDobDisplayElement.textContent = ''; }
 
-                document.getElementById('doe-display').textContent = formatDateDisplay(doeDate); document.getElementById('sos-display').textContent = formatDateDisplay(sosDate);
+                { const dodIn = document.getElementById('date-of-death'); const dodDisp = document.getElementById('date-of-death-display'); if (dodDisp) dodDisp.textContent = (dodIn && dodIn.value) ? formatDateDisplay(parseDate(dodIn.value)) : ''; } document.getElementById('doe-display').textContent = formatDateDisplay(doeDate); document.getElementById('sos-display').textContent = formatDateDisplay(sosDate);
 
                 let roundedQS = 0; let ageNextBirthday = 0; let commutationFactor = 0; let restorationDate = null;
                 if (doeDate && sosDate) {
@@ -2627,7 +2628,7 @@
                 const familyDigits = (familyCnicInput.value || '').replace(/\D/g, '').length;
                 if (familyCnicError) familyCnicError.style.display = familyDigits === 13 ? 'none' : 'block';
             } else {
-                { const gnd = document.getElementById('grp-nature-of-death'); if (gnd) gnd.style.display = 'none'; const gdd = document.getElementById('grp-date-of-death'); if (gdd) gdd.style.display = 'none'; const dod = document.getElementById('date-of-death'); if (dod) dod.value = ''; const nod = document.getElementById('nature-of-death'); if (nod) nod.value = 'After Retirement'; } grpFamilyName.style.display = 'none'; grpFamilyCnic.style.display = 'none'; grpFamilyRelation.style.display = 'none'; if (grpFamilyDob) grpFamilyDob.style.display = 'none'; 
+                { const gnd = document.getElementById('grp-nature-of-death'); if (gnd) gnd.style.display = 'none'; const gdd = document.getElementById('grp-date-of-death'); if (gdd) gdd.style.display = 'none'; const dod = document.getElementById('date-of-death'); if (dod) dod.value = ''; const dodd = document.getElementById('date-of-death-display'); if (dodd) dodd.textContent = ''; const nod = document.getElementById('nature-of-death'); if (nod) nod.value = 'After Retirement'; } grpFamilyName.style.display = 'none'; grpFamilyCnic.style.display = 'none'; grpFamilyRelation.style.display = 'none'; if (grpFamilyDob) grpFamilyDob.style.display = 'none'; 
                 document.getElementById('family-pensioner-name').value = ''; document.getElementById('family-pensioner-cnic').value = ''; document.getElementById('family-relation').selectedIndex = 0;
                 const famDob = document.getElementById('family-dob'); if (famDob) famDob.value = '';
                 const famDobDisp = document.getElementById('family-dob-display'); if (famDobDisp) famDobDisp.textContent = '';
