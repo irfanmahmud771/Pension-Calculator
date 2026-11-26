@@ -401,6 +401,10 @@
                         <svg class="fill-current w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 8h-1V3H6v5H5a3 3 0 0 0-3 3v5h4v5h12v-5h4v-5a3 3 0 0 0-3-3zm-9-3h4v3h-4zm6 14H8v-5h8zm2-7H6v-2h12z"/></svg>
                         85 Years Application
                     </button>
+                    <button id="print-details-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-2 rounded inline-flex items-center transition-colors text-xs sm:text-sm">
+                        <svg class="fill-current w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 8h-1V3H6v5H5a3 3 0 0 0-3 3v5h4v5h12v-5h4v-5a3 3 0 0 0-3-3zm-9-3h4v3h-4zm6 14H8v-5h8zm2-7H6v-2h12z"/></svg>
+                        Print Details
+                    </button>
                 </div>
 
                 <h2 class="card-title text-center font-bold text-xl py-4">Calculated Results</h2>
@@ -973,7 +977,7 @@
             "Remaining Period (%)": "باقی ماندہ مدت (فیصد)",
             "Nature of Death": "وفات کی نوعیت", "After Retirement": "ریٹائرمنٹ کے بعد", "During Service": "دورانِ سروس",
             "Please enter Gross Pension from PPO or Pension Book. Don't enter your current Pension": "براہ کرم مجموعی پنشن پی پی او یا پنشن بک سے درج کریں۔ اپنی موجودہ پنشن درج نہ کریں۔",
-            "Date of Death": "تاریخ وفات", "Pak No cannot be blank. Enter digits only, minimum 4 digits.": "پاک نمبر خالی نہیں ہو سکتا۔ صرف ہندسے درج کریں، کم از کم 4 ہندسے۔", "Error": "خرابی", "Success": "کامیابی", "Input Required": "ان پٹ درکار ہے",
+            "Date of Death": "تاریخ وفات", "Print Details": "تفصیلات پرنٹ کریں", "Pak No cannot be blank. Enter digits only, minimum 4 digits.": "پاک نمبر خالی نہیں ہو سکتا۔ صرف ہندسے درج کریں، کم از کم 4 ہندسے۔", "Error": "خرابی", "Success": "کامیابی", "Input Required": "ان پٹ درکار ہے",
             "No Data Found": "کوئی ڈیٹا نہیں ملا", "No Data Found. Enter Now.": "کوئی ڈیٹا نہیں ملا۔ اب درج کریں۔",
             "Please enter a Pak No to search.": "براہ کرم تلاش کے لیے پاک نمبر درج کریں۔",
             "Please select a date.": "براہ کرم تاریخ منتخب کریں۔",
@@ -1836,6 +1840,95 @@
             const w = frame.contentWindow; const d = frame.contentDocument;
             let printed = false;
             const go = () => { if (printed) return; printed = true; try { w.focus(); w.print(); } catch (e) { } setTimeout(() => frame.remove(), 60000); };
+            d.open(); d.write(html); d.close();
+            frame.onload = () => { (d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve()).then(() => setTimeout(go, 300)); };
+            setTimeout(go, 3000);
+        };
+
+        const printDetailsPage = () => {
+            const isUr = currentLang === 'ur';
+            const esc = (t) => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const visible = (el) => !!el && el.getClientRects().length > 0;
+            // Left column: all visible input details
+            const form = document.getElementById('pension-form');
+            let leftHtml = ''; let pendingPayHeader = '';
+            form.querySelectorAll('h3, .input-group').forEach(el => {
+                if (!visible(el)) return;
+                if (el.tagName === 'H3') { const secHtml = `<div class="sec">${esc(el.textContent.trim())}</div>`; if (el.closest('#pay-components-card')) { pendingPayHeader = secHtml; } else { leftHtml += secHtml; } return; }
+                const lab = el.querySelector('label'); if (!lab) return;
+                const ctrl = (lab.htmlFor && document.getElementById(lab.htmlFor)) || el.querySelector('select, input'); if (!ctrl || ctrl.type === 'password' || ctrl.type === 'hidden') return;
+                if ((ctrl.id === 'family-pension' || ctrl.id === 'tk-award' || ctrl.id === 'medical-board') && ctrl.value === 'No') return;
+                if (ctrl.closest('#pay-components-card')) { const amt = parseAmount(ctrl.value); if (isNaN(amt) || amt === 0) return; if (pendingPayHeader) { leftHtml += pendingPayHeader; pendingPayHeader = ''; } }
+                let val;
+                if (ctrl.tagName === 'SELECT') { val = ctrl.options[ctrl.selectedIndex] ? ctrl.options[ctrl.selectedIndex].textContent.trim() : ''; }
+                else if (ctrl.type === 'checkbox') { val = ctrl.checked ? '✓' : ''; }
+                else {
+                    val = ctrl.value;
+                    const disp = ctrl.id ? document.getElementById(ctrl.id + '-display') : null;
+                    if (disp && disp.textContent.trim()) val = disp.textContent.trim();
+                    else if ((ctrl.id === 'name' || ctrl.id === 'family-pensioner-name') && val) val = nameForPrint(val);
+                }
+                const labC = lab.cloneNode(true); labC.querySelectorAll('span').forEach(x => x.remove());
+                leftHtml += `<div class="row"><span class="lb">${esc(labC.textContent.trim() || lab.textContent.trim())}</span><span class="vl">${esc(val)}</span></div>`;
+            });
+            // Right column: calculated results
+            const resCard = document.getElementById('print-btn').closest('.card');
+            let rightHtml = '';
+            resCard.querySelectorAll('h3, .output-group').forEach(el => {
+                if (!visible(el)) return;
+                if (el.tagName === 'H3') { rightHtml += `<div class="sec">${esc(el.textContent.trim())}</div>`; return; }
+                const l = el.querySelector('.label'); const v = el.querySelector('.value'); if (!l || !v) return;
+                let vt = v.textContent.trim();
+                if (isUr && v.id === 'age-at-restoration-output') { const nn = vt.match(/\d+/g); if (nn && nn.length >= 2) vt = `${nn[0]} سال ${nn[1]} ماہ`; }
+                rightHtml += `<div class="row"><span class="lb">${esc(l.textContent.trim())}</span><span class="vl${isUr ? '' : ' ltr'}">${esc(vt)}</span></div>`;
+            });
+            // Increase table
+            const srcTable = document.querySelector('.increase-table');
+            const tbl = srcTable.cloneNode(true);
+            tbl.querySelectorAll('tr.hidden').forEach(r => r.remove());
+            const tableTitle = document.querySelector('.increase-table-container').parentElement.querySelector('h2')?.textContent.trim() || 'Pension Increase Calculations';
+            const heading = trU('Pension Calculator Armed Forces');
+            const nowD = new Date(); const pad2 = (n) => String(n).padStart(2, '0');
+            const stampLabel = isUr ? 'پرنٹ کی تاریخ اور وقت:' : 'Printed on: ';
+            const stampDate = `${pad2(nowD.getDate())}-${nowD.toLocaleString('en-GB', { month: 'short' }).toUpperCase()}-${nowD.getFullYear()} ${pad2(nowD.getHours())}:${pad2(nowD.getMinutes())}:${pad2(nowD.getSeconds())}`;
+            const dir = isUr ? 'rtl' : 'ltr';
+            const html = `<!DOCTYPE html><html lang="${isUr ? 'ur' : 'en'}"><head><meta charset="UTF-8"><title>${esc(heading)}</title><style>
+                @page { size: A4 portrait; margin: 8mm; }
+                * { box-sizing: border-box; }
+                html, body { margin: 0; padding: 0; }
+                body { font-family: ${isUr ? "'Noori Nastaleeq','Jameel Noori Nastaleeq','Noto Nastaliq Urdu',serif" : "Arial, Helvetica, sans-serif"}; font-size: ${isUr ? '9pt' : '8.5pt'}; color: #000; ${isUr ? 'line-height: 1.8;' : ''} }
+                #fit { width: 194mm; margin: 0 auto; display: flex; flex-direction: column; min-height: 280mm; }
+                .stamp { margin-top: auto; padding-top: 6px; border-top: 1px solid #000; font-size: 8pt; text-align: center; }
+                h1 { text-align: center; font-size: 15pt; margin: 0 0 6px; padding-bottom: 4px; border-bottom: 2px solid #000; }
+                .cols { display: flex; gap: 10px; direction: ltr; align-items: flex-start; }
+                .col { width: 50%; direction: ${dir}; }
+                .sec { font-weight: bold; background: #e5e7eb; border-bottom: 1px solid #000; padding: 1px 4px; margin-top: 5px; }
+                .row { display: flex; justify-content: space-between; gap: 6px; padding: 1px 4px; border-bottom: 1px dotted #999; }
+                .lb { font-weight: bold; }
+                .vl { text-align: ${isUr ? 'left' : 'right'}; ${isUr ? 'direction: rtl; unicode-bidi: isolate;' : ''} }
+                .ltr { direction: ltr; unicode-bidi: isolate; }
+                h2 { font-size: 11pt; text-align: center; margin: 8px 0 3px; }
+                table { width: 100%; border-collapse: collapse; direction: ${dir}; font-size: ${isUr ? '8pt' : '7.5pt'}; }
+                th, td { border: 1px solid #000; padding: 1px 3px; text-align: center; line-height: 1.35; }
+                th { background: #e5e7eb; }
+                .hidden, .hidden-column { display: none !important; }
+            </style></head><body><div id="fit"><h1>${esc(heading)}</h1>
+                <div class="cols"><div class="col">${leftHtml}</div><div class="col">${rightHtml}</div></div>
+                <h2>${esc(tableTitle)}</h2>${tbl.outerHTML}<div class="stamp">${isUr ? esc(stampLabel) + ' <span style="direction:ltr;unicode-bidi:isolate;display:inline-block">' + esc(stampDate) + '</span>' : esc(stampLabel + stampDate)}</div></div></body></html>`;
+            const frame = document.createElement('iframe');
+            frame.style.cssText = 'position:fixed;right:0;bottom:0;width:794px;height:1123px;border:0;visibility:hidden;';
+            document.body.appendChild(frame);
+            const w = frame.contentWindow; const d = frame.contentDocument;
+            let printed = false;
+            const go = () => {
+                if (printed) return; printed = true;
+                try {
+                    const fit = d.getElementById('fit'); const availH = (297 - 16) * 96 / 25.4; const h = fit.scrollHeight;
+                    if (h > availH) { const z = Math.max(0.5, (availH / h) * 0.98); d.body.style.zoom = z; }
+                    w.focus(); w.print();
+                } catch (e) { }
+                setTimeout(() => frame.remove(), 60000);
+            };
             d.open(); d.write(html); d.close();
             frame.onload = () => { (d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve()).then(() => setTimeout(go, 300)); };
             setTimeout(go, 3000);
@@ -2795,6 +2888,7 @@
             if (printBtn) { printBtn.addEventListener('click', () => { window.print(); }); }
             if (printRestorationBtn) { printRestorationBtn.addEventListener('click', generateRestorationApplicationPdf); }
             if (print85YearsBtn) { print85YearsBtn.addEventListener('click', generate85YearsApplicationPdf); }
+            { const pdb = document.getElementById('print-details-btn'); if (pdb) pdb.addEventListener('click', printDetailsPage); }
             
             if (isSupabaseEnabled) { 
                 showLogBtn.addEventListener('click', () => { passwordAction = 'show'; openPasswordModal(); });
