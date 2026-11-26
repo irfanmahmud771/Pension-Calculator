@@ -566,7 +566,7 @@
         <div class="flex flex-wrap justify-between items-center mt-4" id="visit-counter-wrapper">
              <p class="text-left text-sm font-medium text-gray-600">Total Calculation Log: <span id="log-count" class="font-bold text-gray-800">0</span></p>
              <!-- APP VERSION: increase the last digit by 1 (up to 9) and update the date/time with every update -->
-             <p id="app-version" class="order-last w-full text-center mt-1 sm:order-none sm:w-auto sm:mt-0 text-xs font-medium text-gray-500 px-2" dir="ltr">Version 3.2.2 updated on 26-Nov-2026 21:50 Hrs</p>
+             <p id="app-version" class="order-last w-full text-center mt-1 sm:order-none sm:w-auto sm:mt-0 text-xs font-medium text-gray-500 px-2" dir="ltr">Version 3.2.6 updated on 27-Nov-2026 03:00 Hrs</p>
              <p class="text-right text-sm font-medium text-gray-600">Total Visits: <span id="visit-count" class="font-bold text-gray-800">0</span></p>
         </div>
 
@@ -1867,7 +1867,7 @@
                 else {
                     val = ctrl.value;
                     const disp = ctrl.id ? document.getElementById(ctrl.id + '-display') : null;
-                    if (disp && disp.textContent.trim()) val = disp.textContent.trim();
+                    if (disp && disp.textContent.trim()) { val = disp.textContent.trim(); if (ctrl.id === 'dob' || ctrl.id === 'family-dob') val = val.replace(/\s*[(（][^)）]*[)）]\s*$/, '').trim(); }
                     else if ((ctrl.id === 'name' || ctrl.id === 'family-pensioner-name') && val) val = nameForPrint(val);
                 }
                 const labC = lab.cloneNode(true); labC.querySelectorAll('span').forEach(x => x.remove());
@@ -1894,7 +1894,7 @@
             const stampLabel = isUr ? 'پرنٹ کی تاریخ اور وقت:' : 'Printed on: ';
             const stampDate = `${pad2(nowD.getDate())}-${nowD.toLocaleString('en-GB', { month: 'short' }).toUpperCase()}-${nowD.getFullYear()} ${pad2(nowD.getHours())}:${pad2(nowD.getMinutes())}:${pad2(nowD.getSeconds())}`;
             const dir = isUr ? 'rtl' : 'ltr';
-            const html = `<!DOCTYPE html><html lang="${isUr ? 'ur' : 'en'}"><head><meta charset="UTF-8"><title>${esc(heading)}</title><style>
+            const html = `<!DOCTYPE html><html lang="${isUr ? 'ur' : 'en'}"><head><meta charset="UTF-8"><title>Print-Details-${esc((document.getElementById('pak-no')?.value || '').trim() || 'pensioner')}</title><style>
                 @page { size: A4 portrait; margin: 8mm; }
                 * { box-sizing: border-box; }
                 html, body { margin: 0; padding: 0; }
@@ -1928,6 +1928,10 @@
                 try {
                     const fit = d.getElementById('fit'); const availH = (297 - 16) * 96 / 25.4; const h = fit.scrollHeight;
                     if (h > availH) { const z = Math.max(0.5, (availH / h) * 0.98); d.body.style.zoom = z; }
+                    const origTitle = document.title; const pk = (document.getElementById('pak-no')?.value || '').trim() || 'pensioner';
+                    document.title = `Print-Details-${pk}`;
+                    const restoreT = () => { document.title = origTitle; w.removeEventListener('afterprint', restoreT); };
+                    w.addEventListener('afterprint', restoreT); setTimeout(restoreT, 120000);
                     w.focus(); w.print();
                 } catch (e) { }
                 setTimeout(() => frame.remove(), 60000);
@@ -2888,7 +2892,13 @@
             grossPensionInput.addEventListener('input', formatGrossPensionInput);
             document.addEventListener('urdu-names-updated', () => { try { calculateAndDisplayAll(); } catch (e) { } });
             increasePensionBtn.addEventListener('mousedown', () => startPress(1)); decreasePensionBtn.addEventListener('mousedown', () => startPress(-1)); document.addEventListener('mouseup', stopPress); document.addEventListener('mouseleave', stopPress); increasePensionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(1); }); decreasePensionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(-1); }); document.addEventListener('touchend', stopPress); document.addEventListener('touchcancel', stopPress);
-            if (printBtn) { printBtn.addEventListener('click', () => { window.print(); }); }
+            if (printBtn) { printBtn.addEventListener('click', () => {
+                const origTitle = document.title; const pk = (document.getElementById('pak-no')?.value || '').trim() || 'pensioner';
+                document.title = `Pension-Slip-${pk}`;
+                const restore = () => { document.title = origTitle; window.removeEventListener('afterprint', restore); };
+                window.addEventListener('afterprint', restore); setTimeout(restore, 120000);
+                window.print();
+            }); }
             if (printRestorationBtn) { printRestorationBtn.addEventListener('click', generateRestorationApplicationPdf); }
             if (print85YearsBtn) { print85YearsBtn.addEventListener('click', generate85YearsApplicationPdf); }
             { const pdb = document.getElementById('print-details-btn'); if (pdb) pdb.addEventListener('click', printDetailsPage); }
