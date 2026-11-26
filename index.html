@@ -565,6 +565,8 @@
 
         <div class="flex justify-between items-center mt-4" id="visit-counter-wrapper">
              <p class="text-left text-sm font-medium text-gray-600">Total Calculation Log: <span id="log-count" class="font-bold text-gray-800">0</span></p>
+             <!-- APP VERSION: increase the last digit by 1 (up to 9) and update the date/time with every update -->
+             <p id="app-version" class="text-center text-xs font-medium text-gray-500 px-2" dir="ltr">Version 3.2.1 updated on 26-Nov-2026 17:59 Hrs</p>
              <p class="text-right text-sm font-medium text-gray-600">Total Visits: <span id="visit-count" class="font-bold text-gray-800">0</span></p>
         </div>
 
@@ -1911,6 +1913,7 @@
                 table { width: 100%; border-collapse: collapse; direction: ${dir}; font-size: ${isUr ? '8pt' : '7.5pt'}; }
                 th, td { border: 1px solid #000; padding: 1px 3px; text-align: center; line-height: 1.35; }
                 th { background: #e5e7eb; }
+                td.font-bold { font-weight: bold; }
                 .hidden, .hidden-column { display: none !important; }
             </style></head><body><div id="fit"><h1>${esc(heading)}</h1>
                 <div class="cols"><div class="col">${leftHtml}</div><div class="col">${rightHtml}</div></div>
